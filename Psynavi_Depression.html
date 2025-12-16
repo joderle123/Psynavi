@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Depression & Stimmung Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; } /* Cool slate/blue tint base */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(71, 85, 105, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-slate-300 selection:text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - DEPRESSION EDITION ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Depression & Stimmung",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: KVT (Beck), Verhaltensaktivierung (Lewinsohn), Erlernte Hilflosigkeit (Seligman), CBASP.",
+                    noteTitle: "Wichtiger Hinweis:",
+                    noteText: "Depression ist keine Faulheit. Das Gehirn befindet sich im 'Energiesparmodus'. Druck erhöht den Rückzug. Ziel ist kleinschrittige Aktivierung.",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Depression im schulischen Kontext",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für Antriebslosigkeit, Rückzug & Stimmungstiefs. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Interventionen & Nachteilsausgleich",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Depression Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    drive: {
+                        title: "Antrieb & Motivation",
+                        subtitle: "Der leere Akku",
+                        color: "slate",
+                        icon: "BatteryCharging", // BatteryLow not available in all sets, charging implies hope
+                        desc: "Chronische Müdigkeit, 'Faulheit', Unfähigkeit Aufgaben zu beginnen, Apathie.",
+                        patterns: [
+                            {
+                                id: "dep_avolition",
+                                title: "Antriebslosigkeit (Avolition)",
+                                icon: "Anchor",
+                                behavior: "Legt den Kopf auf den Tisch, macht keine Hausaufgaben, wirkt gleichgültig ('Egal-Haltung'), kommt zu spät.",
+                                neuro_logic: "Depression ist physiologisch durch einen Mangel an antriebssteigernden Neurotransmittern (Noradrenalin/Dopamin) gekennzeichnet. Es ist keine Willensschwäche, sondern eine neurobiologische Hemmung ('Bleierne Schwere').",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Die 5-Minuten-Regel", tag: "Verhaltensaktivierung", text: "Vereinbarung: 'Mach nur 5 Minuten mit. Wenn es nicht geht, darfst du Pause machen'. Die Hürde senken." },
+                                        { name: "Material-Service", tag: "Entlastung", text: "Statt zu schimpfen, dass das Heft fehlt: Einfach ein Blatt geben. Konflikte um Orga vermeiden, Energie sparen." },
+                                        { name: "Aktives Aufwecken", tag: "Beziehung", text: "Wenn das Kind schläft: Sanft an der Schulter berühren, nicht quer durch die Klasse rufen. Scham vermeiden." },
+                                        { name: "Pausen-Buddy", tag: "Soziale Stütze", text: "Ein Mitschüler nimmt das Kind in der Pause mit raus (Licht & Bewegung helfen gegen die Schwere)." },
+                                        { name: "Hausaufgaben-Reduktion", tag: "Differenzierung", text: "Offiziell nur 1/3 der Aufgaben aufgeben. Ein geschafftes Drittel ist besser als gar nichts (Erlernte Hilflosigkeit vermeiden)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Strukturierte Pläne", tag: "Tagesstruktur", text: "Depression hasst Struktur. Helfen Sie, den Tag in machbare Blöcke zu teilen (z.B. mit SePAS)." },
+                                        { name: "Noten-Aussetzung", tag: "Nachteilsausgleich", text: "In akuten Phasen: Benotung der mündlichen Mitarbeit aussetzen. Druck entfernen." },
+                                        { name: "Späterer Schulbeginn", tag: "Chronobiologie", text: "Wenn möglich: Erlaubnis, erst zur 2. Stunde zu kommen (Morgentief ist typisch für Depression)." },
+                                        { name: "Sinnhafte Aufgaben", tag: "Werteorientierung", text: "Aufgaben geben, die für andere wichtig sind (z.B. Technik-Support). Das Gefühl 'gebraucht zu werden' aktiviert." },
+                                        { name: "Teilnahme reicht", tag: "Validierung", text: "Feedback: 'Toll, dass du heute da bist'. Die Anwesenheit selbst ist die Leistung." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    mood: {
+                        title: "Stimmung & Reizbarkeit",
+                        subtitle: "Nicht nur traurig, sondern wütend",
+                        color: "indigo",
+                        icon: "CloudLightning",
+                        desc: "Bei Jugendlichen zeigt sich Depression oft als Gereiztheit, Aggression oder extreme Launenhaftigkeit.",
+                        patterns: [
+                            {
+                                id: "dep_irritability",
+                                title: "Reizbarkeit & Dysphorie",
+                                icon: "Zap",
+                                behavior: "Reagiert auf kleinste Kritik aggressiv, knallt Türen, wirkt 'zickig' oder feindselig. Sarkasmus.",
+                                neuro_logic: "Das Emotionsregulationssystem ist überlastet. Die 'dünne Haut' ist ein Symptom der Erschöpfung. Aggression ist oft ein Abwehrversuch gegen das Gefühl der Wertlosigkeit.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Nicht spiegeln", tag: "Deeskalation", text: "Wenn das Kind aggressiv ist, bleiben Sie ruhig und freundlich. Nicht mit-schimpfen (Komplementäre Beziehungsgestaltung)." },
+                                        { name: "Time-Out Karte", tag: "Selbstregulation", text: "Darf rausgehen, um Dampf abzulassen, bevor es explodiert." },
+                                        { name: "Gefühls-Wetter", tag: "Externalisierung", text: "Morgens fragen: 'Wie ist das Wetter im Kopf? Gewitter?'. Hilft, das Verhalten einzuordnen." },
+                                        { name: "Ersatz-Handlung", tag: "Ventil", text: "Papier zerknüllen oder Knetball drücken erlauben, um Anspannung abzubauen." },
+                                        { name: "Bindungsangebot", tag: "Beziehung", text: "Nach einem Ausbruch: 'Alles okay, wir starten neu'. Zeigen, dass die Beziehung hält." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Gespräch unter 4 Augen", tag: "Schamschutz", text: "Kritik niemals vor der Klasse. Das Ego ist extrem fragil." },
+                                        { name: "Alternative Interpretation", tag: "Reframing", text: "Sehen Sie das Verhalten als 'Hilferuf', nicht als 'Respektlosigkeit'. Das ändert Ihre Reaktion." },
+                                        { name: "Schriftliche Kommunikation", tag: "Distanz", text: "Wenn Sprechen zu emotional ist: Über Teams/Zettel kommunizieren." },
+                                        { name: "Musik hören", tag: "Emotionsregulation", text: "Erlaubnis für Kopfhörer in Stillarbeitsphasen zur Abschirmung." },
+                                        { name: "Sachlichkeit", tag: "Haltung", text: "Bleiben Sie bei Fakten, vermeiden Sie moralische Appelle ('Du musst dich mal zusammenreißen')." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    cognition: {
+                        title: "Kognition & Konzentration",
+                        subtitle: "Der Nebel im Kopf",
+                        color: "gray",
+                        icon: "Brain",
+                        desc: "Konzentrationsstörungen, Vergesslichkeit, verlangsamtes Denken ('Brain Fog').",
+                        patterns: [
+                            {
+                                id: "dep_fog",
+                                title: "Pseudo-Demenz & Grübeln",
+                                icon: "Cloud",
+                                behavior: "Wirkt abwesend, vergisst ständig Material, kann einfachen Erklärungen nicht folgen, starrt ins Leere.",
+                                neuro_logic: "Grübeln (Rumination) belegt massiv Arbeitsgedächtnis-Ressourcen. Es ist wie ein Computer, bei dem im Hintergrund ein riesiges Update läuft. Für den Unterricht bleibt keine Rechenleistung übrig.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Schriftliche Stützen", tag: "Entlastung", text: "Hausaufgaben ins Heft schreiben (nicht nur sagen). Tafelbilder kopieren lassen." },
+                                        { name: "Kurze Sequenzen", tag: "Chunking", text: "Anweisungen in Minischritte zerlegen: 'Nimm das Heft. (Warten). Schlag Seite 10 auf'." },
+                                        { name: "Gedächtnis-Hilfen", tag: "Nachteilsausgleich", text: "Formelsammlungen oder Vokabellisten bei Tests erlauben (Entlastung des Abrufs)." },
+                                        { name: "Fokus-Lenkung", tag: "Achtsamkeit", text: "Kind sanft beim Namen nennen und Augenkontakt suchen, bevor man die Anweisung gibt." },
+                                        { name: "Kein Zeitdruck", tag: "Stressreduktion", text: "Zeitlimits entfernen. Druck führt zu sofortiger Blockade." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Skripte bereitstellen", tag: "Barrierefreiheit", text: "Lehrer-Skript aushändigen, damit das Kind nicht mitschreiben muss (Multitasking ist gestört)." },
+                                        { name: "Aufnahme-Gerät", tag: "Tech", text: "Erlauben, den Unterricht (Teile) aufzunehmen, um es zu Hause nochmal zu hören." },
+                                        { name: "One-Tasking", tag: "Struktur", text: "Nicht 'Lies den Text und beantworte Fragen', sondern erst lesen, dann Blatt umdrehen." },
+                                        { name: "Verständnis-Check", tag: "Feedback", text: "Nicht fragen 'Hast du es verstanden?' (Kind sagt ja aus Scham), sondern 'Was ist der erste Schritt?'." },
+                                        { name: "Prüfungs-Split", tag: "Anpassung", text: "Große Prüfungen in zwei kleinere Teile an verschiedenen Tagen splitten." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    self: {
+                        title: "Selbstbild & Hoffnung",
+                        subtitle: "Die dunkle Brille",
+                        color: "rose",
+                        icon: "HeartHandshake",
+                        desc: "Negatives Selbstbild, Hoffnungslosigkeit, Gefühl der Wertlosigkeit.",
+                        patterns: [
+                            {
+                                id: "dep_worthless",
+                                title: "Negative Kognitive Triade",
+                                icon: "XCircle",
+                                behavior: "Sagt 'Ich kann das eh nicht', 'Das bringt nichts', gibt sofort auf. Nimmt Lob nicht an.",
+                                neuro_logic: "Verzerrte Wahrnehmung (Beck): Negativer Blick auf sich selbst, die Welt und die Zukunft. Erfolge werden als 'Zufall' abgetan, Misserfolge als Bestätigung der eigenen Unfähigkeit (Bestätigungsfehler).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Erfolgs-Lupe", tag: "Fokus-Verschiebung", text: "Machen Sie kleinste Fortschritte sichtbar. 'Du hast heute 3 Wörter mehr geschrieben als gestern!'." },
+                                        { name: "Das 'Noch'-Prinzip", tag: "Growth Mindset", text: "Wenn das Kind sagt 'Ich kann das nicht', fügen Sie hinzu: '...NOCH nicht'." },
+                                        { name: "Aufgaben-Bote", tag: "Selbstwirksamkeit", text: "Kind darf Nachrichten ins Sekretariat bringen. Vertrauensbeweis stärkt den Selbstwert." },
+                                        { name: "Lob für Strategie", tag: "Dweck", text: "Nicht 'Du bist schlau' (Zustand), sondern 'Du hast dich gut angestrengt' (Verhalten)." },
+                                        { name: "Dankbarkeits-Ritual", tag: "Pos. Psychologie", text: "Am Ende der Woche: Ein schönes Erlebnis malen/aufschreiben." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Realitäts-Check", tag: "Kognitive Umstrukturierung", text: "Fragen Sie: 'Ist das ein Fakt oder ein Gefühl?'. Beweise suchen." },
+                                        { name: "Erfolgstagebuch", tag: "Dokumentation", text: "Verpflichtend 3 Dinge pro Tag notieren, die okay waren (müssen nicht toll sein, nur okay)." },
+                                        { name: "Stärken-Profil", tag: "Ressourcen", text: "Fokus weg von Defiziten. Was kann der Schüler gut (außerhalb der Schule)? Gaming? Sport?" },
+                                        { name: "Sokratischer Dialog", tag: "Gesprächsführung", text: "Hinterfragen Sie die Negativität sanft: 'Gab es mal eine Situation, wo du es geschafft hast?'." },
+                                        { name: "Zukunftsperspektive", tag: "Hoffnung", text: "Kleine Ziele setzen (bis zu den Ferien), nicht riesige Ziele (Abitur). Schritt für Schritt." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Dépression & Humeur",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : TCC (Beck), Activation Comportementale (Lewinsohn), Impuissance apprise, CBASP.",
+                    noteTitle: "Note Importante :",
+                    noteText: "La dépression n'est pas de la paresse. Le cerveau est en 'mode éco'. La pression augmente le retrait. Visez l'activation par petits pas.",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "La Dépression en contexte scolaire",
+                    headerSubtitle: "Une boîte à outils pour l'apathie, le retrait & les baisses de moral. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions & Aménagements",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert Dépression Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    drive: {
+                        title: "Motivation & Élan vital",
+                        subtitle: "La batterie vide",
+                        color: "slate",
+                        icon: "BatteryCharging",
+                        desc: "Fatigue chronique, 'paresse', incapacité à commencer, apathie.",
+                        patterns: [
+                            {
+                                id: "dep_avolition",
+                                title: "Avolition (Manque d'élan)",
+                                icon: "Anchor",
+                                behavior: "Pose la tête sur la table, ne fait pas les devoirs, semble indifférent ('M'en fiche'), arrive en retard.",
+                                neuro_logic: "La dépression est physiologiquement marquée par un manque de neurotransmetteurs stimulants (Noradrénaline/Dopamine). Ce n'est pas un manque de volonté, mais une inhibition neurobiologique ('Lourdeur de plomb').",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Règle des 5 minutes", tag: "Activation", text: "Accord : 'Participe juste 5 minutes. Si ça ne va pas, tu fais une pause'. Baisser la barre." },
+                                        { name: "Service Matériel", tag: "Soulagement", text: "Au lieu de gronder pour l'oubli du cahier : donner une feuille. Éviter le conflit, économiser l'énergie." },
+                                        { name: "Réveil actif", tag: "Relation", text: "Si l'enfant dort : toucher doucement l'épaule, ne pas crier à travers la classe. Éviter la honte." },
+                                        { name: "Buddy de récré", tag: "Soutien Social", text: "Un camarade emmène l'enfant dehors (Lumière & Mouvement aident contre la lourdeur)." },
+                                        { name: "Réduction Devoirs", tag: "Différenciation", text: "Officiellement seulement 1/3 des devoirs. Un tiers fait vaut mieux que rien (Éviter l'impuissance apprise)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Plans structurés", tag: "Structure", text: "La dépression déteste la structure. Aidez à diviser la journée en blocs gérables (ex: avec SePAS)." },
+                                        { name: "Suspension des notes", tag: "Aménagement", text: "En phase aiguë : ne pas noter la participation orale. Enlever la pression." },
+                                        { name: "Début tardif", tag: "Chronobiologie", text: "Si possible : permission d'arriver à la 2ème heure (le creux matinal est typique)." },
+                                        { name: "Tâches sensées", tag: "Valeurs", text: "Donner des tâches importantes pour les autres (ex: support technique). Se sentir 'utile' active." },
+                                        { name: "Présence suffit", tag: "Validation", text: "Feedback : 'Super que tu sois là'. La présence elle-même est la performance." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    mood: {
+                        title: "Humeur & Irritabilité",
+                        subtitle: "Pas juste triste, mais en colère",
+                        color: "indigo",
+                        icon: "CloudLightning",
+                        desc: "Chez les ados, la dépression se montre souvent par l'irritabilité, l'agression ou des sautes d'humeur.",
+                        patterns: [
+                            {
+                                id: "dep_irritability",
+                                title: "Irritabilité & Dysphorie",
+                                icon: "Zap",
+                                behavior: "Réagit agressivement à la moindre critique, claque les portes, semble hostile ou sarcastique.",
+                                neuro_logic: "Le système de régulation émotionnelle est surchargé. La 'peau fine' est un symptôme d'épuisement. L'agression est souvent une défense contre le sentiment de nullité.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Ne pas refléter", tag: "Désescalade", text: "Si l'enfant est agressif, restez calme et amical. Ne criez pas en retour." },
+                                        { name: "Carte Time-Out", tag: "Autorégulation", text: "Peut sortir pour évacuer la pression avant d'exploser." },
+                                        { name: "Météo des émotions", tag: "Externalisation", text: "Le matin : 'C'est comment la météo dans ta tête ? Orage ?'. Aide à classer le comportement." },
+                                        { name: "Action exutoire", tag: "Soupape", text: "Permettre de froisser du papier ou presser une balle pour réduire la tension." },
+                                        { name: "Offre de lien", tag: "Relation", text: "Après une crise : 'Tout va bien, on recommence'. Montrer que la relation tient." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Gespräch privé", tag: "Protection", text: "Jamais de critique devant la classe. L'ego est extrêmement fragile." },
+                                        { name: "Interprétation alternative", tag: "Recadrage", text: "Voyez le comportement comme un 'appel à l'aide', pas un 'manque de respect'." },
+                                        { name: "Com. écrite", tag: "Distance", text: "Si parler est trop émotionnel : communiquer via Teams/Post-it." },
+                                        { name: "Écouter musique", tag: "Régulation", text: "Permission d'écouteurs en travail individuel pour s'isoler." },
+                                        { name: "Objectivité", tag: "Posture", text: "Restez factuel, évitez les appels moraux ('Tu dois faire un effort')." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    cognition: {
+                        title: "Cognition & Concentration",
+                        subtitle: "Le brouillard mental",
+                        color: "gray",
+                        icon: "Brain",
+                        desc: "Troubles de concentration, oublis, pensée ralentie ('Brain Fog').",
+                        patterns: [
+                            {
+                                id: "dep_fog",
+                                title: "Pseudo-Démence & Rumination",
+                                icon: "Cloud",
+                                behavior: "Semble absent, oublie tout le temps son matériel, ne suit pas les explications simples, regarde dans le vide.",
+                                neuro_logic: "La rumination occupe massivement la mémoire de travail. C'est comme un ordi qui fait une grosse mise à jour en arrière-plan. Il ne reste plus de puissance pour le cours.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Supports écrits", tag: "Soulagement", text: "Écrire les devoirs dans le cahier (pas juste dire). Faire copier le tableau par un autre." },
+                                        { name: "Séquences courtes", tag: "Chunking", text: "Diviser les consignes : 'Prends le cahier. (Attendre). Ouvre page 10'." },
+                                        { name: "Aides-mémoire", tag: "Aménagement", text: "Autoriser formulaires ou listes de vocabulaire lors des tests (soulage le rappel)." },
+                                        { name: "Guidage focus", tag: "Attention", text: "Appeler l'enfant doucement par son nom et chercher le contact visuel avant la consigne." },
+                                        { name: "Pas de chrono", tag: "Anti-Stress", text: "Enlever les limites de temps. La pression bloque immédiatement." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Fournir les scripts", tag: "Accessibilité", text: "Donner le cours imprimé pour ne pas devoir copier (le multitâche est HS)." },
+                                        { name: "Enregistrement", tag: "Tech", text: "Permettre d'enregistrer le cours pour réécouter à la maison." },
+                                        { name: "Mono-tâche", tag: "Structure", text: "Pas 'Lis et réponds', mais d'abord lire, puis tourner la feuille." },
+                                        { name: "Check compréhension", tag: "Feedback", text: "Ne pas demander 'As-tu compris ?' (Il dira oui par honte), mais 'Quelle est la 1ère étape ?'." },
+                                        { name: "Split examen", tag: "Adaptation", text: "Diviser les grands examens en deux parties sur deux jours." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    self: {
+                        title: "Estime de soi & Espoir",
+                        subtitle: "Les lunettes noires",
+                        color: "rose",
+                        icon: "HeartHandshake",
+                        desc: "Image de soi négative, désespoir, sentiment d'inutilité.",
+                        patterns: [
+                            {
+                                id: "dep_worthless",
+                                title: "Triade Cognitive Négative",
+                                icon: "XCircle",
+                                behavior: "Dit 'Je suis nul', 'Ça sert à rien', abandonne tout de suite. Rejette les compliments.",
+                                neuro_logic: "Perception distordue (Beck) : Vue négative de soi, du monde et du futur. Les succès sont vus comme 'chance', les échecs comme preuve d'incapacité (Biais de confirmation).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Loupe à succès", tag: "Focus", text: "Rendez visible les micro-progrès. 'Tu as écrit 3 mots de plus qu'hier !'." },
+                                        { name: "Principe 'Pas encore'", tag: "Growth Mindset", text: "Si l'enfant dit 'Je ne peux pas', ajoutez : '...PAS ENCORE'." },
+                                        { name: "Messager", tag: "Efficacité", text: "L'enfant peut porter des messages. La confiance renforce l'estime." },
+                                        { name: "Louer la stratégie", tag: "Dweck", text: "Pas 'Tu es intelligent' (état), mais 'Tu as bien essayé' (comportement)." },
+                                        { name: "Rituel gratitude", tag: "Psy Positive", text: "Fin de semaine : Dessiner/écrire un truc chouette." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Check Réalité", tag: "Restructuration", text: "Demandez : 'Est-ce un fait ou un sentiment ?'. Chercher des preuves." },
+                                        { name: "Journal de succès", tag: "Documentation", text: "Noter obligatoirement 3 choses 'ok' par jour (pas besoin d'être génial, juste ok)." },
+                                        { name: "Profil de forces", tag: "Ressources", text: "Focus hors déficits. Que fait l'élève de bien (hors école) ? Gaming ? Sport ?" },
+                                        { name: "Dialogue socratique", tag: "Discussion", text: "Questionnez doucement : 'Y a-t-il eu une fois où tu as réussi ?'." },
+                                        { name: "Perspective futur", tag: "Espoir", text: "Fixer des petits buts (jusqu'aux vacances), pas des montagnes (le Bac). Pas à pas." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `Depression_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#f1f5f9] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-slate-500 to-gray-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Umbrella" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-slate-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-xs font-bold border border-slate-300">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-white text-slate-600 rounded-full text-xs font-bold border border-slate-200">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-slate-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12 max-w-5xl mx-auto">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-slate-700 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

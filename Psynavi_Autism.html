@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Autismus Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f0f9ff; } /* Cool blue tint base */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(14, 165, 233, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-sky-200 selection:text-sky-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - AUTISM EDITION ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Autismus Expert",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: TEACCH (Mesibov), Low Arousal (Elvén), Social Stories (Gray), Neurodiversität (Silberman).",
+                    noteTitle: "Professional Note:",
+                    noteText: "Autismus ist ein Neurotyp, keine Krankheit. Ziel ist Barrierefreiheit, nicht 'Heilung' oder Normalisierung (Masking vermeiden).",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Autismus im schulischen Kontext",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für Inklusion & Neurodiversität. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Evidenzbasierte Interventionen & Nachteilsausgleich",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Autismus Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    social: {
+                        title: "Soziale Interaktion & Kommunikation",
+                        subtitle: "Die 'fremde' Sprache",
+                        color: "sky",
+                        icon: "MessagesSquare",
+                        desc: "Unterschiede im Verständnis von sozialen Regeln, wörtliches Verstehen und direkte Kommunikation.",
+                        patterns: [
+                            {
+                                id: "soc_literal",
+                                title: "Wörtliches Verstehen & Ironie",
+                                icon: "Quote",
+                                behavior: "Versteht Metaphern wörtlich ('Wirf ein Auge drauf'), missversteht Ironie, wirkt 'besserwisserisch' bei unpräzisen Aussagen.",
+                                neuro_logic: "Autistische Gehirne verarbeiten Sprache oft semantisch präzise (Bottom-Up). Der pragmatische Kontext (Tonfall, Mimik) wird weniger intuitiv integriert. Dies ist keine Defizit, sondern ein präziser Kommunikationsstil.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Klartext reden", tag: "Low Arousal (Elvén)", text: "Vermeiden Sie Redewendungen. Sagen Sie 'Hör bitte auf zu reden' statt 'Muss es hier so laut sein?'." },
+                                        { name: "Ironie-Warnschild", tag: "TEACCH / Visualisierung", text: "Wenn Sie einen Witz machen, sagen Sie dazu: 'Das war ein Witz'. Nutzen Sie vereinbarte Gesten." },
+                                        { name: "Soziale Geschichten", tag: "Social Stories (Gray)", text: "Nutzen Sie Social Stories, um soziale Situationen (Pause, Begrüßung) explizit und logisch zu erklären." },
+                                        { name: "Präzise Aufträge", tag: "Scaffolding", text: "Statt 'Räum auf' -> 'Leg die Stifte in die Box und das Heft in den Ranzen'." },
+                                        { name: "Interessen-Brücke", tag: "Peer-Mediated Instruction", text: "Nutzen Sie das Spezialinteresse des Kindes, um Kontakt zu anderen Kindern herzustellen (z.B. Lego-Club)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Explizite Regeln", tag: "Hidden Curriculum (Endow)", text: "Erklären Sie das 'Versteckte Curriculum'. Warum machen wir das so? Logik überzeugt, Autorität oft nicht." },
+                                        { name: "Gruppenarbeit-Rolle", tag: "Kooperatives Lernen", text: "Geben Sie dem Schüler eine klare Rolle (z.B. Protokollant, Recherche), statt 'Diskutiert mal'." },
+                                        { name: "Schriftliches Feedback", tag: "Kanal-Trennung", text: "Kritik schriftlich geben. Mündliche Kritik in emotionalen Situationen wird oft nicht prozessiert." },
+                                        { name: "Pause vom Sozialen", tag: "Energiemanagement", text: "Erlaubnis, die Pause in der Bibliothek zu verbringen, statt im lauten Hof sozial interagieren zu müssen." },
+                                        { name: "Mentor-System", tag: "Circle of Friends", text: "Ein empathischer Mitschüler erklärt soziale Dynamiken ohne zu urteilen." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "soc_honest",
+                                title: "Direktheit & Ehrlichkeit",
+                                icon: "Megaphone",
+                                behavior: "Sagt dem Lehrer offen, dass der Unterricht langweilig ist oder korrigiert Fehler vor der Klasse. Wirkt unhöflich.",
+                                neuro_logic: "Autistische Menschen priorisieren oft den faktischen Wahrheitsgehalt über soziale Hierarchien. Es ist selten als Beleidigung gemeint, sondern als Information (Fakt).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Der Wahrheits-Filter", tag: "Kognitive Strategie", text: "Visualisieren: Ist es wahr? Ist es nett? Ist es notwendig? Üben, wann man 'Notlügen' nutzt." },
+                                        { name: "Privates Korrigieren", tag: "Kontingenzmanagement", text: "Vereinbaren: 'Wenn ich einen Fehler mache, sag es mir bitte nach der Stunde am Pult'." },
+                                        { name: "Perspektivwechsel", tag: "Theory of Mind (ToM)", text: "Erklären Sie Gefühle anderer logisch: 'Wenn du das sagst, fühlt sich X traurig, weil...'." },
+                                        { name: "Feste Fragezeit", tag: "Token-System", text: "Begrenzung von Fragen/Korrekturen auf 3 pro Stunde (mit Token), Rest wird aufgeschrieben." },
+                                        { name: "Nicht persönlich nehmen", tag: "Pädagogische Haltung", text: "Verstehen Sie es als Feedback zur Sache, nicht als Angriff auf Ihre Autorität." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Debattier-Club", tag: "Ressourcenorientierung", text: "Kanalisieren Sie die argumentative Stärke in Fächern wie Politik oder Philosophie." },
+                                        { name: "Alternative Formulierungen", tag: "Skripting", text: "Satzbausteine anbieten: 'Ich habe eine andere Meinung dazu...' statt 'Das ist falsch'." },
+                                        { name: "Lehrer-Signal", tag: "Nonverbaler Cue", text: "Ein unauffälliges Handzeichen des Lehrers, wenn der Schüler gerade eine soziale Grenze überschreitet." },
+                                        { name: "Logische Begründung", tag: "Rationalität", text: "Wenn eine Regel sinnlos erscheint, wird sie oft nicht befolgt. Erklären Sie den Sinn (Sicherheit, Zeit)." },
+                                        { name: "Schutz vor Mobbing", tag: "Prävention", text: "Aufklären der Klasse (mit Einverständnis) über Neurodiversität, um Ausgrenzung wegen 'Anderssein' zu verhindern." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    sensory: {
+                        title: "Sensorik & Reizverarbeitung",
+                        subtitle: "Overload & Shutdown",
+                        color: "indigo",
+                        icon: "Ear",
+                        desc: "Über- oder Unterempfindlichkeit bei Lärm, Licht, Geruch, Texturen. Gefahr des Meltdown.",
+                        patterns: [
+                            {
+                                id: "sens_overload",
+                                title: "Sensorischer Overload (Reizüberflutung)",
+                                icon: "ZapOff",
+                                behavior: "Hält sich die Ohren zu, wird plötzlich aggressiv oder zieht sich komplett zurück (Shutdown) in lauten Situationen.",
+                                neuro_logic: "Intense World Theory (Markram): Das autistische Gehirn nimmt Reize ungefiltert und verstärkt wahr. Neonlicht kann flackern wie Stroboskop, Stühlerücken klingt wie Kanonenschläge.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Noise-Cancelling", tag: "Reizabschirmung (Ayres)", text: "Kopfhörer (Micky Mäuse) müssen jederzeit griffbereit und erlaubt sein." },
+                                        { name: "Rückzugsort", tag: "Safe Space", text: "Ein reizarmer Ort (Nebenraum, Zelt) zur Regulation. Ohne Fragen nutzbar." },
+                                        { name: "Licht-Management", tag: "Ergonomie", text: "Platz weg vom Fenster (Gegenlicht) und nicht direkt unter flackernden Neonröhren. Ggf. Sonnenbrille erlauben." },
+                                        { name: "Vorangehen", tag: "Prävention", text: "Schüler darf 2 Min vor dem Klingeln in die Pause/den Bus, um das Gedränge im Flur zu vermeiden." },
+                                        { name: "Geruchs-Schutz", tag: "Barrierefreiheit", text: "Wenn die Mensa zu stark riecht: Erlaubnis, in einem separaten Raum zu essen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Exit-Card", tag: "Krisenintervention", text: "Karte zeigen -> Raum verlassen. Ohne Diskussion. Dient der Vermeidung eines Meltdowns." },
+                                        { name: "Keine Gruppen im Flur", tag: "Raumakustik", text: "Gruppenarbeiten nicht im hallenden Flur durchführen lassen." },
+                                        { name: "Sport-Alternativen", tag: "Inklusion", text: "Hallenlärm ist oft unerträglich. Alternative Aufgaben (Schiedsrichter, Geräteaufbau) oder Befreiung bei Akustik-Problemen." },
+                                        { name: "Digitaler Ersatz", tag: "Assistive Tech", text: "Wenn das Kratzen von Kreide/Stiften triggert: Tablet nutzen lassen." },
+                                        { name: "Sitzplatzwahl", tag: "Sicherheitsgefühl", text: "Ecke hinten ist oft besser als vorne (weniger Reize im Rücken, 'Sicherheit')." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "sens_stimming",
+                                title: "Stimming (Selbststimulation)",
+                                icon: "Activity",
+                                behavior: "Wippen, Summen, Stift drehen, Handflattern.",
+                                neuro_logic: "Stimming dient der Selbstregulation (Beruhigung bei Stress oder Aktivierung bei Unterforderung). Es ist notwendig für das emotionale Gleichgewicht (Homöostase).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Stimming erlauben", tag: "Akzeptanz / Neurodiversität", text: "Solange niemand verletzt/massiv gestört wird: Nicht unterbinden! Es ist ein Ventil." },
+                                        { name: "Diskrete Alternativen", tag: "Umlenkung", text: "Wenn das Geräusch stört: Lautlose Fidgets (Knetball, Infinity Cube) anbieten." },
+                                        { name: "Bewegungspausen", tag: "Sensorische Integration", text: "Kurz auf dem Trampolin springen oder gegen die Wand drücken (Tiefensensibilität)." },
+                                        { name: "Kaugummi / Kaukette", tag: "Orale Regulation", text: "Kauen reguliert Stress sehr effektiv (Vagusnerv-Stimulation)." },
+                                        { name: "Erklärung für Mitschüler", tag: "Psychoedukation", text: "'X macht das, um sich besser konzentrieren zu können, genau wie Y eine Brille trägt'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Doodling", tag: "Monotropismus", text: "Zeichnen/Kritzeln während des Unterrichts fördert oft das Zuhören (Kanalisierung)." },
+                                        { name: "Musik hören", tag: "Auditive Regulation", text: "Ein Ohrstöpsel mit Musik/Hörbuch bei Einzelarbeit kann isolieren und fokussieren." },
+                                        { name: "Fidget-Ring", tag: "Unauffälligkeit", text: "Schmuckstücke, an denen man drehen kann." },
+                                        { name: "Barfuß/Schuhe aus", tag: "Taktile Entlastung", text: "Wenn Schuhe drücken: Erlauben, in Socken zu sitzen (unter dem Tisch)." },
+                                        { name: "Aufklärung", tag: "Selbstadvocacy", text: "Den Schüler ermutigen, selbst zu erklären (wenn er möchte): 'Ich höre besser zu, wenn ich mich bewege'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    flexibility: {
+                        title: "Flexibilität & Routinen",
+                        subtitle: "Sicherheit durch Struktur",
+                        color: "teal",
+                        icon: "Repeat",
+                        desc: "Bedürfnis nach Vorhersehbarkeit, Stress bei Veränderungen, Spezialinteressen.",
+                        patterns: [
+                            {
+                                id: "flex_change",
+                                title: "Widerstand gegen Veränderungen",
+                                icon: "AlertTriangle",
+                                behavior: "Panik bei Vertretungslehrern, Raumwechsel, Sitzplanänderung. Weigerung, neue Aufgabenformate zu beginnen.",
+                                neuro_logic: "Das autistische Gehirn erstellt extrem präzise Vorhersagemodelle (Predictive Coding / Van de Cruys). Eine Abweichung von der Erwartung erzeugt einen massiven Fehler-Alarm (Prediction Error) im Gehirn.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Visueller Tagesplan", tag: "TEACCH", text: "Der Ablauf muss an der Tafel/am Pult sichtbar sein. Änderungen sofort markieren." },
+                                        { name: "Priming (Vorwarnung)", tag: "Vorbereitung", text: "Kündigen Sie Änderungen so früh wie möglich an. 'Morgen ist Herr Müller krank, Frau Meier kommt'." },
+                                        { name: "Übergangsobjekt", tag: "Bindungstheorie", text: "Darf das Lieblingsspielzeug mitnehmen zum neuen Ort (Sicherheitsanker)." },
+                                        { name: "Sanduhr für Wechsel", tag: "Visualisierte Zeit", text: "5 Min vor Ende der Aktivität ankündigen. Nicht plötzlich abbrechen." },
+                                        { name: "Fester Platz", tag: "Raumstruktur", text: "Même au cercle oder in der Mensa: Ein fester Platz gibt Sicherheit." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Plan B Besprechen", tag: "Kognitives Training", text: "Was machen wir, wenn der Beamer nicht geht? Szenarien vorbesprechen." },
+                                        { name: "Raumplan-App", tag: "Orientierungshilfe", text: "Bei Raumwechseln: Plan/Fotos des Weges bereitstellen." },
+                                        { name: "Hausaufgaben-Routine", tag: "Ritualisierung", text: "Hausaufgaben immer an die gleiche Stelle schreiben (Tafel rechts oben) und in Teams posten." },
+                                        { name: "Ausnahmen definieren", tag: "Explizite Logik", text: "Regeln erklären: 'Handys sind verboten, AUSSER wir nutzen sie für Kahoot'." },
+                                        { name: "Erste Schritte begleiten", tag: "Modelllernen", text: "Bei neuen Aufgabentypen: Das erste Beispiel gemeinsam machen, um das Muster zu etablieren." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "flex_interest",
+                                title: "Spezialinteressen & Monotropismus",
+                                icon: "Star",
+                                behavior: "Beschäftigt sich intensiv mit einem Thema (Dinos, Züge, Programmieren). Will nur darüber reden/arbeiten.",
+                                neuro_logic: "Monotropismus (Murray et al.) bedeutet 'Aufmerksamkeitstunnel'. Es ist eine Stärke! Das Gehirn geht in den Flow-Zustand. Es ist Ressource für Erholung und Kompetenz.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Interesse als Belohnung", tag: "Premack-Prinzip", text: "'Wenn du Mathe fertig hast, darfst du 5 Min über Dinos lesen' (Erst das Unangenehme, dann das Angenehme)." },
+                                        { name: "Inhalte anpassen", tag: "Interessenbasierte Diff.", text: "Textaufgaben mit Zügen statt Äpfeln. Motiviert sofort." },
+                                        { name: "Experten-Vortrag", tag: "Selbstwirksamkeit", text: "Kind darf sein Wissen der Klasse präsentieren (PowerPoint). Stärkt den sozialen Status." },
+                                        { name: "Pausen-Club", tag: "Soziale Integration", text: "Gründung eines Clubs zum Thema, um Gleichgesinnte zu finden." },
+                                        { name: "Spezial-Mappe", tag: "Kanalisierung", text: "Eine Mappe für 'Spezialwissen', in die man schreiben darf, wenn man fertig ist." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Referat-Themenwahl", tag: "Autonomie-Förderung", text: "Freie Themenwahl ermöglichen, wann immer der Lehrplan es zulässt." },
+                                        { name: "Deep Dive erlauben", tag: "Enrichment (Renzulli)", text: "Wenn der Schüler tiefer gehen will als der Stoff: Lassen Sie ihn! (Begabtenförderung)." },
+                                        { name: "Berufsorientierung", tag: "Zukunftsplanung", text: "Praktika im Bereich des Interesses suchen. Autisten sind oft Top-Spezialisten." },
+                                        { name: "Interesse als Anker", tag: "Stressregulation", text: "In Stressphasen darf sich der Schüler mit seinem Thema beschäftigen, um runterzukommen." },
+                                        { name: "Verbindung herstellen", tag: "Transferleistung", text: "Zeigen Sie, wie das Interesse mit dem Schulstoff verknüpft ist (z.B. Minecraft -> Geometrie)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    exec: {
+                        title: "Exekutive & Handlungsplanung",
+                        subtitle: "Der Anlasser klemmt",
+                        color: "rose",
+                        icon: "Cog",
+                        desc: "Schwierigkeiten bei der Initiierung von Handlungen (Inertia) und der Priorisierung (Bottom-Up).",
+                        patterns: [
+                            {
+                                id: "exec_inertia",
+                                title: "Autistische Trägheit (Inertia)",
+                                icon: "Anchor",
+                                behavior: "Schüler sitzt da und fängt nicht an, obwohl er will. Oder kann nicht aufhören, wenn er einmal im Flow ist (Hyperfokus).",
+                                neuro_logic: "Autistic Inertia: Probleme beim Task Switching aufgrund dysfunktionaler exekutiver Schaltkreise. Es ist keine Faulheit, sondern eine Blockade im motorischen Planungszentrum.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Body Doubling", tag: "Co-Regulation", text: "Setzen Sie sich kurz daneben, nur um den Start zu begleiten. Die Anwesenheit hilft beim 'Zünden'." },
+                                        { name: "Der erste Schritt", tag: "Chaining (Verhaltenskette)", text: "Legen Sie das Heft schon offen hin und geben Sie den Stift. Die physische Hürde wird entfernt." },
+                                        { name: "Countdown", tag: "Übergangsmanagement", text: "Nicht 'Jetzt aufhören', sondern 'Noch 3, 2, 1... Abschluss'. Gibt dem Gehirn Zeit zum Bremsen." },
+                                        { name: "Bewegung nutzen", tag: "Aktivierung", text: "Manchmal hilft Aufstehen und einmal um den Stuhl gehen, um die Starre zu lösen." },
+                                        { name: "Spezial-Interesse", tag: "Dopamin-Kick", text: "Verknüpfen Sie den Start mit etwas, das Spaß macht, um den Dopamin-Motor zu zünden." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Start-Rituale", tag: "Konditionierung", text: "Immer die gleiche Musik oder der gleiche Handgriff vor dem Lernen, um das Gehirn zu konditionieren." },
+                                        { name: "Flow respektieren", tag: "Zeitmanagement", text: "Wenn möglich: Längere Arbeitsphasen am Stück statt ständiger Fächerwechsel (Blockunterricht)." },
+                                        { name: "Digitale Assistenten", tag: "Assistive Technologie", text: "Nutzung von Apps, die den ersten Schritt vorgeben (Goblin Tools), um Aufgaben in winzige Schritte zu zerlegen." },
+                                        { name: "Verständnis zeigen", tag: "Validierung", text: "Niemals 'Du bist faul' sagen. Stattdessen: 'Klemmt der Anlasser gerade? Wie kann ich helfen?'" },
+                                        { name: "Energie-Check", tag: "Metakognition", text: "Lernen, wann die 'Schalt-Energie' am höchsten ist (oft morgens oder spät abends) und schwierige Aufgaben dahin legen." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "exec_detail",
+                                title: "Detail-Fokus (Bottom-Up)",
+                                icon: "ZoomIn",
+                                behavior: "Verliert sich in Details, verpasst das 'Große Ganze'. Korrigiert beim Abschreiben jeden i-Punkt, wird aber nicht fertig.",
+                                neuro_logic: "Wahrnehmungsstil: Lokale Verarbeitung vor globaler Verarbeitung ('Bottom-Up' statt 'Top-Down'). Führt zu tiefem Verständnis, kostet aber Zeit.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Fertiges Beispiel", tag: "Top-Down Modeling", text: "Zeigen Sie das fertige Bild/Produkt vorher. 'So soll es am Ende aussehen'. Gibt das Ziel (Top) vor." },
+                                        { name: "Zeit-Limit für Details", tag: "Strukturierung", text: "'Du hast 5 Min für die Skizze, keine Farben'. Sanduhr nutzen." },
+                                        { name: "Lückentexte", tag: "Entlastung", text: "Statt alles abzuschreiben (Gefahr des Verlierens in Buchstaben), nur Schlüsselwörter ergänzen." },
+                                        { name: "Marker-Methode", tag: "Fokus-Lenkung", text: "Bitten Sie das Kind, erst alle Verben gelb zu markieren, bevor es die Aufgabe liest." },
+                                        { name: "Akzeptanz", tag: "Stärkenorientierung", text: "Loben Sie die Genauigkeit, auch wenn die Menge geringer ist. 'Qualität vor Quantität'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Checklisten", tag: "Selbstinstruktion (Meichenbaum)", text: "Eine Liste der Hauptschritte. Schüler hakt ab, um den Fortschritt im Blick zu behalten." },
+                                        { name: "Mindmaps", tag: "Lerntechnik", text: "Nutzen Sie Mindmaps, um Zusammenhänge sichtbar zu machen und nicht nur Listen von Fakten." },
+                                        { name: "Zusammenfassungen", tag: "Advance Organizer", text: "Geben Sie eine Zusammenfassung des Kapitels am Anfang, um den Rahmen zu setzen." },
+                                        { name: "Rollenverteilung", tag: "Kooperatives Lernen", text: "In Gruppenarbeiten: Der Schüler ist der 'Qualitätsmanager' oder 'Faktenchecker' (Stärke nutzen)." },
+                                        { name: "Pragmatismus üben", tag: "Pareto-Prinzip", text: "Diskutieren: 'Wann reicht 80%? Wann brauchen wir 100%?'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    body: {
+                        title: "Körper & Wahrnehmung",
+                        subtitle: "Das Gefühl für sich selbst",
+                        color: "emerald",
+                        icon: "Accessibility",
+                        desc: "Herausforderungen mit Motorik (Dyspraxie) und der Wahrnehmung innerer Signale (Interozeption).",
+                        patterns: [
+                            {
+                                id: "body_dyspraxia",
+                                title: "Dyspraxie & Motorik",
+                                icon: "PenTool",
+                                behavior: "Schrift ist unleserlich, wirkt tollpatschig, stößt Dinge um, hat Probleme beim Sport/Umziehen.",
+                                neuro_logic: "Motorische Planungsstörung. Die Automatisierung von Bewegungen ist erschwert. Das Schreiben von Hand blockiert Arbeitsgedächtnis-Kapazität.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Laptop/Tablet", tag: "Kompensation", text: "Ab C2/C3 einführen. Tippen ist motorisch einfacher als Schreiben." },
+                                        { name: "Größere Linien", tag: "Materialanpassung", text: "Hefte mit vergrößerter Lineatur oder Kästchen nutzen." },
+                                        { name: "Keine Noten auf Schönschrift", tag: "Nachteilsausgleich", text: "Bewerten Sie den Inhalt, nicht die Form. Schriftbild nicht in die Note einfließen lassen." },
+                                        { name: "Klebeband am Tisch", tag: "Ordnungshilfe", text: "Markieren Sie den Platz für das Heft mit Tape, damit es nicht verrutscht." },
+                                        { name: "Hilfe beim Umziehen", tag: "Assistenz", text: "Mehr Zeit geben oder Schuhe mit Klettverschluss empfehlen (Eltern)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Digital First", tag: "Standardisierung", text: "Erlaubnis, alle längeren Texte digital zu verfassen (auch in Prüfungen)." },
+                                        { name: "Skripte statt Mitschreiben", tag: "Kognitive Entlastung", text: "Lehrer-Skript kopieren. Gleichzeitiges Zuhören und Schreiben ist bei Dyspraxie fast unmöglich." },
+                                        { name: "Mündliche Prüfung", tag: "Alternative Leistungsform", text: "Wenn die Hand weh tut: Teile der Prüfung mündlich ablegen." },
+                                        { name: "Sport-Beurteilung", tag: "Individuelle Bezugsnorm", text: "Bewertung nach individuellem Fortschritt oder Einsatz, nicht nach Norm-Tabellen." },
+                                        { name: "Ergonomie", tag: "Gesundheitsförderung", text: "Auf gute Sitzhaltung achten, da die Muskelspannung oft niedrig ist (Hypotonie)." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "body_intero",
+                                title: "Interozeption (Innenschau)",
+                                icon: "Thermometer",
+                                behavior: "Geht nicht zur Toilette bis es dringend ist, vergisst zu essen/trinken, zieht Jacke im Winter nicht an (spürt Kälte nicht).",
+                                neuro_logic: "Interozeptive Wahrnehmungsstörung (Alexithymie auf körperlicher Ebene). Signale (Hunger, Durst) erreichen das Bewusstsein nicht rechtzeitig.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Feste Toiletten-Zeiten", tag: "Routinebildung", text: "Schicken Sie das Kind in der großen Pause, auch wenn es 'nicht muss'." },
+                                        { name: "Trink-Erinnerung", tag: "Visualisierung", text: "Gemeinsames Trinken in der Klasse einführen. Flasche auf den Tisch." },
+                                        { name: "Kleidungs-Check", tag: "Fürsorge", text: "Vor der Pause: 'Alle ziehen die Jacke an'. Kontrollieren, ob der Reißverschluss zu ist." },
+                                        { name: "Gefühle visualisieren", tag: "Body-Scan", text: "Bild eines Körpers: 'Wo spürst du die Wut? Im Bauch? In den Händen?'" },
+                                        { name: "Snack-Pausen", tag: "Blutzucker-Management", text: "Erinnern Sie ans Essen, um Unterzuckerung (Hangry) zu vermeiden." }
+                                    ],
+                                    secondaire: [
+                                        { name: "App-Erinnerungen", tag: "Selbstmanagement", text: "Smartwatch-Alarm für Trinken oder Toilette." },
+                                        { name: "Freier Zugang zu Wasser", tag: "Grundbedürfnis", text: "Darf jederzeit trinken, auch im Unterricht." },
+                                        { name: "Temperatur-Check", tag: "Kognitive Kompensation", text: "App nutzen: 'Es sind 5 Grad -> Ich brauche eine Jacke', statt auf das (fehlende) Kältegefühl zu warten." },
+                                        { name: "Achtsamkeits-Training", tag: "Wahrnehmungsschulung", text: "Kurze Body-Scans in den Alltag einbauen, um die Wahrnehmung zu schulen." },
+                                        { name: "Pausen-Management", tag: "Gesundheitsschutz", text: "Darauf achten, dass in der Mittagspause tatsächlich gegessen wird (und nicht nur über Spezialinteressen geredet)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Expert Autisme",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : TEACCH (Mesibov), Low Arousal (Elvén), Social Stories (Gray), Neurodiversité (Silberman).",
+                    noteTitle: "Note Professionnelle :",
+                    noteText: "L'autisme est un neurotype, pas une maladie. L'objectif est l'accessibilité, pas la 'guérison' ou la normalisation (éviter le Masking).",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "L'Autisme en contexte scolaire",
+                    headerSubtitle: "Une boîte à outils méthodologique pour l'inclusion & la neurodiversité. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions basées sur des preuves & Aménagements",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert Autisme Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    social: {
+                        title: "Interaction Sociale & Communication",
+                        subtitle: "La langue 'étrangère'",
+                        color: "sky",
+                        icon: "MessagesSquare",
+                        desc: "Différences dans la compréhension des règles sociales, compréhension littérale et communication directe.",
+                        patterns: [
+                            {
+                                id: "soc_literal",
+                                title: "Compréhension littérale & Ironie",
+                                icon: "Quote",
+                                behavior: "Prend les métaphores au pied de la lettre ('Jeter un œil'), ne comprend pas l'ironie, semble 'pédant' sur les détails.",
+                                neuro_logic: "Les cerveaux autistes traitent souvent le langage de manière sémantiquement précise (Bottom-Up). Le contexte pragmatique (ton, mimique) est moins intuitivement intégré.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Parler clairement", tag: "Low Arousal (Elvén)", text: "Évitez les expressions idiomatiques. Dites 'Arrête de parler' au lieu de 'Est-ce qu'il faut faire autant de bruit ?'." },
+                                        { name: "Balise Ironie", tag: "TEACCH / Visuel", text: "Si vous faites une blague, précisez : 'C'était une blague'. Utilisez des gestes convenus." },
+                                        { name: "Scénarios Sociaux", tag: "Social Stories (Gray)", text: "Utilisez des Social Stories pour expliquer explicitement et logiquement les situations sociales (récré, salutations)." },
+                                        { name: "Consignes précises", tag: "Étayage (Scaffolding)", text: "Au lieu de 'Range', dites 'Mets les crayons dans la boîte et le cahier dans le sac'." },
+                                        { name: "Pont d'intérêts", tag: "Enseignement par les pairs", text: "Utilisez l'intérêt spécifique de l'enfant pour créer un lien avec les autres (ex: Club Lego)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Règles Explicites", tag: "Curriculum Caché (Endow)", text: "Expliquez le 'Curriculum Caché'. Pourquoi fait-on ça ? La logique convainc, l'autorité souvent non." },
+                                        { name: "Rôle de groupe", tag: "Apprentissage Coopératif", text: "Donnez à l'élève un rôle clair (ex: secrétaire, recherche) au lieu de 'Discutez entre vous'." },
+                                        { name: "Feedback Écrit", tag: "Canal Visuel", text: "Donner les critiques par écrit. La critique orale en situation émotionnelle est souvent non traitée." },
+                                        { name: "Pause Sociale", tag: "Gestion Énergie", text: "Permission de passer la récréation à la bibliothèque au lieu de devoir socialiser dans la cour bruyante." },
+                                        { name: "Système Mentor", tag: "Circle of Friends", text: "Un élève empathique explique les dynamiques sociales sans juger." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "soc_honest",
+                                title: "Franchise & Honnêteté",
+                                icon: "Megaphone",
+                                behavior: "Dit ouvertement au prof que le cours est ennuyeux ou corrige les fautes devant la classe. Paraît impoli.",
+                                neuro_logic: "Les personnes autistes priorisent souvent la vérité factuelle sur les hiérarchies sociales. C'est rarement une insulte, mais une information (un fait).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Filtre de Vérité", tag: "Stratégie Cognitive", text: "Visualiser : Est-ce vrai ? Est-ce gentil ? Est-ce nécessaire ? Apprendre quand utiliser les 'mensonges sociaux'." },
+                                        { name: "Correction Privée", tag: "Gestion des contingences", text: "Convenir : 'Si je fais une erreur, dis-le moi après le cours à mon bureau'." },
+                                        { name: "Changement Perspective", tag: "Théorie de l'Esprit (ToM)", text: "Expliquez logiquement les sentiments : 'Si tu dis ça, X se sent triste parce que...'." },
+                                        { name: "Quota de questions", tag: "Économie de jetons", text: "Limiter les questions/corrections à 3 par heure (avec jetons), le reste est écrit." },
+                                        { name: "Ne pas prendre perso", tag: "Posture pro", text: "Comprenez-le comme un feedback factuel, pas une attaque contre votre autorité." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Club Débat", tag: "Orientation Ressources", text: "Canalisez la force argumentative dans des matières comme la politique ou la philo." },
+                                        { name: "Formulations Alternatives", tag: "Scripting", text: "Proposer des phrases types : 'J'ai un avis différent...' au lieu de 'C'est faux'." },
+                                        { name: "Signal Prof", tag: "Indice Non-verbal", text: "Un signe discret de l'enseignant quand l'élève dépasse une limite sociale." },
+                                        { name: "Justification Logique", tag: "Rationalité", text: "Si une règle semble illogique, elle ne sera pas suivie. Expliquez le sens (sécurité, temps)." },
+                                        { name: "Prévention Harcèlement", tag: "Psychoéducation", text: "Sensibiliser la classe (avec accord) à la neurodiversité pour éviter l'exclusion due à la 'différence'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    sensory: {
+                        title: "Sensoriel & Traitement",
+                        subtitle: "Surcharge & Shutdown",
+                        color: "indigo",
+                        icon: "Ear",
+                        desc: "Hyper- ou hyposensibilité au bruit, lumière, odeurs, textures. Risque de Meltdown.",
+                        patterns: [
+                            {
+                                id: "sens_overload",
+                                title: "Surcharge Sensorielle (Overload)",
+                                icon: "ZapOff",
+                                behavior: "Se bouche les oreilles, devient soudainement agressif ou se retire complètement (Shutdown) dans le bruit.",
+                                neuro_logic: "Intense World Theory (Markram) : Le cerveau autiste perçoit les stimuli sans filtre et amplifiés. Cela mène à une douleur physique et à la panique.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Casque Antibruit", tag: "Protection Sensorielle (Ayres)", text: "Les écouteurs (coquilles) doivent être accessibles et autorisés à tout moment." },
+                                        { name: "Lieu de Retrait", tag: "Safe Space", text: "Un lieu calme (salle annexe, tente) pour la régulation. Utilisable sans questions." },
+                                        { name: "Gestion Lumière", tag: "Ergonomie", text: "Place loin de la fenêtre (contre-jour) et pas sous les néons directs. Lunettes de soleil si besoin." },
+                                        { name: "Sortie Anticipée", tag: "Organisation", text: "L'élève peut sortir 2 min avant la sonnerie pour éviter la bousculade dans le couloir." },
+                                        { name: "Protection Odeurs", tag: "Accessibilité", text: "Si la cantine sent trop fort : permission de manger dans une salle séparée." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Carte de Sortie", tag: "Intervention de crise", text: "Montrer la carte -> Quitter la salle. Sans discussion. Pour éviter le Meltdown." },
+                                        { name: "Pas de groupes couloir", tag: "Acoustique", text: "Ne pas faire de travaux de groupe dans les couloirs résonnants." },
+                                        { name: "Alternatives Sport", tag: "Inclusion", text: "Le bruit du hall est souvent insupportable. Tâches alternatives (arbitre) ou dispense si acoustique impossible." },
+                                        { name: "Substitut Numérique", tag: "Tech d'assistance", text: "Si le grattement de la craie/stylos déclenche : utiliser la tablette." },
+                                        { name: "Choix de Place", tag: "Sécurité", text: "Le coin au fond est souvent mieux que devant (moins de stimuli dans le dos, 'sécurité')." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "sens_stimming",
+                                title: "Stimming (Autostimulation)",
+                                icon: "Activity",
+                                behavior: "Balancement, fredonnement, tourner un stylo, battements de mains.",
+                                neuro_logic: "Le stimming sert à l'autorégulation (calme le stress ou active en cas d'ennui). Nécessaire à l'homéostasie émotionnelle.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Autoriser le Stimming", tag: "Acceptation / Neurodiversité", text: "Tant que personne n'est blessé/gêné massivement : Ne pas interdire ! C'est une soupape." },
+                                        { name: "Alternatives Discrètes", tag: "Redirection", text: "Si le bruit gêne : Proposer des Fidgets silencieux (balle, cube)." },
+                                        { name: "Pauses Mouvement", tag: "Intégration Sensorielle", text: "Sauter sur un trampoline ou pousser contre le mur (proprioception)." },
+                                        { name: "Chewing-gum / Collier", tag: "Régulation Orale", text: "Mâcher régule très efficacement le stress (Nerf Vague)." },
+                                        { name: "Explication aux élèves", tag: "Psychoéducation", text: "'X fait ça pour mieux se concentrer, tout comme Y porte des lunettes'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Gribouillage", tag: "Monotropisme", text: "Dessiner pendant le cours favorise souvent l'écoute (Canalisation)." },
+                                        { name: "Écouter Musique", tag: "Régulation Auditive", text: "Un écouteur avec musique/livre audio en travail individuel peut isoler et focaliser." },
+                                        { name: "Bague Fidget", tag: "Discrétion", text: "Bijoux que l'on peut faire tourner." },
+                                        { name: "Pieds nus/Chaussettes", tag: "Soulagement Tactile", text: "Si les chaussures serrent : permettre d'être en chaussettes (sous la table)." },
+                                        { name: "Sensibilisation", tag: "Auto-défense", text: "Encourager l'élève à expliquer (s'il veut) : 'J'écoute mieux quand je bouge'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    flexibility: {
+                        title: "Flexibilité & Routines",
+                        subtitle: "Sécurité par la structure",
+                        color: "teal",
+                        icon: "Repeat",
+                        desc: "Besoin de prévisibilité, stress face aux changements, intérêts spécifiques.",
+                        patterns: [
+                            {
+                                id: "flex_change",
+                                title: "Résistance au Changement",
+                                icon: "AlertTriangle",
+                                behavior: "Panique lors de remplacements, changement de salle, plan de classe. Refus de commencer de nouveaux formats.",
+                                neuro_logic: "Predictive Coding (Van de Cruys) : Le cerveau autiste crée des modèles de prédiction très précis. Un écart crée une alerte erreur massive (Anxiété).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Planning Visuel", tag: "TEACCH", text: "Le déroulement doit être visible. Marquer immédiatement les changements." },
+                                        { name: "Priming (Préavis)", tag: "Préparation", text: "Annoncez les changements le plus tôt possible. 'Demain M. Muller est malade, Mme Meier vient'." },
+                                        { name: "Objet de Transition", tag: "Théorie de l'attachement", text: "Peut emmener son jouet favori vers le nouveau lieu." },
+                                        { name: "Sablier de Transition", tag: "Temps visualisé", text: "Annoncer 5 min avant la fin de l'activité. Ne pas arrêter brusquement." },
+                                        { name: "Place Fixe", tag: "Constance", text: "Même au cercle ou à la cantine : une place fixe donne de la sécurité." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Discuter Plan B", tag: "Entraînement cognitif", text: "Que fait-on si le projecteur ne marche pas ? Pré-discuter les scénarios." },
+                                        { name: "App Plan de Salle", tag: "Orientation", text: "Lors de changements de salle : fournir plan/photos du chemin." },
+                                        { name: "Routine Devoirs", tag: "Ritualisation", text: "Toujours écrire les devoirs au même endroit (tableau droite) et poster sur Teams." },
+                                        { name: "Définir Exceptions", tag: "Logique explicite", text: "Expliquer les règles : 'Portables interdits, SAUF si on les utilise pour Kahoot'." },
+                                        { name: "Guider Premiers Pas", tag: "Modélisation", text: "Pour les nouveaux types de tâches : Faire le premier exemple ensemble pour établir le modèle." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "flex_interest",
+                                title: "Intérêts Spécifiques & Monotropisme",
+                                icon: "Star",
+                                behavior: "S'occupe intensément d'un sujet (Dinos, Trains, Code). Ne veut parler/travailler que là-dessus.",
+                                neuro_logic: "Monotropisme (Murray) : 'Tunnel d'attention'. C'est une force ! Le cerveau entre en état de Flow. Ressource pour le repos et la compétence.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Intérêt comme Récompense", tag: "Principe de Premack", text: "'Quand tu as fini les maths, tu peux lire 5 min sur les dinos' (D'abord l'effort, puis le plaisir)." },
+                                        { name: "Adapter Contenus", tag: "Différenciation par intérêt", text: "Problèmes de maths avec des trains au lieu de pommes. Motive immédiatement." },
+                                        { name: "Exposé Expert", tag: "Estime de soi", text: "L'enfant peut présenter son savoir à la classe. Renforce le statut social." },
+                                        { name: "Club Récré", tag: "Intégration Sociale", text: "Création d'un club sur le thème pour trouver des pairs." },
+                                        { name: "Dossier Spécial", tag: "Canalisation", text: "Une farde pour 'Savoir Spécial', où l'on peut écrire quand on a fini." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Choix Sujet Exposé", tag: "Soutien à l'autonomie", text: "Permettre le choix libre du sujet quand le programme le permet." },
+                                        { name: "Permettre Deep Dive", tag: "Enrichissement (Renzulli)", text: "Si l'élève veut aller plus loin que le cours : Laissez-le faire ! (Talents)." },
+                                        { name: "Orientation Pro", tag: "Avenir", text: "Chercher des stages dans le domaine d'intérêt. Les autistes sont souvent des spécialistes de haut niveau." },
+                                        { name: "Intérêt comme Ancre", tag: "Apaisement", text: "En phase de stress, l'élève peut s'occuper de son sujet pour se calmer." },
+                                        { name: "Créer le lien", tag: "Transfert", text: "Montrez comment l'intérêt est lié au programme (ex: Minecraft -> Géométrie)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    exec: {
+                        title: "Fonctions Exécutives & Planification",
+                        subtitle: "Le démarreur est bloqué",
+                        color: "rose",
+                        icon: "Cog",
+                        desc: "Difficultés à initier des actions (Inertie) et à prioriser (Bottom-Up).",
+                        patterns: [
+                            {
+                                id: "exec_inertia",
+                                title: "Inertie Autistique (Inertia)",
+                                icon: "Anchor",
+                                behavior: "L'élève reste assis et ne commence pas, même s'il le veut. Ou ne peut pas s'arrêter une fois lancé (Hyperfocus).",
+                                neuro_logic: "Autistic Inertia : Difficulté de 'Task Switching'. Ce n'est pas de la paresse, mais un blocage de la planification motrice.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Body Doubling", tag: "Co-Régulation", text: "Asseyez-vous à côté juste pour le démarrage. La présence aide à 'lancer le moteur'." },
+                                        { name: "Le Premier Pas", tag: "Chaining (Chaînage)", text: "Ouvrez déjà le cahier et donnez le stylo. L'obstacle physique est levé." },
+                                        { name: "Compte à rebours", tag: "Gestion transition", text: "Pas 'Arrête maintenant', mais 'Encore 3, 2, 1... Fin'. Donne au cerveau le temps de freiner." },
+                                        { name: "Utiliser le Mouvement", tag: "Activation", text: "Parfois, se lever et tourner autour de la chaise aide à briser la paralysie." },
+                                        { name: "Intérêt Spécial", tag: "Boost Dopamine", text: "Lier le démarrage à quelque chose de plaisant pour allumer le moteur dopaminergique." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Rituels de démarrage", tag: "Conditionnement", text: "Toujours la même musique ou le même geste avant d'étudier pour conditionner le cerveau." },
+                                        { name: "Respecter le Flow", tag: "Gestion du temps", text: "Si possible : phases de travail plus longues au lieu de changements constants." },
+                                        { name: "Assistants Numériques", tag: "Tech d'assistance", text: "Apps qui donnent la première étape (Goblin Tools) pour décomposer les tâches en micro-étapes." },
+                                        { name: "Montrer de la Compréhension", tag: "Validation", text: "Jamais 'Tu es paresseux'. Plutôt : 'Le démarreur est coincé ? Comment je peux aider ?'" },
+                                        { name: "Check Énergie", tag: "Métacognition", text: "Apprendre quand l'énergie de 'commutation' est la plus haute et y placer les tâches dures." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "exec_detail",
+                                title: "Pensée en Détails (Bottom-Up)",
+                                icon: "ZoomIn",
+                                behavior: "Se perd dans les détails, manque la 'Vue d'ensemble'. Corrige chaque point en recopiant mais ne finit pas.",
+                                neuro_logic: "Traitement 'Bottom-Up' (Détail vers Global) au lieu de 'Top-Down'. Mène à une compréhension profonde mais coûte du temps.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Exemple Fini", tag: "Top-Down Modeling", text: "Montrez le produit fini avant. 'Ça doit ressembler à ça'. Donne le but (Top)." },
+                                        { name: "Limite de temps détails", tag: "Structuration", text: "'Tu as 5 min pour le croquis, pas de couleurs'. Utiliser sablier." },
+                                        { name: "Textes à trous", tag: "Allègement", text: "Au lieu de tout copier, compléter seulement les mots-clés." },
+                                        { name: "Méthode Surligneur", tag: "Guidage attentionnel", text: "Demander à l'enfant de surligner tous les verbes avant de lire la consigne." },
+                                        { name: "Acceptation", tag: "Valorisation", text: "Louez la précision même si la quantité est moindre. 'Qualité avant quantité'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Checklists", tag: "Auto-instruction (Meichenbaum)", text: "Une liste des étapes principales. L'élève coche pour voir la progression globale." },
+                                        { name: "Mindmaps", tag: "Technique d'apprentissage", text: "Utiliser des cartes mentales pour visualiser les liens, pas juste des listes." },
+                                        { name: "Résumés", tag: "Advance Organizer", text: "Donnez un résumé du chapitre au début." },
+                                        { name: "Rôles", tag: "Apprentissage Coopératif", text: "En groupe : L'élève est le 'Manager Qualité' ou 'Vérificateur' (Utiliser la force)." },
+                                        { name: "Pragmatisme", tag: "Loi de Pareto", text: "Discuter : 'Quand 80% suffisent-ils ? Quand faut-il 100% ?'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    body: {
+                        title: "Corps & Perception",
+                        subtitle: "Le sentiment de soi",
+                        color: "emerald",
+                        icon: "Accessibility",
+                        desc: "Défis avec la motricité (Dyspraxie) et la perception des signaux internes (Intéroception).",
+                        patterns: [
+                            {
+                                id: "body_dyspraxia",
+                                title: "Dyspraxie & Motricité",
+                                icon: "PenTool",
+                                behavior: "Écriture illisible, semble maladroit, renverse des choses, problèmes en sport/habillement.",
+                                neuro_logic: "Planification motrice altérée. L'automatisation est faible. Écrire à la main bloque la mémoire de travail.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Laptop/Tablette", tag: "Compensation", text: "Introduire dès le C2/C3. Taper est motricement plus simple qu'écrire." },
+                                        { name: "Lignes agrandies", tag: "Adaptation matériel", text: "Cahiers avec interlignes agrandis ou carreaux." },
+                                        { name: "Pas de note de soin", tag: "Aménagement raisonnable", text: "Évaluez le contenu, pas la forme. L'écriture ne doit pas impacter la note." },
+                                        { name: "Scotch sur table", tag: "Aide organisation", text: "Marquez l'emplacement du cahier avec du scotch pour qu'il ne glisse pas." },
+                                        { name: "Aide habillement", tag: "Assistance", text: "Donner plus de temps ou recommander des chaussures à scratch (parents)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Digital First", tag: "Standardisation", text: "Permission de rédiger tous les textes longs numériquement (même en examen)." },
+                                        { name: "Scripts prof", tag: "Allègement cognitif", text: "Copier le script du prof. Écouter et écrire en même temps est quasi impossible avec dyspraxie." },
+                                        { name: "Examen Oral", tag: "Forme alternative", text: "Si la main fait mal : passer une partie de l'examen à l'oral." },
+                                        { name: "Évaluation Sport", tag: "Norme individuelle", text: "Noter selon le progrès individuel ou l'effort, pas selon les barèmes normés." },
+                                        { name: "Ergonomie", tag: "Santé", text: "Veiller à une bonne posture, le tonus musculaire étant souvent bas (hypotonie)." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "body_intero",
+                                title: "Intéroception (Perception interne)",
+                                icon: "Thermometer",
+                                behavior: "Ne va pas aux toilettes avant l'urgence, oublie de manger/boire, ne met pas de veste en hiver.",
+                                neuro_logic: "Trouble de la perception intéroceptive (Alexithymie corporelle). Les signaux n'atteignent pas la conscience.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Horaires Toilettes", tag: "Création de routine", text: "Envoyez l'enfant à la récréation, même s'il 'n'a pas envie'." },
+                                        { name: "Rappel Boisson", tag: "Visualisation", text: "Moment boire collectif. Bouteille sur la table." },
+                                        { name: "Check Vêtements", tag: "Soin", text: "Avant la récré : 'Tout le monde met sa veste'. Vérifier si le zip est fermé." },
+                                        { name: "Visualiser émotions", tag: "Body-Scan", text: "Image du corps : 'Où sens-tu la colère ? Ventre ? Mains ?'" },
+                                        { name: "Pauses Snack", tag: "Gestion Glycémie", text: "Rappeler de manger pour éviter l'hypoglycémie (Hangry)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Rappels App", tag: "Autogestion", text: "Alarme montre connectée pour boire ou toilettes." },
+                                        { name: "Accès libre eau", tag: "Besoin fondamental", text: "Droit de boire à tout moment, même en cours." },
+                                        { name: "Check Température", tag: "Compensation cognitive", text: "Utiliser une App : 'Il fait 5 degrés -> Il faut une veste', au lieu d'attendre la sensation de froid." },
+                                        { name: "Entraînement Conscience", tag: "Prévention", text: "Intégrer de courts Body-Scans pour exercer la perception." },
+                                        { name: "Gestion Pauses", tag: "Santé", text: "Veiller à ce que l'élève mange vraiment à midi (et ne parle pas juste de ses intérêts)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `Autism_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#f0f9ff] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-sky-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-sky-500 to-indigo-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Infinity" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-sky-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-sky-50 text-sky-700 rounded-full text-xs font-bold border border-sky-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-sky-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-sky-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

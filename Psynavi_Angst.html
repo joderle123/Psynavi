@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Angst & Emotion Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f5f3ff; } /* Calming violet tint base */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(124, 58, 237, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #8b5cf6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-violet-200 selection:text-violet-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - ANXIETY EDITION ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Angst & Emotion",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: KVT (Beck), Mutig werden (Rapee), Schulabsentismus (Kearney), Polyvagal-Theorie (Porges).",
+                    noteTitle: "Wichtiger Hinweis:",
+                    noteText: "Vermeidung hält die Angst aufrecht. Ziel ist nicht Stressfreiheit, sondern Bewältigungskompetenz (Exposition).",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Angststörungen in der Schule",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für Prüfungsangst, Soziale Phobie & Schulvermeidung. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Interventionen & Nachteilsausgleich",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Angst & Emotion Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    performance: {
+                        title: "Leistungs- & Prüfungsangst",
+                        subtitle: "Der Blackout vor dem Blatt",
+                        color: "violet",
+                        icon: "FileX",
+                        desc: "Extreme Furcht vor Bewertung, Blackouts, Perfektionismus und Blockaden in Testsituationen.",
+                        patterns: [
+                            {
+                                id: "perf_blackout",
+                                title: "Blackout & Blockade",
+                                icon: "BrainCircuit",
+                                behavior: "Schüler hat gelernt, starrt aber auf das Blatt und weiß nichts mehr. Weinen, Zittern, Übelkeit vor Tests.",
+                                neuro_logic: "Bei Gefahr (Angst) schaltet das Gehirn vom präfrontalen Cortex (Denken) auf das limbische System (Kampf/Flucht) um. Cortisol flutet das Gehirn und blockiert den Zugriff auf das Gedächtnis ('Cortisol-Blockade'). Das Wissen ist da, aber der Zugriff ist versperrt.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Der Mut-Stein", tag: "Anker-Technik", text: "Ein kleiner Gegenstand in der Tasche, den das Kind drücken kann, um sich zu erden." },
+                                        { name: "Bewegungs-Pause", tag: "Physiologie", text: "Erlauben Sie dem Kind, kurz aufzustehen und sich zu schütteln, um das Adrenalin abzubauen ('Abschütteln')." },
+                                        { name: "Start-Hilfe", tag: "Scaffolding", text: "Lesen Sie die erste Aufgabe laut vor oder schreiben Sie den ersten Satzanfang gemeinsam hin." },
+                                        { name: "Lächeln-Trick", tag: "Biofeedback", text: "Bitten Sie das Kind kurz zu lächeln (Stift zwischen Zähne). Das signalisiert dem Gehirn Sicherheit." },
+                                        { name: "Kuscheltier als Beisitzer", tag: "Sicherheitsobjekt", text: "Das Maskottchen darf auf dem Tisch sitzen und 'zuschauen'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Stopp-Technik", tag: "KVT", text: "Bei Panik: Stift hinlegen, Augen zu, 'STOPP' denken, 3x tief atmen. Erst dann weitermachen." },
+                                        { name: "Separate Raum", tag: "Reizreduktion", text: "Nachteilsausgleich: Test im SePAS oder Nebenraum schreiben, um die 'Ansteckung' durch nervöse Mitschüler zu vermeiden." },
+                                        { name: "Zeit-Zuschlag", tag: "Tiers-Temps", text: "Offizieller Nachteilsausgleich (33% mehr Zeit) nimmt den immensen Zeitdruck." },
+                                        { name: "Mündlich statt Schriftlich", tag: "Alternative", text: "Wenn der Schreibarm blockiert: Wissen mündlich abfragen (kurzes Kolloquium)." },
+                                        { name: "Realitäts-Check", tag: "Kognitive Umstrukturierung", text: "Vorher besprechen: 'Was passiert im schlimmsten Fall? Geht die Welt unter?' (Entkatastrophisieren)." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "perf_perfect",
+                                title: "Perfektionismus & Radieren",
+                                icon: "Eraser",
+                                behavior: "Radiert ständig, fängt immer neu an, wird nicht fertig, weil es 'nicht gut genug' ist. Verweigert Aufgaben aus Angst vor Fehlern.",
+                                neuro_logic: "Perfektionismus ist oft eine Angstbewältigungsstrategie. Der Fehler wird als existenzielle Bedrohung des Selbstwerts wahrgenommen. Das Gehirn meldet: 'Wenn ich nicht perfekt bin, bin ich nichts wert'.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Kuli statt Bleistift", tag: "Exposition", text: "Lassen Sie mit Kugelschreiber schreiben. Fehler werden durchgestrichen, nicht wegradiert. Das trainiert Fehlertoleranz." },
+                                        { name: "Die 'Gut genug'-Linie", tag: "Zielsetzung", text: "Definieren Sie vorher: 'Drei Sätze reichen'. Stoppen Sie das Kind dort aktiv." },
+                                        { name: "Fehler der Woche", tag: "Modelllernen", text: "Die Lehrkraft macht absichtlich einen Fehler an der Tafel und feiert ihn: 'Ohne Fehler kein Lernen!'." },
+                                        { name: "Zeit-Limit pro Aufgabe", tag: "Struktur", text: "Sanduhr für jede Teilaufgabe, um das 'Verlieren im Detail' zu verhindern." },
+                                        { name: "Ergebnis-unabhängiges Lob", tag: "Mindset", text: "Loben Sie die Anstrengung ('Du hast dich getraut'), nicht das Ergebnis ('Das ist eine 1')." }
+                                    ],
+                                    secondaire: [
+                                        { name: "80%-Regel", tag: "Pareto-Prinzip", text: "Vereinbarung: Für Hausaufgaben geben wir nur 80%. Das Restrisiko wird ausgehalten." },
+                                        { name: "Worst-Case Szenario", tag: "KVT", text: "Was passiert, wenn da ein Fehler ist? Zu Ende denken, um die irrationale Angst zu entlarven." },
+                                        { name: "Entwurfs-Denken", tag: "Reframing", text: "Jede Arbeit ist ein 'Draft' (Entwurf), kein finales Urteil über die Person." },
+                                        { name: "Fokus auf Stärken", tag: "Ressourcen", text: "Erinnern an vergangene Erfolge, um das Selbstvertrauen zu stärken (Ressourcenaktivierung)." },
+                                        { name: "Positive Selbstinstruktion", tag: "Affirmation", text: "Satz auf dem Tisch: 'Ein Fehler ist eine Information, keine Katastrophe'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    social: {
+                        title: "Soziale Angst & Mutismus",
+                        subtitle: "Die Angst vor Bewertung",
+                        color: "teal",
+                        icon: "Users",
+                        desc: "Angst vor Blamage, Sprechangst, Vermeidung von Gruppenarbeiten oder dem Pausenhof.",
+                        patterns: [
+                            {
+                                id: "soc_speak",
+                                title: "Sprechangst & Selektiver Mutismus",
+                                icon: "MicOff",
+                                behavior: "Spricht zu Hause normal, in der Schule gar nicht oder nur flüsternd. Erstarrt, wenn aufgerufen.",
+                                neuro_logic: "Selektiver Mutismus ist eine Angststörung (kein Trotz!). Bei Sprechdruck friert das Sprachzentrum ein (Freeze-Response). Je mehr Druck ausgeübt wird, desto unmöglicher wird das Sprechen.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Kein Sprechzwang", tag: "Druckentlastung", text: "Zwingen Sie das Kind niemals zum Sprechen. Vereinbaren Sie nonverbale Zeichen (Nicken, Kärtchen)." },
+                                        { name: "Flüster-Post", tag: "Stufenplan", text: "Kind darf dem Freund die Antwort flüstern, der Freund sagt sie laut (Sprachrohr)." },
+                                        { name: "Ja/Nein Fragen", tag: "Vereinfachung", text: "Stellen Sie geschlossene Fragen, auf die man nicken kann, statt offene Fragen." },
+                                        { name: "Aufgaben ohne Worte", tag: "Inklusion", text: "Tafeldienst, Austeilen – Rollen, die Status geben, ohne Sprache zu erfordern." },
+                                        { name: "Video-Hausaufgabe", tag: "Nachteilsausgleich", text: "Gedicht zu Hause aufnehmen und als Video/Audio schicken." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Präsentation vor Lehrer", tag: "Desensibilisierung", text: "Referat nur vor dem Lehrer halten, dann vor Lehrer + 1 Freund, dann Kleingruppe." },
+                                        { name: "Schriftliche Beteiligung", tag: "Kompensation", text: "Note für mündliche Mitarbeit durch schriftliche Kurz-Kommentare oder Chat-Beiträge ersetzen." },
+                                        { name: "Sitzordnung", tag: "Sicherheit", text: "Neben einer vertrauten Person sitzen, nicht im Zentrum der Aufmerksamkeit." },
+                                        { name: "1-zu-1 Gespräche", tag: "Beziehungsaufbau", text: "Vertrauen aufbauen in Situationen ohne Publikum (kurz nach der Stunde)." },
+                                        { name: "Thema-Fokus", tag: "Ablenkung", text: "Über Sachthemen sprechen ist oft leichter als über persönliche Gefühle." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "soc_avoid",
+                                title: "Vermeidung sozialer Situationen",
+                                icon: "UserX",
+                                behavior: "Versteckt sich in der Pause, geht nicht in die Mensa, verweigert Gruppenarbeit, meldet sich krank bei Ausflügen.",
+                                neuro_logic: "Soziale Phobie ist die Angst vor negativer Bewertung. Vermeidung reduziert die Angst kurzfristig massiv (Belohnung), verstärkt sie aber langfristig, da keine korrigierende Erfahrung gemacht wird ('Es war gar nicht so schlimm').",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Pausen-Pate", tag: "Peer-Support", text: "Ein älterer Schüler oder ein empathischer Mitschüler nimmt das Kind an die Hand." },
+                                        { name: "Aufgabe in der Pause", tag: "Funktion", text: "Dem Kind eine Aufgabe geben (Blumen gießen, Bibliothek), damit es nicht 'nutzlos rumsteht' (Schutz)." },
+                                        { name: "Kleingruppe statt Großgruppe", tag: "Exposition", text: "Gruppenarbeit nur zu zweit mit einem netten Partner beginnen." },
+                                        { name: "Strukturierte Spiele", tag: "Regeln", text: "Spiele mit festen Regeln (Fangenspiel) sind einfacher als freies Spiel ('Roleplay')." },
+                                        { name: "Rückzugsort", tag: "Sicherheit", text: "Erlaubnis, bei Überforderung kurz ins Sekretariat/SePAS zu gehen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Definierte Rolle", tag: "Struktur", text: "In Gruppenarbeiten eine Rolle geben (Zeitwächter, Protokollant), die Interaktion regelt." },
+                                        { name: "Mensa-Buddy", tag: "Planung", text: "Vorher klären, wer mit wem isst. Die Ungewissheit 'Wo sitze ich?' ist der größte Stressor." },
+                                        { name: "Schrittweise Exposition", tag: "Stufenplan", text: "Ziel vereinbaren: 'Heute bleibst du 5 Min in der Aula, dann darfst du raus'." },
+                                        { name: "Skill-Training", tag: "Soziales Kompetenztraining", text: "Im SePAS konkret üben: Wie starte ich ein Gespräch? (Rollenspiel)." },
+                                        { name: "Fokus nach außen", tag: "Aufmerksamkeitslenkung", text: "Beobachtungsaufgabe geben: 'Zähl mal, wie viele blaue Pullis du siehst', um den Fokus von sich selbst ('Alle starren mich an') wegzulenken." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    school: {
+                        title: "Schulabsentismus & Trennungsangst",
+                        subtitle: "Der schwere Weg zum Tor",
+                        color: "rose",
+                        icon: "DoorOpen",
+                        desc: "Schulverweigerung, morgendliche Dramen, Bauchschmerzen vor der Schule, Angst vor Trennung von Eltern.",
+                        patterns: [
+                            {
+                                id: "school_refusal",
+                                title: "Schulvermeidung",
+                                icon: "Home",
+                                behavior: "Morgens Übelkeit/Bauchweh, Weinen, Weigerung das Haus zu verlassen. Fehlt häufig tageweise.",
+                                neuro_logic: "Oft eine Mischung aus Trennungsangst und Leistungs-/Sozialangst. Das Zuhause ist der Sicherheitsbereich. Jeder Tag zu Hause verstärkt die Angst vor der Rückkehr (Vermeidungsspirale).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Soft Landing", tag: "Bindung", text: "Kind wird am Tor von einer Lieblingsperson (Lehrer/Erzieher) persönlich abgeholt ('Übergabe')." },
+                                        { name: "Übergangsobjekt", tag: "Trost", text: "Ein Schal der Mama oder ein Foto in der Hosentasche als Verbindung nach Hause." },
+                                        { name: "Sorgenfresser", tag: "Ritual", text: "Morgens die Sorge aufmalen, in den Sorgenfresser stecken und in der Schule 'abgeben'." },
+                                        { name: "Keine Diskussion", tag: "Eltern-Coaching", text: "Schule ist Pflicht. Eltern sollten liebevoll aber bestimmt bleiben. Nicht verhandeln." },
+                                        { name: "Teilzeit-Einstieg", tag: "Desensibilisierung", text: "Erstmal nur für die erste Stunde kommen, dann steigern (in Absprache mit SePAS)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Check-in Person", tag: "Beziehung", text: "Morgens erster Gang nicht in die Klasse, sondern kurz zum SePAS/Tutor zum 'Hallo' sagen." },
+                                        { name: "Rückzugskarte", tag: "Sicherheit", text: "Darf den Raum verlassen, wenn die Panik kommt, muss aber in der Schule bleiben (nicht nach Hause gehen!)." },
+                                        { name: "Stundenplan anpassen", tag: "Entlastung", text: "Vorübergehend schwierige Fächer reduzieren, um Erfolgserlebnisse beim Anwesenheit zu sichern." },
+                                        { name: "Kontakt halten", tag: "Bindung", text: "Wenn Schüler fehlt: Lehrkraft ruft an oder schreibt Karte 'Wir vermissen dich' (nicht 'Wo bleibst du?')." },
+                                        { name: "Ursachenforschung", tag: "Analyse", text: "Liegt es am Stoff (Überforderung) oder Mobbing? Gezielte Lösung suchen." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    general: {
+                        title: "Generalisierte Angst & Sorgen",
+                        subtitle: "Das Gedankenkarussell",
+                        color: "indigo",
+                        icon: "CloudRain",
+                        desc: "Ständiges 'Was wäre wenn...', Katastrophisieren, körperliche Unruhe, Schlafstörungen.",
+                        patterns: [
+                            {
+                                id: "gen_worry",
+                                title: "Grübeln & Sorgenketten",
+                                icon: "HelpCircle",
+                                behavior: "Fragt ständig rückversichernd nach ('Ist das so richtig?', 'Gehen wir wirklich pünktlich raus?'). Kann nicht abschalten.",
+                                neuro_logic: "Das Gehirn scannt permanent nach Gefahr (Hypervigilanz). Unsicherheit wird nicht toleriert (Intoleranz der Ungewissheit). Rückversicherung beruhigt nur kurz, erhält aber die Angst aufrecht.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Sorgen-Box", tag: "Containment", text: "Sorge aufschreiben, in die Box sperren. 'Wir kümmern uns Freitag darum'. Kopf wird frei." },
+                                        { name: "Nur 1x fragen", tag: "Regel", text: "Rückversicherung begrenzen. 'Ich habe es einmal gesagt, das gilt.' Stärkt das Aushalten von Unsicherheit." },
+                                        { name: "Wahrscheinlichkeits-Check", tag: "Kognitiv", text: "Wie ein Detektiv: 'Wie oft ist das wirklich schon passiert?'. Beweise suchen." },
+                                        { name: "Ablenkung", tag: "Fokus", text: "Aktive Aufgaben geben (Tafel wischen), um das Grübeln zu unterbrechen." },
+                                        { name: "Entspannungs-Insel", tag: "PMR", text: "Kurze Atemübung oder Muskelentspannung mit der ganzen Klasse (hilft allen)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Grübel-Stuhl", tag: "Reizkontrolle", text: "Zu Hause: Sorgen nur auf einem bestimmten Stuhl machen. In der Schule: Sorgenzeit festlegen (z.B. 10 Min beim SePAS)." },
+                                        { name: "Gedanken-Stopp", tag: "Technik", text: "Gummiband am Handgelenk schnippen lassen, wenn die Sorgenschleife startet. Zurück ins Hier und Jetzt." },
+                                        { name: "Akzeptanz", tag: "ACT", text: "Dem Sorgengedanken sagen: 'Hallo, da bist du ja wieder. Du darfst da sein, aber ich lerne jetzt weiter'." },
+                                        { name: "Fakt vs. Fiktion", tag: "Realitätsprüfung", text: "Ist das ein Fakt oder nur ein Gefühl? Gefühle sind keine Fakten." },
+                                        { name: "Dankbarkeit", tag: "Fokus-Shift", text: "Am Ende der Stunde: 1 Sache notieren, die gut geklappt hat (Positive Psychologie)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Anxiété & Émotion",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : TCC (Beck), Cool Kids (Rapee), Refus scolaire (Kearney), Théorie Polyvagale.",
+                    noteTitle: "Note Importante :",
+                    noteText: "L'évitement maintient l'anxiété. L'objectif n'est pas zéro stress, mais la compétence à gérer le stress (Exposition).",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "Les Troubles Anxieux à l'école",
+                    headerSubtitle: "Une boîte à outils pour l'anxiété de performance, sociale & le refus scolaire. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions & Aménagements",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert Anxiété Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    performance: {
+                        title: "Anxiété de Performance",
+                        subtitle: "Le trou noir devant la feuille",
+                        color: "violet",
+                        icon: "FileX",
+                        desc: "Peur extrême de l'évaluation, blackouts, perfectionnisme et blocages lors des tests.",
+                        patterns: [
+                            {
+                                id: "perf_blackout",
+                                title: "Blackout & Blocage",
+                                icon: "BrainCircuit",
+                                behavior: "L'élève a appris, mais fixe la feuille et ne sait plus rien. Pleurs, tremblements, nausées avant les tests.",
+                                neuro_logic: "En cas de danger (peur), le cerveau bascule du cortex préfrontal (réflexion) au système limbique (combat/fuite). Le cortisol inonde le cerveau et bloque l'accès à la mémoire. Le savoir est là, mais la porte est fermée.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "La Pierre de Courage", tag: "Ancrage", text: "Un petit objet dans la poche que l'enfant peut serrer pour s'ancrer." },
+                                        { name: "Pause Mouvement", tag: "Physiologie", text: "Permettre à l'enfant de se lever et de se secouer pour évacuer l'adrénaline." },
+                                        { name: "Aide au démarrage", tag: "Étayage", text: "Lisez la première consigne à voix haute ou écrivez le début de la phrase ensemble." },
+                                        { name: "Le truc du Sourire", tag: "Biofeedback", text: "Demandez à l'enfant de sourire (stylo entre les dents). Cela signale la sécurité au cerveau." },
+                                        { name: "Doudou spectateur", tag: "Objet Transitionnel", text: "La mascotte peut s'asseoir sur la table et 'regarder'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Technique STOP", tag: "TCC", text: "En panique : poser le stylo, fermer les yeux, penser 'STOP', respirer 3x. Reprendre ensuite." },
+                                        { name: "Salle Séparée", tag: "Réduction Stimuli", text: "Aménagement : Faire le test au SePAS ou salle annexe pour éviter la 'contagion' du stress des autres." },
+                                        { name: "Tiers-Temps", tag: "Aménagement", text: "Aménagement officiel (33% de temps en plus) réduit l'immense pression temporelle." },
+                                        { name: "Oral au lieu d'écrit", tag: "Alternative", text: "Si le bras bloque : interroger l'élève à l'oral (court colloque)." },
+                                        { name: "Check Réalité", tag: "Restructuration Cognitive", text: "Discuter avant : 'Quel est le pire scénario ? Est-ce la fin du monde ?' (Décatastrophisation)." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "perf_perfect",
+                                title: "Perfectionnisme & Gommer",
+                                icon: "Eraser",
+                                behavior: "Gomme tout le temps, recommence sans cesse, ne finit pas car 'ce n'est pas assez bien'. Refuse par peur de l'erreur.",
+                                neuro_logic: "Le perfectionnisme est une stratégie de gestion de la peur. L'erreur est vue comme une menace existentielle pour l'estime de soi. Le cerveau dit : 'Si je ne suis pas parfait, je ne vaux rien'.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Stylo au lieu de crayon", tag: "Exposition", text: "Faire écrire au stylo. On barre les fautes, on ne gomme pas. Entraîne la tolérance à l'erreur." },
+                                        { name: "La ligne 'Assez bon'", tag: "Objectif", text: "Définir avant : 'Trois phrases suffisent'. Arrêtez activement l'enfant à ce stade." },
+                                        { name: "Erreur de la semaine", tag: "Modélisation", text: "L'enseignant fait exprès une faute au tableau et la célèbre : 'Sans erreur, pas d'apprentissage !'." },
+                                        { name: "Limite de temps", tag: "Structure", text: "Sablier pour chaque sous-tâche pour éviter de se perdre dans les détails." },
+                                        { name: "Louer l'effort", tag: "Mindset", text: "Louez le courage ('Tu as osé essayer'), pas le résultat ('C'est un 20/20')." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Règle des 80%", tag: "Pareto", text: "Accord : Pour les devoirs, on ne donne que 80%. On supporte le risque résiduel." },
+                                        { name: "Scénario Catastrophe", tag: "TCC", text: "Que se passe-t-il s'il y a une faute ? Penser jusqu'au bout pour démasquer la peur irrationnelle." },
+                                        { name: "Pensée Brouillon", tag: "Recadrage", text: "Chaque travail est un 'Draft' (brouillon), pas un jugement final sur la personne." },
+                                        { name: "Focus Forces", tag: "Ressources", text: "Rappeler les succès passés pour renforcer la confiance." },
+                                        { name: "Auto-instruction positive", tag: "Affirmation", text: "Phrase sur la table : 'Une erreur est une info, pas une catastrophe'." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    social: {
+                        title: "Anxiété Sociale & Mutisme",
+                        subtitle: "La peur du jugement",
+                        color: "teal",
+                        icon: "Users",
+                        desc: "Peur de l'humiliation, peur de parler, évitement des travaux de groupe ou de la récréation.",
+                        patterns: [
+                            {
+                                id: "soc_speak",
+                                title: "Peur de parler & Mutisme Sélectif",
+                                icon: "MicOff",
+                                behavior: "Parle normalement à la maison, mais pas du tout ou en chuchotant à l'école. Se fige quand on l'interroge.",
+                                neuro_logic: "Le mutisme sélectif est un trouble anxieux (pas de l'opposition !). Sous la pression, le centre de la parole se fige (Freeze-Response). Plus on met de pression, plus la parole devient impossible.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Pas de contrainte", tag: "Désescalade", text: "Ne forcez jamais à parler. Convenez de signes non-verbaux (hochement, cartes)." },
+                                        { name: "Téléphone Arabe", tag: "Étapes", text: "L'enfant chuchote à un copain, le copain dit la réponse à voix haute." },
+                                        { name: "Questions Oui/Non", tag: "Simplification", text: "Posez des questions fermées auxquelles on peut répondre par un hochement de tête." },
+                                        { name: "Tâches sans mots", tag: "Inclusion", text: "Effacer le tableau, distribuer – des rôles qui donnent du statut sans exiger de parole." },
+                                        { name: "Devoir Vidéo", tag: "Aménagement", text: "Enregistrer la poésie à la maison et envoyer la vidéo/audio." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Présentation progressive", tag: "Désensibilisation", text: "Exposé seul devant le prof, puis prof + 1 ami, puis petit groupe." },
+                                        { name: "Participation Écrite", tag: "Compensation", text: "Remplacer la note orale par des commentaires écrits courts ou via un chat." },
+                                        { name: "Plan de salle", tag: "Sécurité", text: "Assis à côté d'une personne de confiance, pas au centre de l'attention." },
+                                        { name: "Entretiens 1-à-1", tag: "Relation", text: "Bâtir la confiance dans des situations sans public." },
+                                        { name: "Focus Thème", tag: "Distraction", text: "Parler de sujets factuels est souvent plus facile que de sentiments personnels." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "soc_avoid",
+                                title: "Évitement des situations sociales",
+                                icon: "UserX",
+                                behavior: "Se cache à la récré, ne va pas à la cantine, refuse les travaux de groupe, malade lors des sorties.",
+                                neuro_logic: "L'anxiété sociale est la peur du jugement négatif. L'évitement réduit l'anxiété massivement à court terme (récompense), mais la renforce à long terme car aucune expérience correctrice n'est faite.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Parrain de récré", tag: "Soutien Pairs", text: "Un élève plus âgé ou un camarade empathique prend l'enfant avec lui." },
+                                        { name: "Tâche à la pause", tag: "Fonction", text: "Donner une mission (arroser plantes, bibliothèque) pour ne pas 'rester là inutilement' (Protection)." },
+                                        { name: "Petits groupes", tag: "Exposition", text: "Commencer le travail de groupe en binôme avec un partenaire sympa." },
+                                        { name: "Jeux structurés", tag: "Règles", text: "Les jeux avec règles fixes (chat) sont plus simples que le jeu libre." },
+                                        { name: "Lieu de repli", tag: "Sécurité", text: "Permission d'aller brièvement au secrétariat/SePAS en cas de surcharge." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Rôle défini", tag: "Structure", text: "En groupe, donner un rôle précis (gardien du temps, secrétaire) qui régule l'interaction." },
+                                        { name: "Buddy Cantine", tag: "Planification", text: "Clarifier avant qui mange avec qui. L'incertitude 'Où je m'assois ?' est le plus grand stress." },
+                                        { name: "Exposition par étapes", tag: "Escalier", text: "Objectif : 'Aujourd'hui tu restes 5 min dans le hall, après tu peux sortir'." },
+                                        { name: "Entraînement Habiletés", tag: "Compétences", text: "Au SePAS : Comment démarrer une conversation ? (Jeu de rôle)." },
+                                        { name: "Focus externe", tag: "Attention", text: "Tâche d'observation : 'Compte les pulls bleus', pour détourner l'attention de soi-même ('Tout le monde me regarde')." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    school: {
+                        title: "Refus Scolaire & Séparation",
+                        subtitle: "Le chemin difficile vers le portail",
+                        color: "rose",
+                        icon: "DoorOpen",
+                        desc: "Refus d'aller à l'école, drames le matin, maux de ventre, anxiété de séparation.",
+                        patterns: [
+                            {
+                                id: "school_refusal",
+                                title: "Évitement scolaire",
+                                icon: "Home",
+                                behavior: "Nausées le matin, pleurs, refus de quitter la maison. Absentéisme fréquent.",
+                                neuro_logic: "Souvent un mélange d'anxiété de séparation et d'anxiété sociale/performance. La maison est la zone de sécurité. Chaque jour à la maison renforce la peur du retour (spirale d'évitement).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Soft Landing", tag: "Attachement", text: "L'enfant est accueilli personnellement au portail par une personne favorite ('Passage de témoin')." },
+                                        { name: "Objet de transition", tag: "Réconfort", text: "Une écharpe de maman ou une photo dans la poche comme lien avec la maison." },
+                                        { name: "Mangeur de soucis", tag: "Rituel", text: "Dessiner le souci le matin, le mettre dans la poupée et le 'déposer' à l'école." },
+                                        { name: "Pas de discussion", tag: "Coaching Parents", text: "L'école est obligatoire. Les parents doivent rester aimants mais fermes. Ne pas négocier." },
+                                        { name: "Rentrée partielle", tag: "Désensibilisation", text: "Venir juste pour la 1ère heure au début, puis augmenter (avec SePAS)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Personne Check-in", tag: "Relation", text: "Le matin, ne pas aller direct en classe, mais dire 'Bonjour' au SePAS/Tuteur." },
+                                        { name: "Carte de Retrait", tag: "Sécurité", text: "Droit de quitter la classe si panique, mais doit rester dans l'école (ne pas rentrer à la maison !)." },
+                                        { name: "Adapter l'horaire", tag: "Allègement", text: "Réduire temporairement les matières difficiles pour assurer des succès de présence." },
+                                        { name: "Garder le contact", tag: "Lien", text: "Si absent : L'enseignant appelle ou écrit 'Tu nous manques' (pas 'T'es où ?')." },
+                                        { name: "Recherche causes", tag: "Analyse", text: "Est-ce le contenu (surmenage) ou le harcèlement ? Chercher une solution ciblée." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    general: {
+                        title: "Anxiété Généralisée & Soucis",
+                        subtitle: "Le manège des pensées",
+                        color: "indigo",
+                        icon: "CloudRain",
+                        desc: "Des 'Et si...' permanents, catastrophisme, agitation physique, troubles du sommeil.",
+                        patterns: [
+                            {
+                                id: "gen_worry",
+                                title: "Ruminations & Chaînes de soucis",
+                                icon: "HelpCircle",
+                                behavior: "Demande constamment réassurance ('C'est juste ?', 'On sort vraiment à l'heure ?'). N'arrive pas à déconnecter.",
+                                neuro_logic: "Le cerveau scanne en permanence le danger (Hypervigilance). L'incertitude n'est pas tolérée. La réassurance calme brièvement, mais maintient l'anxiété.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Boîte à soucis", tag: "Contenant", text: "Écrire le souci, l'enfermer dans la boîte. 'On s'en occupe vendredi'. Libère la tête." },
+                                        { name: "Demander 1x max", tag: "Règle", text: "Limiter la réassurance. 'Je l'ai dit une fois, ça tient.' Renforce la tolérance à l'incertitude." },
+                                        { name: "Check Probabilité", tag: "Cognitif", text: "Comme un détective : 'Combien de fois c'est vraiment arrivé ?'. Chercher des preuves." },
+                                        { name: "Distraction", tag: "Focus", text: "Donner des tâches actives (effacer tableau) pour interrompre la rumination." },
+                                        { name: "Îlot de calme", tag: "Relaxation", text: "Court exercice de respiration avec toute la classe (aide tout le monde)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Chaise à soucis", tag: "Contrôle Stimulus", text: "À la maison : Ne s'inquiéter que sur une chaise précise. À l'école : Temps de soucis fixé (ex: 10 min au SePAS)." },
+                                        { name: "Arrêt de pensée", tag: "Technique", text: "Faire claquer un élastique au poignet quand la boucle démarre. Retour à l'ici et maintenant." },
+                                        { name: "Acceptation", tag: "ACT", text: "Dire à la pensée : 'Salut, te revoilà. Tu peux rester, mais moi j'étudie maintenant'." },
+                                        { name: "Fait vs Fiction", tag: "Test Réalité", text: "Est-ce un fait ou juste un sentiment ? Les sentiments ne sont pas des faits." },
+                                        { name: "Gratitude", tag: "Psychologie Positive", text: "Fin de l'heure : Noter 1 truc qui a bien marché." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `Anxiety_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#f5f3ff] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-violet-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-violet-500 to-indigo-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Activity" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-violet-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-bold border border-violet-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-violet-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-violet-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

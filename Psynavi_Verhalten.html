@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Verhalten & Kooperation Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fef2f2; } /* Red tint base for alert/action */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(220, 38, 38, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-red-200 selection:text-red-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - CONDUCT EDITION ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Verhalten & Kooperation",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: Neue Autorität (Omer), Traumapädagogik (Weiß), Low Arousal (Elvén), KVT (Döpfner).",
+                    noteTitle: "Wichtiger Hinweis:",
+                    noteText: "Hinter 'schlechtem' Verhalten steckt oft Not, Trauma oder Hilflosigkeit. Ziel ist Beziehung statt Machtkampf ('Präsenz statt Dominanz').",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Herausforderndes Verhalten",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für Opposition (ODD), Aggression & Regelverstöße. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Interventionen & Deeskalation",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Verhalten Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    opposition: {
+                        title: "Opposition & Trotz (ODD)",
+                        subtitle: "Der ewige Machtkampf",
+                        color: "orange",
+                        icon: "ShieldX",
+                        desc: "Verweigert Anweisungen, diskutiert endlos, provoziert Autoritäten, schiebt Schuld auf andere.",
+                        patterns: [
+                            {
+                                id: "odd_defiance",
+                                title: "Verweigerung & Diskussion",
+                                icon: "MessageSquareX",
+                                behavior: "Lehrer sagt 'Setz dich', Schüler sagt 'Nein' oder 'Warum immer ich?'. Zieht den Lehrer in endlose Debatten.",
+                                neuro_logic: "Schüler mit ODD (Oppositionelles Trotzverhalten) erleben Kontrollverlust als existenzielle Bedrohung. Das 'Nein' ist ein Versuch, Autonomie und Sicherheit wiederherzustellen. Jede Diskussion belohnt das Verhalten durch Aufmerksamkeit (Negative Zuwendung).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Wahlmöglichkeiten", tag: "Autonomie", text: "Nicht befehlen, sondern Wahl lassen: 'Möchtest du das rote oder blaue Heft nutzen?'. Gibt Kontrolle im Rahmen." },
+                                        { name: "Die kaputte Schallplatte", tag: "Technik", text: "Nicht argumentieren. Ruhig die Kern-Aussage wiederholen: 'Ich verstehe, dass du wütend bist, aber die Regel ist...'" },
+                                        { name: "Zeitverzögerung", tag: "Neue Autorität", text: "Nicht sofort reagieren! 'Ich sehe das. Ich entscheide später, was wir tun'. Nimmt den Druck aus dem Kessel." },
+                                        { name: "Das 'Wenn-Dann' Prinzip", tag: "Transparenz", text: "Ruhig ankündigen: 'Wenn du weiterstörst, musst du 5 Min nachsitzen. Du entscheidest'. Verantwortung zurückgeben." },
+                                        { name: "Lob für Kooperation", tag: "Shaping", text: "Jedes kleine 'Ja' sofort positiv verstärken. Aufmerksamkeit weg vom Negativen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Schmiede das Eisen, wenn es kalt ist", tag: "Haim Omer", text: "Konflikte nicht in der Hitze des Gefechts lösen. Bestrafung/Gespräch erst am nächsten Tag, wenn alle ruhig sind." },
+                                        { name: "Vermeidung des 'Ja-Aber'", tag: "Kommunikation", text: "Sagen Sie Ihre Anweisung und gehen Sie weg ('Walk away'). Warten Sie nicht auf die Antwort/Diskussion." },
+                                        { name: "Schriftliche Verträge", tag: "Verbindlichkeit", text: "Verhaltensvertrag mit klaren Konsequenzen. Unterschrift vom Schüler. Nimmt die Emotion raus." },
+                                        { name: "Beziehungs-Konto", tag: "Prävention", text: "Man kann nur so viel fordern, wie man eingezahlt hat. Investieren Sie in positive Momente außerhalb des Konflikts." },
+                                        { name: "Deeskalierendes Schweigen", tag: "Status", text: "Schweigen wirkt oft souveräner als Schreien. Halten Sie den Blickkontakt (freundlich ernst), aber diskutieren Sie nicht." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    aggression: {
+                        title: "Aggression & Wut",
+                        subtitle: "Wenn die Sicherung durchbrennt",
+                        color: "red",
+                        icon: "Flame",
+                        desc: "Physische oder verbale Gewalt, Wutanfälle, Zerstörung von Eigentum.",
+                        patterns: [
+                            {
+                                id: "agg_rage",
+                                title: "Explosive Wutausbrüche",
+                                icon: "Bomb",
+                                behavior: "Schreit, wirft Stühle, bedroht Mitschüler. Oft aus dem Nichts (Trigger oft unsichtbar).",
+                                neuro_logic: "Das Stresssystem (Amygdala) ist hypersensibel (oft durch Trauma). Der präfrontale Cortex (Impulskontrolle) geht 'offline'. Das Kind KANN sich in dem Moment nicht beruhigen ('Survival Mode'). Strafen in dieser Phase eskalieren die Situation.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Low Arousal", tag: "Deeskalation", text: "Körpersprache entspannen, leise sprechen, Abstand halten, keine direkten Drohungen. Spiegelneuronen nutzen." },
+                                        { name: "Safe Place", tag: "Sicherheit", text: "Ein Ort (Wutecke mit Kissen), wo das Kind toben darf, ohne jemanden zu verletzen. Wut ist okay, Gewalt nicht." },
+                                        { name: "Notfall-Plan", tag: "Struktur", text: "Wenn Stufe Rot erreicht ist: Klasse geht raus (Selbstschutz), Kind bleibt drin (oder umgekehrt)." },
+                                        { name: "Bewegung", tag: "Physiologie", text: "Lassen Sie das Kind gegen eine Wand drücken oder Papier zerreißen. Adrenalin muss physisch abgebaut werden." },
+                                        { name: "Nachbesprechung", tag: "Reflexion", text: "Erst wenn das Kind wieder völlig ruhig ist (oft Stunden später). 'Was hast du gebraucht? Wie machen wir es nächstes Mal?'" }
+                                    ],
+                                    secondaire: [
+                                        { name: "Exit-Strategie", tag: "Prävention", text: "Dauerhafte Erlaubnis, den Raum zu verlassen, bevor die Kontrolle verloren geht (Selbstmanagement)." },
+                                        { name: "Kein Publikum", tag: "Status-Schutz", text: "Klären Sie Konflikte nie vor der Klasse. Das Gesicht zu verlieren, erzwingt Gegengewalt." },
+                                        { name: "Sit-In / Nachsitzen", tag: "Neue Autorität", text: "Statt Strafe: Lehrkraft und Unterstützer sitzen schweigend beim Schüler. Botschaft: 'Wir geben dich nicht auf, aber wir akzeptieren das nicht'." },
+                                        { name: "Trauma-Brille", tag: "Haltung", text: "Fragen Sie nicht 'Was stimmt nicht mit dir?', sondern 'Was ist dir passiert?'. Aggression ist oft Schutz." },
+                                        { name: "Wiedergutmachung", tag: "Restorative Justice", text: "Statt Strafarbeit: Den Schaden reparieren (Tisch putzen, Entschuldigungsbrief). Lehrt Verantwortung." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    antisocial: {
+                        title: "Regelverstöße & Dissozialität",
+                        subtitle: "Regeln gelten nur für andere",
+                        color: "stone",
+                        icon: "Gavel", // Judge symbol for rules/justice
+                        desc: "Lügen, Stehlen, Schwänzen, Mobbing. Mangel an Unrechtsbewusstsein.",
+                        patterns: [
+                            {
+                                id: "anti_rules",
+                                title: "Manipulation & Lügen",
+                                icon: "Mask",
+                                behavior: "Lügt charmant ('Ich war das nicht'), manipuliert Mitschüler, zeigt keine Reue bei Strafe.",
+                                neuro_logic: "Bei manchen Formen (Callous-Unemotional Traits) ist die emotionale Empathie reduziert. Strafen (Angst) wirken kaum, da das Angstzentrum unteraktiv ist. Belohnung (Vorteil) wirkt besser als Bestrafung.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Token-System", tag: "Belohnung", text: "Klare Belohnungen für positives Verhalten. Der 'Gewinn' durch Kooperation muss größer sein als durch Manipulation." },
+                                        { name: "Direkte Überprüfung", tag: "Kontrolle", text: "Vertrauen ist gut, Kontrolle ist besser. Hausaufgabenheft täglich unterschreiben lassen. Lücken schließen." },
+                                        { name: "Opfer-Perspektive", tag: "Empathie-Training", text: "Nicht predigen. Fragen: 'Wie fühlt sich X jetzt?'. Kognitive Empathie nutzen, wenn emotionale fehlt." },
+                                        { name: "Gruppen-Konsequenz", tag: "Sozialer Druck", text: "Positiver Gruppendruck: 'Wenn alle leise sind, gibt es 5 Min Spielzeit'. Nutzt den Wunsch nach Status." },
+                                        { name: "Feste Struktur", tag: "Rahmen", text: "Keine Ausnahmen. Vorhersehbarkeit reduziert Manipulationsversuche." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Konfrontative Pädagogik", tag: "Klare Linie", text: "Liebevoll aber konfrontativ. Lügen sofort benennen ('Das glaube ich dir nicht'), ohne Diskussion." },
+                                        { name: "Transparenz-Netzwerk", tag: "Kooperation", text: "Alle Lehrer und Eltern ziehen an einem Strang. Absprachen verhindern das Ausspielen gegeneinander." },
+                                        { name: "Verantwortung geben", tag: "Ressource", text: "Geben Sie dem Schüler eine 'Macht-Position' (z.B. Aufsicht beim Sportfest). Kanalisiert den Führungswillen." },
+                                        { name: "Kosten-Nutzen-Analyse", tag: "Kognitiv", text: "Rational besprechen: 'Lügen bringt dir kurzfristig Ruhe, aber langfristig Stress. Lohnt sich das?'." },
+                                        { name: "Täter-Opfer-Ausgleich", tag: "Verantwortung", text: "Moderiertes Gespräch mit dem Geschädigten. Konfrontation mit den Folgen des Handelns." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Comportement & Coopération",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : Nouvelle Autorité (Omer), Pédagogie du Trauma, Low Arousal, TCC.",
+                    noteTitle: "Note Importante :",
+                    noteText: "Derrière un 'mauvais' comportement se cache souvent une détresse ou un trauma. Objectif : Relation au lieu de lutte de pouvoir ('Présence au lieu de Dominance').",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "Comportements Défis",
+                    headerSubtitle: "Une boîte à outils pour l'opposition (TOP), l'agression & le non-respect des règles. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions & Désescalade",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert Comportement Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    opposition: {
+                        title: "Opposition & Provocation (TOP)",
+                        subtitle: "La lutte de pouvoir éternelle",
+                        color: "orange",
+                        icon: "ShieldX",
+                        desc: "Refuse les consignes, discute sans fin, provoque l'autorité, blâme les autres.",
+                        patterns: [
+                            {
+                                id: "odd_defiance",
+                                title: "Refus & Discussion",
+                                icon: "MessageSquareX",
+                                behavior: "Le prof dit 'Assieds-toi', l'élève dit 'Non' ou 'Pourquoi toujours moi?'. Entraîne le prof dans des débats infinis.",
+                                neuro_logic: "Les élèves avec TOP (Trouble Oppositionnel avec Provocation) vivent la perte de contrôle comme une menace existentielle. Le 'Non' est une tentative de restaurer l'autonomie et la sécurité. Chaque discussion récompense le comportement par de l'attention.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Choix illusoires", tag: "Autonomie", text: "Ne pas ordonner, mais offrir un choix : 'Tu veux le cahier rouge ou bleu ?'. Donne du contrôle dans le cadre." },
+                                        { name: "Disque rayé", tag: "Technique", text: "Ne pas argumenter. Répéter calmement le message clé : 'Je comprends que tu es fâché, mais la règle est...'." },
+                                        { name: "Délai de réponse", tag: "Nouvelle Autorité", text: "Ne pas réagir tout de suite ! 'Je vois ça. Je déciderai plus tard de ce qu'on fait'. Enlève la pression immédiate." },
+                                        { name: "Principe 'Si-Alors'", tag: "Transparence", text: "Annoncer calmement : 'Si tu continues, tu auras 5 min de retenue. C'est toi qui décides'." },
+                                        { name: "Renforcement positif", tag: "Shaping", text: "Renforcez immédiatement chaque petit 'Oui' ou geste de coopération." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Battre le fer quand il est froid", tag: "Haim Omer", text: "Ne pas régler les conflits à chaud. Sanction/Discussion le lendemain, quand tout le monde est calme." },
+                                        { name: "Éviter le 'Oui-Mais'", tag: "Communication", text: "Donnez votre consigne et éloignez-vous ('Walk away'). N'attendez pas la réponse/discussion." },
+                                        { name: "Contrats écrits", tag: "Engagement", text: "Contrat de comportement avec conséquences claires. Signature de l'élève. Objectivise l'émotion." },
+                                        { name: "Compte Relationnel", tag: "Prévention", text: "On ne peut exiger qu'à hauteur de ce qu'on a investi. Investissez dans des moments positifs hors conflit." },
+                                        { name: "Silence désescaladant", tag: "Statut", text: "Le silence est souvent plus puissant que les cris. Gardez le contact visuel (calme), mais ne discutez pas." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    aggression: {
+                        title: "Agression & Colère",
+                        subtitle: "Quand les fusibles sautent",
+                        color: "red",
+                        icon: "Flame",
+                        desc: "Violence physique ou verbale, crises de rage, destruction de matériel.",
+                        patterns: [
+                            {
+                                id: "agg_rage",
+                                title: "Crises explosives",
+                                icon: "Bomb",
+                                behavior: "Crie, jette des chaises, menace. Souvent soudain (déclencheur souvent invisible).",
+                                neuro_logic: "Le système de stress (amygdale) est hypersensible (souvent dû à un trauma). Le cortex préfrontal (contrôle) se met 'hors ligne'. L'enfant NE PEUT PAS se calmer à ce moment ('Mode Survie'). Punir ici aggrave tout.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Low Arousal", tag: "Désescalade", text: "Détendre le langage corporel, parler bas, garder ses distances, pas de menaces directes." },
+                                        { name: "Safe Place", tag: "Sécurité", text: "Un endroit (coin coussins) où l'enfant peut se défouler sans blesser personne. La colère est ok, la violence non." },
+                                        { name: "Plan d'urgence", tag: "Structure", text: "Si niveau rouge atteint : La classe sort (protection), l'enfant reste (ou inversement)." },
+                                        { name: "Mouvement", tag: "Physiologie", text: "Laisser l'enfant pousser contre un mur ou déchirer du papier. L'adrénaline doit sortir physiquement." },
+                                        { name: "Debriefing", tag: "Réflexion", text: "Seulement quand l'enfant est totalement calme (souvent des heures après). 'De quoi avais-tu besoin ?'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Stratégie de Sortie", tag: "Prévention", text: "Permission permanente de quitter la salle avant de perdre le contrôle (Autogestion)." },
+                                        { name: "Pas de public", tag: "Protection Statut", text: "Ne réglez jamais ça devant la classe. Perdre la face force à la surenchère." },
+                                        { name: "Sit-In / Présence", tag: "Nouvelle Autorité", text: "Au lieu de punir : L'enseignant s'assoit silencieusement près de l'élève. Message : 'On ne t'abandonne pas, mais on n'accepte pas ça'." },
+                                        { name: "Lunettes Trauma", tag: "Posture", text: "Ne demandez pas 'Qu'est-ce qui cloche chez toi ?', mais 'Qu'est-ce qui t'est arrivé ?'. L'agression est souvent une protection." },
+                                        { name: "Réparation", tag: "Justice Restaurative", text: "Au lieu de copier des lignes : Réparer le dommage (nettoyer, lettre d'excuse). Enseigne la responsabilité." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    antisocial: {
+                        title: "Transgression & Dissocialité",
+                        subtitle: "Les règles c'est pour les autres",
+                        color: "stone",
+                        icon: "Gavel",
+                        desc: "Mensonges, vol, absentéisme, harcèlement. Manque de conscience de l'injustice.",
+                        patterns: [
+                            {
+                                id: "anti_rules",
+                                title: "Manipulation & Mensonge",
+                                icon: "Mask",
+                                behavior: "Ment avec charme ('C'était pas moi'), manipule les autres, ne montre pas de remords.",
+                                neuro_logic: "Dans certaines formes (traits Callous-Unemotional), l'empathie émotionnelle est réduite. La punition (peur) marche mal car le centre de la peur est sous-actif. La récompense (avantage) marche mieux.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Système de Jetons", tag: "Récompense", text: "Récompenses claires pour comportement positif. Le 'gain' par la coopération doit être supérieur à la manipulation." },
+                                        { name: "Vérification directe", tag: "Contrôle", text: "La confiance c'est bien, le contrôle c'est mieux. Signer le journal tous les jours. Fermer les brèches." },
+                                        { name: "Perspective Victime", tag: "Entraînement Empathie", text: "Ne pas prêcher. Demander : 'Comment se sent X ?'. Utiliser l'empathie cognitive si l'émotionnelle manque." },
+                                        { name: "Conséquence Groupe", tag: "Pression sociale", text: "Pression positive : 'Si tout le monde est calme, 5 min de jeu'. Utilise le désir de statut." },
+                                        { name: "Structure ferme", tag: "Cadre", text: "Pas d'exceptions. La prévisibilité réduit les tentatives de manipulation." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Pédagogie Confrontative", tag: "Ligne Claire", text: "Bienveillant mais confrontant. Nommer le mensonge tout de suite ('Je ne te crois pas'), sans débat." },
+                                        { name: "Réseau Transparence", tag: "Coopération", text: "Tous les profs et parents tirent dans le même sens. Empêche de jouer les uns contre les autres." },
+                                        { name: "Donner Responsabilité", tag: "Ressource", text: "Donnez à l'élève un poste de 'pouvoir' (ex: supervision sport). Canalise le désir de leadership." },
+                                        { name: "Analyse Coût-Bénéfice", tag: "Cognitif", text: "Discuter rationnellement : 'Mentir t'apporte le calme maintenant, mais le stress plus tard. Est-ce rentable ?'." },
+                                        { name: "Médiation Auteur-Victime", tag: "Responsabilité", text: "Entretien modéré avec la victime. Confrontation avec les conséquences réelles des actes." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `Behavior_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#fef2f2] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-red-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-red-500 to-orange-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Siren" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-red-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-red-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

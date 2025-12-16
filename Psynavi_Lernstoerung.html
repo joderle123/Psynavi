@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Lernstörungen Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #ecfeff; } /* Cyan tint base */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(6, 182, 212, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-cyan-200 selection:text-cyan-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - LEARNING DISORDERS ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Lernstörungen (DYS)",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: S3-Leitlinien, Schulze-Brüggemann (Nachteilsausgleich), Küspert (Phonologie), Butterworth (Dyskalkulie).",
+                    noteTitle: "Wichtiger Hinweis:",
+                    noteText: "Lernstörungen haben NICHTS mit Intelligenz zu tun. Ziel ist Nachteilsausgleich (Kompensation), nicht Heilung. Die Brille für das Gehirn.",
+                    symptomsTitle: "Spezifische Herausforderungen",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Lernstörungen & Nachteilsausgleich",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für LRS, Dyslexie & Dyskalkulie. Für Lehrkräfte, SePAS, ESEB & CI.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Nachteilsausgleich & Förderung",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Lernstörungen Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    reading: {
+                        title: "Lesen (Dyslexie)",
+                        subtitle: "Die Mauer aus Buchstaben",
+                        color: "cyan",
+                        icon: "BookOpen",
+                        desc: "Mühsames Dekodieren, Stocken, Raten von Wörtern, fehlendes Textverständnis.",
+                        patterns: [
+                            {
+                                id: "dys_decode",
+                                title: "Dekodier-Schwäche",
+                                icon: "ScanLine",
+                                behavior: "Liest langsam und stockend, verwechselt b/d, p/q, errät Wörter statt sie zu lesen, wird schnell müde.",
+                                neuro_logic: "Dyslexie ist eine neurobiologische Verarbeitungsstörung im Sprachzentrum (links temporo-parietal). Buchstaben werden nicht automatisiert in Laute umgewandelt. Das Lesen bleibt ein bewusster, energiefressender Prozess (keine Automatisierung).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Silben-Lesen", tag: "Förderung", text: "Texte mit farbigen Silbenbögen (blau/rot) nutzen. Hilft dem Gehirn beim Segmentieren." },
+                                        { name: "Lese-Pfeil / Lineal", tag: "Hilfsmittel", text: "Ein Abdeckblatt oder Lesepfeil verhindert das Verrutschen in den Zeilen." },
+                                        { name: "Tandem-Lesen", tag: "Kooperation", text: "Gemeinsam mit einem starken Partner lesen. Gibt Sicherheit und Fluss." },
+                                        { name: "Kein lautes Vorlesen", tag: "Schutz", text: "Niemals unangekündigt vor der Klasse lesen lassen! Das ist pure Beschämung. Wenn, dann nur geübte Texte." },
+                                        { name: "Audio-Unterstützung", tag: "Kompensation", text: "Hörbücher nutzen oder Text vorlesen lassen, um Inhalt zu verstehen (Inhalt ≠ Lesetechnik)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Text-to-Speech (Vorlese-App)", tag: "Assistenz-Tech", text: "Erlaubnis, iPad-Funktion 'Auswahl sprechen' zu nutzen. Prüfungsfragen über Kopfhörer hören." },
+                                        { name: "Schriftbild anpassen", tag: "Barrierefreiheit", text: "Arbeitsblätter in Sans-Serif (Arial/Verdana), Schriftgröße 12-14, Zeilenabstand 1.5." },
+                                        { name: "Zeit-Zuschlag", tag: "Nachteilsausgleich", text: "Offiziell 33% mehr Zeit (Tiers-Temps), da das Dekodieren 3x länger dauert." },
+                                        { name: "Hörverstehen werten", tag: "Bewertung", text: "In Sprachen: Gewichtung auf Mündliches/Hörverstehen legen, Lesekompetenz weniger werten." },
+                                        { name: "Vokabeln auditiv", tag: "Lernstrategie", text: "Vokabeln nicht nur lesen, sondern hören und sprechen (Quizlet mit Audio)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    writing: {
+                        title: "Schreiben (LRS/Dysorthographie)",
+                        subtitle: "Der Buchstabensalat",
+                        color: "blue",
+                        icon: "PenTool",
+                        desc: "Viele Fehler (auch bei geübten Wörtern), unleserliche Schrift, phonetisches Schreiben ('Fata' statt 'Vater').",
+                        patterns: [
+                            {
+                                id: "dys_spell",
+                                title: "Rechtschreib-Schwäche",
+                                icon: "Edit3",
+                                behavior: "Schreibt das gleiche Wort auf einer Seite 3x anders. Lässt Endungen weg. Kann eigene Schrift nicht lesen.",
+                                neuro_logic: "Das 'orthographische Lexikon' im Gehirn speichert Wortbilder nicht korrekt ab. Das Kind muss jedes Wort neu 'konstruieren' (Hören -> Schreiben). Regelsysteme werden nicht intuitiv erfasst.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Notenschutz (Diktat)", tag: "Nachteilsausgleich", text: "Rechtschreibung in Diktaten/Aufsätzen nicht benoten (oder stark gewichtet reduzieren). Fokus auf Inhalt." },
+                                        { name: "Lückentexte", tag: "Entlastung", text: "Statt 'Schreib den Satz', nur das Zielwort einsetzen lassen. Reduziert die Fehlerquote." },
+                                        { name: "Laut-Gebärden", tag: "Multisensorik", text: "Handzeichen für schwierige Laute nutzen (Kieler Leseaufbau)." },
+                                        { name: "Computer nutzen", tag: "Tech", text: "Frühzeitig Tippen lernen. Die Tastatur hat motorisch getrennte Wege für jeden Buchstaben." },
+                                        { name: "Wörterbuch-Nutzung", tag: "Strategie", text: "Erlauben, jedes Wort nachzuschlagen (oder elektronisches Wörterbuch)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Spell-Check", tag: "Kompensation", text: "Nutzung der Rechtschreibprüfung (Word/iPad) in allen Fächern und Prüfungen." },
+                                        { name: "Mündliche Prüfung", tag: "Alternative", text: "Wenn Schreiben blockiert: Wissen mündlich abfragen. Das Wissen ist da, der Kanal ist verstopft." },
+                                        { name: "Kopier-Verbot umgehen", tag: "Effizienz", text: "Tafelbild abfotografieren statt abschreiben (Fehlerquelle Nr. 1)." },
+                                        { name: "Fremdsprachen-Dispens", tag: "Curriculum", text: "In schweren Fällen: Befreiung von einer Fremdsprache oder angepasstes Anforderungsniveau." },
+                                        { name: "Speech-to-Text (Diktieren)", tag: "Tech", text: "Aufsätze diktieren (Siri/Word Diktat). Erlaubt komplexe Satzstrukturen ohne Blockade." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    math: {
+                        title: "Rechnen (Dyskalkulie)",
+                        subtitle: "Zahlen ohne Sinn",
+                        color: "teal",
+                        icon: "Calculator",
+                        desc: "Kein Mengenverständnis, Zählen statt Rechnen, Probleme mit Zehnerübergang und Uhrzeit.",
+                        patterns: [
+                            {
+                                id: "dys_calc",
+                                title: "Mengenblindheit",
+                                icon: "Hash",
+                                behavior: "Zählt an den Fingern (auch in C4). Versteht nicht, dass 5 mehr ist als 3. Verwechselt Rechenzeichen (+/-).",
+                                neuro_logic: "Dyskalkulie ist ein Defizit im 'intraparietalen Sulcus' (Mengenverarbeitung). Zahlen sind für das Kind abstrakte Symbole ohne Wert (wie chinesische Zeichen). Das kardinale Verständnis (Menge) fehlt.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Material nutzen", tag: "Enaktiv", text: "Immer mit Material (Dienes-Würfel, Rechenkette) arbeiten. Finger sind okay (besser als raten)!" },
+                                        { name: "Zahlenstrahl kleben", tag: "Visualisierung", text: "Ein Zahlenstrahl (1-20 oder 1-100) klebt fest auf dem Tisch als ständige Stütze." },
+                                        { name: "1x1 Tabelle", tag: "Entlastung", text: "Das kleine Einmaleins muss nicht auswendig gewusst werden (wenn es nicht klappt). Tabelle nutzen lassen." },
+                                        { name: "Stellenwert-Tafel", tag: "Struktur", text: "Farben für Einer/Zehner/Hunderter konsequent nutzen (Montessori-Farben)." },
+                                        { name: "Mengen bündeln", tag: "Training", text: "Nicht 'eins, zwei, drei' zählen, sondern 'das sind 5' (Simultanerfassung üben)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Taschenrechner", tag: "Nachteilsausgleich", text: "Sofortige Erlaubnis für den Rechner, auch bei 'Kopfrechnen'-Aufgaben. Fokus auf den Rechenweg." },
+                                        { name: "Formelsammlung", tag: "Gedächtnis", text: "Alle Formeln liegen bereit. Das Arbeitsgedächtnis ist bei Dyskalkulie oft schwach." },
+                                        { name: "Zeit-Verlängerung", tag: "Stress", text: "Mehr Zeit für Mathe-Tests. Stress blockiert das ohnehin schwache Zahlenverständnis komplett." },
+                                        { name: "Textaufgaben vorlesen", tag: "Transfer", text: "Oft scheitert es am Lesen. Textaufgabe laut vorlesen oder visualisieren (Skizze)." },
+                                        { name: "Realitätsbezug", tag: "Sinn", text: "Mathe beim Einkaufen/Kochen üben. Abstrakte Zahlen vermeiden." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    tech: {
+                        title: "Technologie & Tools",
+                        subtitle: "Die Brille für das Gehirn",
+                        color: "sky",
+                        icon: "Laptop",
+                        desc: "Digitale Hilfsmittel sind kein 'Schummeln', sondern notwendige Kompensation (wie eine Brille/Rollstuhl).",
+                        patterns: [
+                            {
+                                id: "dys_tech",
+                                title: "Assistive Technologie",
+                                icon: "Wifi",
+                                behavior: "Schüler blüht auf, wenn er digitale Tools nutzen darf. Plötzlich sind die Texte gut und komplex.",
+                                neuro_logic: "Technologie überbrückt die defizitäre Schnittstelle (Lesen/Schreiben/Rechnen) und erlaubt dem intakten Intellekt, sich auszudrücken. Es stellt Chancengleichheit her.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "iPad Integration", tag: "One2One", text: "Tablets mit integrierten Bedienungshilfen (Vorlesen, Diktieren) nutzen." },
+                                        { name: "Anton / Lerner-Apps", tag: "Gamification", text: "Apps geben sofortiges Feedback und motivieren durch Belohnungssysteme." },
+                                        { name: "Hörstift (Anybook)", tag: "Audio", text: "Aufgabenblätter vertonen. Kind tippt mit Stift auf Aufgabe -> Stift liest vor." },
+                                        { name: "Foto-Funktion", tag: "Memory", text: "Tafelbild fotografieren statt abschreiben." },
+                                        { name: "Schriftarten-Wahl", tag: "Design", text: "OpenDyslexic oder Dyslexie-Font auf dem Tablet einstellen (unten schwerer gewichtet)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "PDF-Scanner (OCR)", tag: "Workflow", text: "Arbeitsblätter scannen (Office Lens) und sich vorlesen lassen (Voice Dream Reader)." },
+                                        { name: "DeepL / Übersetzer", tag: "Sprachen", text: "In Fremdsprachen: Nutzung von Übersetzungstools zur Wortschatz-Suche erlauben." },
+                                        { name: "Mindmap-Software", tag: "Struktur", text: "Aufsätze digital planen (XMind), dann ausformulieren." },
+                                        { name: "Präsentations-Software", tag: "Alternative", text: "PowerPoint/Canva nutzen statt Plakat (Rechtschreibprüfung hilft)." },
+                                        { name: "Digitales Schulbuch", tag: "Standard", text: "Zugang zu Leloo.lu oder PDF-Versionen der Schulbücher für Suchfunktion und Zoom." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    psyche: {
+                        title: "Psyche & Selbstwert",
+                        subtitle: "Ich bin nicht dumm",
+                        color: "indigo",
+                        icon: "Smile",
+                        desc: "Vermeidung von erlernter Hilflosigkeit, Schulangst und dem Gefühl des Versagens.",
+                        patterns: [
+                            {
+                                id: "dys_self",
+                                title: "Selbstwert-Krise",
+                                icon: "Frown",
+                                behavior: "Sagt 'Ich bin dumm', vergleicht sich mit anderen, Klassenclown (Ablenkung) oder stiller Rückzug.",
+                                neuro_logic: "Ständiges Scheitern trotz Anstrengung führt zu 'Erlernter Hilflosigkeit'. Das Kind glaubt, es hat keine Kontrolle über den Erfolg. Sekundäre Psychopathologie (Depression/Angst) droht.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Transparenz", tag: "Psychoedukation", text: "Erklären Sie dem Kind (und der Klasse): 'Dein Kopf ist wie ein Ferrari, aber die Bremse beim Schreiben klemmt'." },
+                                        { name: "Stärken-Fokus", tag: "Ressourcen", text: "Geben Sie Raum für Talente: Sport, Kunst, Sozialverhalten. DYS ist nur ein kleiner Teil." },
+                                        { name: "Individuelle Bezugsnorm", tag: "Bewertung", text: "Vergleichen Sie das Kind nur mit sich selbst ('Besser als letzte Woche'), nicht mit der Klasse." },
+                                        { name: "Erfolgserlebnisse", tag: "Wirksamkeit", text: "Geben Sie Aufgaben, die das Kind sicher lösen kann, um Selbstwirksamkeit zu spüren." },
+                                        { name: "Keine roten Stifte", tag: "Korrektur", text: "Korrigieren Sie in Grün oder Blau. Rot ist die Farbe des Versagens." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Vorbilder zeigen", tag: "Role Models", text: "Berühmte Legastheniker zeigen (Einstein, Steve Jobs, Tom Cruise). 'Anders denken ist eine Stärke'." },
+                                        { name: "Nachteilsausgleich ist kein Bonus", tag: "Fairness", text: "Erklären: 'Die Brille macht nicht schlauer, sie macht, dass du sehen kannst'. Gegen Neid in der Klasse." },
+                                        { name: "Lösungsorientierung", tag: "Coaching", text: "'Wie hast du das Problem gelöst?' (Strategie loben, nicht Ergebnis)." },
+                                        { name: "Offener Umgang", tag: "Klima", text: "Ermutigen Sie, offen damit umzugehen: 'Ich habe LRS, ich brauche kurz Zeit'." },
+                                        { name: "Mental Health Check", tag: "Prävention", text: "Regelmäßig fragen: 'Wie geht es dir mit der Schule?'. Frust auffangen." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Troubles DYS",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : Lignes directrices S3, Aménagements raisonnables (MENJE), Méthode syllabique, Butterworth.",
+                    noteTitle: "Note Importante :",
+                    noteText: "Les troubles DYS n'ont RIEN à voir avec l'intelligence. L'objectif est la compensation, pas la guérison. Les lunettes pour le cerveau.",
+                    symptomsTitle: "Défis spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "Troubles d'apprentissage (DYS)",
+                    headerSubtitle: "Une boîte à outils pour la Dyslexie, Dysorthographie & Dyscalculie. Pour les enseignants, le SePAS, l'ESEB & la CI.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Aménagements & Soutien",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert DYS Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    reading: {
+                        title: "Lecture (Dyslexie)",
+                        subtitle: "Le mur de lettres",
+                        color: "cyan",
+                        icon: "BookOpen",
+                        desc: "Décodage laborieux, hésitations, devinettes de mots, manque de compréhension.",
+                        patterns: [
+                            {
+                                id: "dys_decode",
+                                title: "Faiblesse de Décodage",
+                                icon: "ScanLine",
+                                behavior: "Lit lentement, confond b/d, p/q, devine les mots, se fatigue très vite.",
+                                neuro_logic: "La dyslexie est un trouble neurobiologique dans l'aire du langage (temporo-pariétal gauche). Les lettres ne sont pas converties automatiquement en sons. Lire reste un processus conscient et énergivore (pas d'automatisation).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Lecture par Syllabes", tag: "Soutien", text: "Textes avec arcs syllabiques colorés (bleu/rouge). Aide le cerveau à segmenter." },
+                                        { name: "Règle de lecture", tag: "Outil", text: "Une cache ou une règle pour ne pas sauter de ligne." },
+                                        { name: "Lecture en Tandem", tag: "Coopération", text: "Lire avec un partenaire fort. Donne sécurité et flux." },
+                                        { name: "Pas de lecture haute voix", tag: "Protection", text: "Jamais de lecture surprise devant la classe ! C'est humiliant. Seulement textes préparés." },
+                                        { name: "Soutien Audio", tag: "Compensation", text: "Livres audio ou lecture par l'adulte pour comprendre le contenu (Contenu ≠ Technique)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Synthèse vocale (TTS)", tag: "Tech Assistive", text: "Permission d'utiliser 'Énoncer la sélection' sur iPad. Écouter les questions d'examen." },
+                                        { name: "Adapter Police", tag: "Accessibilité", text: "Feuilles en Sans-Serif (Arial/Verdana), taille 12-14, interligne 1.5." },
+                                        { name: "Tiers-Temps", tag: "Aménagement", text: "Officiellement 33% de temps en plus, car le décodage prend 3x plus de temps." },
+                                        { name: "Valoriser l'Oral", tag: "Évaluation", text: "En langues : Mettre du poids sur l'oral/écoute, moins sur la lecture." },
+                                        { name: "Vocabulaire auditif", tag: "Stratégie", text: "Ne pas juste lire les vocs, mais les entendre (Quizlet avec audio)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    writing: {
+                        title: "Écriture (Dysorthographie)",
+                        subtitle: "La salade de lettres",
+                        color: "blue",
+                        icon: "PenTool",
+                        desc: "Nombreuses fautes (même sur mots connus), écriture illisible, écriture phonétique.",
+                        patterns: [
+                            {
+                                id: "dys_spell",
+                                title: "Faiblesse Orthographique",
+                                icon: "Edit3",
+                                behavior: "Écrit le même mot de 3 façons différentes. Oublie les terminaisons. Ne peut pas se relire.",
+                                neuro_logic: "Le 'lexique orthographique' du cerveau ne stocke pas les images des mots. L'enfant doit 'construire' chaque mot (Son -> Écrit). Les règles ne sont pas intuitives.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Dispense de note", tag: "Aménagement", text: "Ne pas noter l'orthographe en dictée/rédaction (ou pondération réduite). Focus sur le contenu." },
+                                        { name: "Textes à trous", tag: "Soulagement", text: "Au lieu d'écrire la phrase, insérer le mot cible. Réduit le taux d'erreur." },
+                                        { name: "Gestes Borel-Maisonny", tag: "Multisensoriel", text: "Signes de la main pour les sons difficiles." },
+                                        { name: "Ordinateur", tag: "Tech", text: "Apprendre à taper tôt. Le clavier sépare motricement les lettres." },
+                                        { name: "Dictionnaire", tag: "Stratégie", text: "Permettre de vérifier chaque mot (ou dictionnaire électronique)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Correcteur Ortho", tag: "Compensation", text: "Utilisation du correcteur (Word/iPad) dans toutes les matières et examens." },
+                                        { name: "Examen Oral", tag: "Alternative", text: "Si l'écrit bloque : interroger à l'oral. Le savoir est là, le canal est bouché." },
+                                        { name: "Photo du tableau", tag: "Efficacité", text: "Photographier au lieu de copier (Source d'erreur n°1)." },
+                                        { name: "Dispense Langue", tag: "Curriculum", text: "Cas sévères : Dispense d'une langue étrangère ou niveau adapté." },
+                                        { name: "Dictée Vocale", tag: "Tech", text: "Dicter les rédactions (Siri/Word). Permet des phrases complexes sans blocage." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    math: {
+                        title: "Calcul (Dyscalculie)",
+                        subtitle: "Chiffres sans sens",
+                        color: "teal",
+                        icon: "Calculator",
+                        desc: "Pas de sens du nombre, compte au lieu de calculer, problèmes avec dizaines et l'heure.",
+                        patterns: [
+                            {
+                                id: "dys_calc",
+                                title: "Cécité des nombres",
+                                icon: "Hash",
+                                behavior: "Compte sur les doigts (même en C4). Ne comprend pas que 5 est plus que 3. Confond +/-.",
+                                neuro_logic: "Déficit dans le 'sillon intrapariétal' (traitement des quantités). Les chiffres sont des symboles abstraits sans valeur (comme du chinois). Le sens cardinal manque.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Matériel concret", tag: "Enactif", text: "Toujours travailler avec matériel (Cubes, colliers). Les doigts sont OK (mieux que deviner) !" },
+                                        { name: "Bande numérique", tag: "Visualisation", text: "Une bande (1-20 ou 1-100) collée sur la table comme aide permanente." },
+                                        { name: "Table de Pythagore", tag: "Soulagement", text: "Les tables de multiplication ne doivent pas être par cœur (si ça bloque). Utiliser la table." },
+                                        { name: "Tableau de numération", tag: "Structure", text: "Couleurs pour Unités/Dizaines/Centaines (Couleurs Montessori)." },
+                                        { name: "Grouper les quantités", tag: "Entraînement", text: "Pas compter 'un, deux, trois', mais 'c'est 5' (Subitizing)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Calculatrice", tag: "Aménagement", text: "Permission immédiate, même en 'calcul mental'. Focus sur le raisonnement." },
+                                        { name: "Formulaire", tag: "Mémoire", text: "Toutes les formules disponibles. La mémoire de travail est souvent faible." },
+                                        { name: "Extension temps", tag: "Stress", text: "Plus de temps pour les tests. Le stress bloque le peu de sens du nombre existant." },
+                                        { name: "Lire les problèmes", tag: "Transfert", text: "Souvent la lecture bloque. Lire la consigne à haute voix ou visualiser (schéma)." },
+                                        { name: "Lien Réalité", tag: "Sens", text: "Maths en faisant les courses/cuisine. Éviter l'abstrait." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    tech: {
+                        title: "Technologie & Outils",
+                        subtitle: "Les lunettes du cerveau",
+                        color: "sky",
+                        icon: "Laptop",
+                        desc: "Les outils numériques ne sont pas de la 'triche', mais une compensation nécessaire (comme un fauteuil roulant).",
+                        patterns: [
+                            {
+                                id: "dys_tech",
+                                title: "Technologie d'Assistance",
+                                icon: "Wifi",
+                                behavior: "L'élève s'épanouit avec le numérique. Soudain, les textes sont bons et complexes.",
+                                neuro_logic: "La technologie ponte l'interface déficitaire (Lecture/Écriture) et permet à l'intellect intact de s'exprimer. Elle rétablit l'égalité des chances.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Intégration iPad", tag: "One2One", text: "Tablettes avec accessibilité (Synthèse vocale, Dictée)." },
+                                        { name: "Apps Ludiques", tag: "Gamification", text: "Anton / Apps donnent un feedback immédiat et motivent." },
+                                        { name: "Stylo lecteur", tag: "Audio", text: "Sonoriser les fiches. L'enfant pointe le texte -> le stylo lit." },
+                                        { name: "Fonction Photo", tag: "Mémoire", text: "Photographier le tableau au lieu de copier." },
+                                        { name: "Choix Police", tag: "Design", text: "Régler OpenDyslexic sur la tablette (plus lourd en bas)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Scanner PDF (OCR)", tag: "Workflow", text: "Scanner les feuilles (Office Lens) et faire lire (Voice Dream)." },
+                                        { name: "Traducteurs", tag: "Langues", text: "En langues : Outils de traduction pour chercher le vocabulaire (DeepL)." },
+                                        { name: "Logiciel Mindmap", tag: "Structure", text: "Planifier les rédactions numériquement (XMind), puis rédiger." },
+                                        { name: "Logiciel Présentation", tag: "Alternative", text: "PowerPoint/Canva au lieu d'affiches (le correcteur aide)." },
+                                        { name: "Manuel Numérique", tag: "Standard", text: "Accès à Leloo.lu ou PDF des livres pour zoom et recherche." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    psyche: {
+                        title: "Psyché & Estime de soi",
+                        subtitle: "Je ne suis pas bête",
+                        color: "indigo",
+                        icon: "Smile",
+                        desc: "Éviter l'impuissance apprise, l'anxiété scolaire et le sentiment d'échec.",
+                        patterns: [
+                            {
+                                id: "dys_self",
+                                title: "Crise d'estime de soi",
+                                icon: "Frown",
+                                behavior: "Dit 'Je suis bête', se compare, clown de classe (distraction) ou retrait silencieux.",
+                                neuro_logic: "L'échec constant malgré l'effort mène à 'l'impuissance apprise'. L'enfant croit ne pas contrôler sa réussite. Risque de psychopathologie secondaire (dépression).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Transparence", tag: "Psychoéducation", text: "Expliquez à l'enfant (et la classe) : 'Ton cerveau est une Ferrari, mais le frein à main de l'écriture coince'." },
+                                        { name: "Focus Forces", tag: "Ressources", text: "Valorisez les talents : Sport, Art, Social. Le DYS n'est qu'une petite part." },
+                                        { name: "Norme Individuelle", tag: "Évaluation", text: "Comparez l'enfant à lui-même ('Mieux que la semaine passée'), pas à la classe." },
+                                        { name: "Succès garantis", tag: "Efficacité", text: "Donnez des tâches réussissables pour sentir la compétence." },
+                                        { name: "Pas de stylo rouge", tag: "Correction", text: "Corrigez en vert ou bleu. Le rouge est la couleur de l'échec." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Modèles", tag: "Inspiration", text: "Montrer des DYS célèbres (Einstein, Steve Jobs). 'Penser différemment est une force'." },
+                                        { name: "Expliquer l'équité", tag: "Justice", text: "Dire : 'Les lunettes ne rendent pas plus intelligent, elles permettent de voir'. Contre la jalousie." },
+                                        { name: "Solution-Focus", tag: "Coaching", text: "'Comment as-tu résolu ça ?' (Louer la stratégie, pas le résultat)." },
+                                        { name: "Climat ouvert", tag: "Ambiance", text: "Encourager à en parler : 'J'ai une dyslexie, j'ai besoin d'un moment'." },
+                                        { name: "Check Mental", tag: "Prévention", text: "Demander régulièrement : 'Comment ça va avec l'école ?'. Capter la frustration." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `DYS_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#ecfeff] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-cyan-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Brain" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-cyan-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-cyan-50 text-cyan-700 rounded-full text-xs font-bold border border-cyan-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-cyan-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-cyan-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

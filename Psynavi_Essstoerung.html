@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: Essstörungen Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fdf2f8; } /* Soft pink/rose tint base */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(219, 39, 119, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #db2777; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #be185d; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-pink-200 selection:text-pink-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) - EATING DISORDERS ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: Essstörungen & Körper",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Methodische Basis: Maudsley Model (FBT), CBT-E (Fairburn), S3-Leitlinien, SePAS Gesundheitsdienst.",
+                    noteTitle: "Warnsignal:",
+                    noteText: "Essstörungen sind tödlich ernst. Lehrkräfte sind keine Therapeuten. Bei Verdacht sofort SePAS/Schularzt kontaktieren. Nicht zum Essen zwingen!",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "Essstörungen im Schulalltag",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für Anorexie, Bulimie & Körperbildstörungen. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Pädagogische Interventionen & Umgang",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "Essstörungen Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    anorexia: {
+                        title: "Restriktion & Kontrolle (Anorexie)",
+                        subtitle: "Der Hunger als Leistung",
+                        color: "pink",
+                        icon: "Scale", // Balance/Weighing
+                        desc: "Extreme Gewichtsabnahme, Perfektionismus, Leistungsdruck, Verweigerung von Nahrung.",
+                        patterns: [
+                            {
+                                id: "anorexia_control",
+                                title: "Perfektionismus & Kälte",
+                                icon: "Snowflake",
+                                behavior: "Schülerin friert ständig (trägt Jacke im Sommer), ist extrem ehrgeizig (Note 1), wirkt starr/unflexibel. Isst nicht vor anderen.",
+                                neuro_logic: "Bei Anorexie reagiert das Belohnungszentrum paradox: Hunger erzeugt Ruhe und Euphorie (statt Panik). Essen erzeugt massive Angst. Das rigide Verhalten dient der Angstreduktion ('Wenn ich kontrolliere, bin ich sicher').",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Kein Essens-Zwang", tag: "Sicherheit", text: "Zwingen Sie das Kind niemals zum Aufessen der 'Tartine'. Das löst Panik aus und zerstört Vertrauen." },
+                                        { name: "Wärmflasche erlauben", tag: "Fürsorge", text: "Erlaubnis, Jacke/Decke im Unterricht zu nutzen. Der Körper kann Temperatur nicht halten." },
+                                        { name: "Leistung entkoppeln", tag: "Selbstwert", text: "Loben Sie Dinge, die nichts mit Leistung/Aussehen zu tun haben: 'Du hast einen tollen Humor', 'Du bist hilfsbereit'." },
+                                        { name: "Sport-Befreiung", tag: "Gesundheitsschutz", text: "Bei Untergewicht: Sportverbot (in Absprache mit Arzt/SePAS). Bewegung verbrennt lebenswichtige Energie." },
+                                        { name: "Beobachtung", tag: "Früherkennung", text: "Wird das Pausenbrot weggeworfen? Diskret notieren und SePAS informieren (nicht das Kind konfrontieren)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Ich-Botschaften", tag: "Gesprächsführung", text: "Sagen Sie: 'Ich mache mir Sorgen, weil du so müde wirkst'. Nicht: 'Du bist zu dünn, iss mal was' (löst Abwehr aus)." },
+                                        { name: "Stuhlkreis meiden", tag: "Körperscham", text: "Das Sitzen auf harten Stühlen tut weh (kein Fettpolster). Auf Sitzkissen achten." },
+                                        { name: "Gruppenarbeit sensibel", tag: "Soziales", text: "Perfektionisten übernehmen oft die ganze Arbeit. Achten Sie auf faire Verteilung." },
+                                        { name: "Thema 'Ernährung'", tag: "Trigger-Schutz", text: "Vorsicht in Biologie/Sport beim Thema Kalorien/BMI. Das triggert den Vergleich. Befreiung anbieten." },
+                                        { name: "Nachteilsausgleich", tag: "Kognition", text: "Hunger senkt die Konzentration massiv. Mehr Zeit bei Tests gewähren." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    bulimia: {
+                        title: "Kompensation & Scham (Bulimie)",
+                        subtitle: "Der heimliche Kampf",
+                        color: "violet",
+                        icon: "RotateCcw", // Cycle/Repeat
+                        desc: "Essanfälle gefolgt von Erbrechen, Sportexzesse oder Fasten. Hohe Scham, oft Normalgewicht.",
+                        patterns: [
+                            {
+                                id: "bulimia_secret",
+                                title: "Heimlichkeit & Kompensation",
+                                icon: "EyeOff",
+                                behavior: "Geht sofort nach dem Essen zur Toilette, trinkt extrem viel Wasser, wirkt launisch, Schwellungen im Gesicht (Hamsterbacken).",
+                                neuro_logic: "Der Essanfall ist ein missglückter Versuch der Emotionsregulation (Spannungsabfuhr). Das Erbrechen dient der Wiederherstellung der Kontrolle und Angstreduktion. Es ist ein Sucht-ähnlicher Kreislauf.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Toiletten-Begleitung", tag: "Prävention", text: "In akuten Phasen (Absprache Eltern): Nach dem Essen 30 Min nicht alleine zur Toilette lassen (Ablenkung anbieten)." },
+                                        { name: "Keine Kommentare", tag: "Schutz", text: "Niemals Figur oder Essmenge kommentieren ('Wow, hast du Hunger?'). Scham ist der Motor der Krankheit." },
+                                        { name: "Stress-Abbau", tag: "Alternative", text: "Knetball oder Malen anbieten, wenn die Anspannung steigt, um den Impuls zum Essanfall zu surfen." },
+                                        { name: "Wasserzugang", tag: "Physiologie", text: "Erbrechen dehydriert. Trinken erlauben (aber Achtung vor 'Bauch füllen' zum Hunger unterdrücken)." },
+                                        { name: "Vertrauensperson", tag: "Bindung", text: "Ein diskretes Zeichen vereinbaren, wenn es dem Kind schlecht geht." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Toiletten-Aufsicht", tag: "Struktur", text: "Schlüssel-System einführen, um lange Aufenthalte zu bemerken (diskret)." },
+                                        { name: "Sport-Exzess bremsen", tag: "Beobachtung", text: "Wenn Schüler im Sportunterricht extrem verbissen trainiert (Kalorien abarbeiten), bremsen Sie ihn." },
+                                        { name: "Kaugummi erlauben", tag: "Stimulation", text: "Kauen kann kurzfristig Spannungen reduzieren ohne Kalorienzufuhr/Erbrechen." },
+                                        { name: "Emotionaler Check-in", tag: "Beziehung", text: "Fragen Sie 'Wie geht es dir?' (Gefühl), nicht 'Was hast du gegessen?'." },
+                                        { name: "Abwesenheit klären", tag: "Präsenz", text: "Häufiges Fehlen (wegen Scham oder körperlicher Schwäche) sensibel ansprechen." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    bodyimage: {
+                        title: "Körperbild & Dysmorphie",
+                        subtitle: "Der verzerrte Spiegel",
+                        color: "teal",
+                        icon: "Mirror", // Replace with specific icon if available, or generic
+                        desc: "Hass auf den eigenen Körper, ständiges Vergleichen, weite Kleidung (Baggy Clothes).",
+                        patterns: [
+                            {
+                                id: "body_shame",
+                                title: "Body Checking & Verstecken",
+                                icon: "UserMinus",
+                                behavior: "Trägt im Sommer Hoodies (Kaschieren), checkt ständig das Spiegelbild oder vermeidet Spiegel komplett. Vergleicht sich mit Social Media.",
+                                neuro_logic: "Körperdysmorphie ist eine Wahrnehmungsstörung. Das Gehirn zoomt auf vermeintliche Makel (Bottom-Up Processing) und blendet das Ganze aus. Der 'Makel' erscheint riesig und bedrohlich.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Spiegel verhängen", tag: "Umgebung", text: "In der Umkleide/Toilette: Wenn möglich Spiegel reduzieren oder positive Sprüche darauf kleben." },
+                                        { name: "Komplimente-Dusche", tag: "Ressourcen", text: "Komplimente NUR für Charakter/Fähigkeiten, nie für Aussehen/Kleidung. 'Du bist ein toller Freund'." },
+                                        { name: "Medienkompetenz", tag: "Prävention", text: "Bilderbücher nutzen, die Körpervielfalt zeigen (Body Positivity/Neutrality)." },
+                                        { name: "Umziehen geschützt", tag: "Schamreduktion", text: "Erlaubnis, sich in der Lehrerkabine/Toilette umzuziehen. Die Gruppenumkleide ist die Hölle." },
+                                        { name: "Funktion statt Form", tag: "Reframing", text: "Im Sport: 'Was kann dein Körper leisten?' (Kraft, Schnelligkeit) statt 'Wie sieht er aus?'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Social Media Detox", tag: "Aufklärung", text: "Im Unterricht: 'Fake vs. Realität' auf Instagram analysieren. Filter-Techniken entlarven." },
+                                        { name: "Präsentations-Schutz", tag: "Angst", text: "Nicht zwingen, vor der Klasse zu stehen, wenn die Körperscham extrem ist. Sitzend präsentieren lassen." },
+                                        { name: "Kein Wiegen", tag: "No-Go", text: "Niemals im Sportunterricht vor anderen wiegen! Das ist demütigend und gefährlich." },
+                                        { name: "Kleidungswahl", tag: "Autonomie", text: "Akzeptieren Sie weite Kleidung (Hoodies), auch wenn es warm ist. Es ist ein Schutzpanzer." },
+                                        { name: "Werte-Arbeit", tag: "Identität", text: "Diskussion: 'Was macht einen Menschen wertvoll?'. Fokus weg vom Äußeren lenken." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    orthorexia: {
+                        title: "Orthorexie & Zwang",
+                        subtitle: "Wenn Gesundsein krank macht",
+                        color: "emerald",
+                        icon: "Apple",
+                        desc: "Zwanghafte Fixierung auf 'gesundes' Essen, Angst vor Zucker/Fett, soziale Isolation durch Essensregeln.",
+                        patterns: [
+                            {
+                                id: "ortho_rigid",
+                                title: "Rigide Essensregeln",
+                                icon: "ListChecks",
+                                behavior: "Isst nichts, was andere mitbringen (Kuchen), predigt über 'Gift' im Essen, panische Angst vor 'ungesunden' Zutaten.",
+                                neuro_logic: "Ähnlich wie bei Zwangsstörungen (OCD). Das Einhalten strikter Regeln reduziert Angst und gibt ein Gefühl von moralischer Überlegenheit und Reinheit.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Keine Diskussion", tag: "Grenzen", text: "Diskutieren Sie nicht über Ernährungstheorien. 'In der Schule essen wir entspannt zusammen'." },
+                                        { name: "Vorbild sein", tag: "Modelllernen", text: "Essen Sie als Lehrer entspannt auch mal etwas Süßes. Zeigen Sie, dass nichts Schlimmes passiert." },
+                                        { name: "Gemeinschaft fördern", tag: "Inklusion", text: "Fokus beim Klassenfrühstück auf das Zusammensein, nicht auf die Nährwerte." },
+                                        { name: "Alternativen tolerieren", tag: "Akzeptanz", text: "Wenn das Kind sein eigenes 'Safe Food' mitbringt, lassen Sie es gewähren (kein Zwang zum Kuchen)." },
+                                        { name: "Eltern-Info", tag: "Netzwerk", text: "Beobachtung teilen: 'X wirkt sehr ängstlich beim Thema Essen'. Nicht diagnostizieren." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Flexibilität üben", tag: "Challenge", text: "In Koch-AGs: 'Es gibt kein schlechtes Essen, nur die Menge macht's'." },
+                                        { name: "Keine Diät-Talks", tag: "Klimaschutz", text: "Unterbinden Sie 'Fat Talk' in der Klasse ('Ich bin so fett', 'Ich mache Keto'). Null Toleranz für Bodyshaming." },
+                                        { name: "Wissenschaftlichkeit", tag: "Fakten", text: "Mythen entkräften (z.B. 'Zucker ist Gift'). Differenzierte Sichtweise vermitteln." },
+                                        { name: "Soziale Teilhabe", tag: "Fokus", text: "Ermutigen, bei Ausflügen dabei zu sein, auch wenn nicht mitgegessen wird. Isolation vermeiden." },
+                                        { name: "Stressmanagement", tag: "Ursachen", text: "Oft ist der Esszwang eine Reaktion auf Schulstress. Helfen Sie beim Stressabbau (Lernplan)." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Troubles Alimentaires",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Bases méthodologiques : Maudsley Model (FBT), CBT-E (Fairburn), Lignes directrices S3, SePAS.",
+                    noteTitle: "Signal d'alarme :",
+                    noteText: "Les troubles alimentaires sont mortels. Les profs ne sont pas des thérapeutes. Contactez SePAS/Médecin scolaire immédiatement. Ne forcez pas à manger !",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "Troubles alimentaires à l'école",
+                    headerSubtitle: "Une boîte à outils pour l'anorexie, la boulimie & l'image corporelle. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions Pédagogiques",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert Troubles Alimentaires Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    anorexia: {
+                        title: "Restriction & Contrôle (Anorexie)",
+                        subtitle: "La faim comme performance",
+                        color: "pink",
+                        icon: "Scale",
+                        desc: "Perte de poids extrême, perfectionnisme, pression de performance, refus de nourriture.",
+                        patterns: [
+                            {
+                                id: "anorexia_control",
+                                title: "Perfectionnisme & Froid",
+                                icon: "Snowflake",
+                                behavior: "L'élève a froid tout le temps (veste en été), est hyper-ambitieux (notes top), semble rigide. Ne mange pas devant les autres.",
+                                neuro_logic: "Dans l'anorexie, le système de récompense réagit paradoxalement : la faim crée le calme et l'euphorie (au lieu de la panique). Manger crée une anxiété massive. Le contrôle réduit la peur.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Pas de contrainte", tag: "Sécurité", text: "Ne forcez jamais l'enfant à finir sa tartine. Cela déclenche la panique et détruit la confiance." },
+                                        { name: "Bouillotte permise", tag: "Soin", text: "Autorisation de garder la veste/couverture. Le corps ne peut pas maintenir sa température." },
+                                        { name: "Découpler performance", tag: "Estime de soi", text: "Louez des choses hors performance/physique : 'Tu as un super humour', 'Tu es serviable'." },
+                                        { name: "Dispense Sport", tag: "Santé", text: "En sous-poids : interdiction de sport (avec médecin/SePAS). Le mouvement brûle l'énergie vitale." },
+                                        { name: "Observation", tag: "Dépistage", text: "Le pain est-il jeté ? Noter discrètement et informer le SePAS (ne pas confronter l'enfant)." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Messages 'Je'", tag: "Communication", text: "Dites : 'Je m'inquiète car tu as l'air fatigué'. Pas : 'Tu es trop maigre, mange' (provoque la défense)." },
+                                        { name: "Éviter chaises dures", tag: "Douleur", text: "S'asseoir fait mal (pas de coussin graisseux). Veiller aux coussins." },
+                                        { name: "Travail de groupe", tag: "Social", text: "Les perfectionnistes font souvent tout le travail. Veillez à une répartition équitable." },
+                                        { name: "Sujet 'Nutrition'", tag: "Protection Trigger", text: "Attention en Bio/Sport avec les calories/IMC. Cela déclenche la comparaison. Offrir une dispense." },
+                                        { name: "Tiers-Temps", tag: "Cognition", text: "La faim baisse massivement la concentration. Donner plus de temps aux tests." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    bulimia: {
+                        title: "Compensation & Honte (Boulimie)",
+                        subtitle: "Le combat secret",
+                        color: "violet",
+                        icon: "RotateCcw",
+                        desc: "Crises de boulimie suivies de vomissements, sport excessif ou jeûne. Grande honte, souvent poids normal.",
+                        patterns: [
+                            {
+                                id: "bulimia_secret",
+                                title: "Secret & Compensation",
+                                icon: "EyeOff",
+                                behavior: "Va aux toilettes juste après le repas, boit énormément d'eau, humeur changeante, visage gonflé.",
+                                neuro_logic: "La crise est une tentative ratée de régulation émotionnelle. Vomir sert à restaurer le contrôle et réduire l'anxiété. C'est un cycle addictif.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Accompagnement WC", tag: "Prévention", text: "En phase aiguë (accord parents) : Ne pas laisser seul aux WC 30 min après le repas (distraction)." },
+                                        { name: "Pas de commentaires", tag: "Protection", text: "Jamais de commentaire sur le physique ou la quantité ('Waw, tu as faim?'). La honte est le moteur." },
+                                        { name: "Anti-Stress", tag: "Alternative", text: "Proposer une balle anti-stress ou du dessin quand la tension monte, pour surfer sur l'envie de crise." },
+                                        { name: "Accès Eau", tag: "Physiologie", text: "Vomir déshydrate. Permettre de boire (mais attention au 'remplissage' pour couper la faim)." },
+                                        { name: "Personne de confiance", tag: "Lien", text: "Convenir d'un signe discret quand l'enfant ne va pas bien." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Surveillance WC", tag: "Structure", text: "Système de clé pour remarquer les longues absences (discrètement)." },
+                                        { name: "Freiner le sport", tag: "Observation", text: "Si l'élève s'entraîne avec acharnement en EPS (brûler des calories), freinez-le." },
+                                        { name: "Chewing-gum", tag: "Stimulation", text: "Mâcher peut réduire la tension à court terme sans calories/vomissement." },
+                                        { name: "Check-in émotionnel", tag: "Relation", text: "Demandez 'Comment vas-tu ?' (Sentiment), pas 'Qu'as-tu mangé ?'." },
+                                        { name: "Clarifier absences", tag: "Présence", text: "Aborder les absences fréquentes (honte ou faiblesse) avec sensibilité." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    bodyimage: {
+                        title: "Image Corporelle & Dysmorphie",
+                        subtitle: "Le miroir déformé",
+                        color: "teal",
+                        icon: "Mirror",
+                        desc: "Haine du corps, comparaison constante, vêtements amples (Baggy Clothes).",
+                        patterns: [
+                            {
+                                id: "body_shame",
+                                title: "Vérification & Cache-cache",
+                                icon: "UserMinus",
+                                behavior: "Porte des hoodies en été (cacher), vérifie son reflet tout le temps ou évite les miroirs. Se compare aux réseaux sociaux.",
+                                neuro_logic: "La dysmorphie est un trouble de la perception. Le cerveau zoome sur des 'défauts' (Traitement Bottom-Up) et ignore l'ensemble. Le 'défaut' paraît énorme et menaçant.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Couvrir miroirs", tag: "Environnement", text: "Vestiaires/WC : Réduire les miroirs ou coller des phrases positives dessus." },
+                                        { name: "Douche de compliments", tag: "Ressources", text: "Compliments UNIQUEMENT sur le caractère/compétences, jamais sur le physique. 'Tu es un super ami'." },
+                                        { name: "Éducation Médias", tag: "Prévention", text: "Livres montrant la diversité corporelle (Body Positivity/Neutrality)." },
+                                        { name: "Change protégé", tag: "Pudeur", text: "Droit de se changer dans la cabine prof/WC. Le vestiaire collectif est un enfer." },
+                                        { name: "Fonction vs Forme", tag: "Recadrage", text: "En sport : 'Que peut faire ton corps ?' (Force, vitesse) au lieu de 'À quoi ressemble-t-il ?'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Détox Réseaux", tag: "Éducation", text: "Analyser 'Fake vs Réalité' sur Insta. Démasquer les filtres." },
+                                        { name: "Protection Exposé", tag: "Peur", text: "Ne pas forcer à se tenir debout devant la classe si la honte est extrême. Laisser présenter assis." },
+                                        { name: "Pas de pesée", tag: "Interdit", text: "Jamais de pesée devant les autres en sport ! C'est humiliant et dangereux." },
+                                        { name: "Choix vêtements", tag: "Autonomie", text: "Acceptez les vêtements larges (hoodies), même s'il fait chaud. C'est une armure." },
+                                        { name: "Travail Valeurs", tag: "Identité", text: "Discussion : 'Qu'est-ce qui donne de la valeur à un humain ?'. Détourner du physique." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    orthorexia: {
+                        title: "Orthorexie & Obsession",
+                        subtitle: "Quand le sain rend malade",
+                        color: "emerald",
+                        icon: "Apple",
+                        desc: "Fixation obsessionnelle sur le manger 'sain', peur du sucre/gras, isolement social dû aux règles.",
+                        patterns: [
+                            {
+                                id: "ortho_rigid",
+                                title: "Règles rigides",
+                                icon: "ListChecks",
+                                behavior: "Ne mange rien apporté par d'autres (gâteau), prêche sur le 'poison', peur panique des ingrédients 'malsains'.",
+                                neuro_logic: "Similaire aux TOC. Suivre des règles strictes réduit l'anxiété et donne un sentiment de supériorité morale et de pureté.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Pas de débat", tag: "Limites", text: "Ne discutez pas théories nutritionnelles. 'À l'école, on mange ensemble détendu'." },
+                                        { name: "Être modèle", tag: "Modélisation", text: "Mangez un truc sucré devant eux sans stress. Montrez que rien de grave n'arrive." },
+                                        { name: "Favoriser communauté", tag: "Inclusion", text: "Focus du petit-déj classe sur le 'vivre ensemble', pas les nutriments." },
+                                        { name: "Tolérer alternatives", tag: "Acceptation", text: "Si l'enfant apporte sa 'Safe Food', laissez faire (pas forcer le gâteau)." },
+                                        { name: "Info Parents", tag: "Réseau", text: "Partager l'observation : 'X semble très anxieux autour de la nourriture'. Pas de diagnostic." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Exercer Flexibilité", tag: "Challenge", text: "En cuisine : 'Il n'y a pas de mauvais aliments, seule la dose compte'." },
+                                        { name: "Pas de 'Fat Talk'", tag: "Climat", text: "Interdire le 'Fat Talk' ('Je suis gros', 'Je fais Keto'). Tolérance zéro pour le Bodyshaming." },
+                                        { name: "Science", tag: "Faits", text: "Déboulonner les mythes (ex: 'Le sucre est un poison'). Enseigner la nuance." },
+                                        { name: "Participation Sociale", tag: "Focus", text: "Encourager à venir aux sorties même sans manger. Éviter l'isolement." },
+                                        { name: "Gestion Stress", tag: "Causes", text: "Souvent l'obsession alimentaire réagit au stress scolaire. Aider à réduire le stress." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `EatingDisorder_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#fdf2f8] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-pink-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-pink-500 to-rose-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Heart" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-pink-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs font-bold border border-pink-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-pink-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12 max-w-5xl mx-auto">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-pink-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

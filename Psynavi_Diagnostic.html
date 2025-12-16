@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi - Clinical Screening Tool</title>
+    
+    <!-- 1. Styles & Design (Tailwind CSS) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#1e293b' }, // Custom Dark
+                        amber: { 50: '#fffbeb', 500: '#f59e0b', 600: '#d97706' },
+                        indigo: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5' },
+                        rose: { 50: '#fff1f2', 500: '#f43f5e', 600: '#e11d48' },
+                        sky: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' },
+                        emerald: { 50: '#ecfdf5', 500: '#10b981', 600: '#059669' },
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 2. React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 3. Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 4. Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- 5. PDF Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Print Styles */
+        @media print {
+            @page { margin: 10mm; }
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+            .shadow-2xl { box-shadow: none !important; }
+            .bg-slate-50 { background-color: white !important; }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICON ADAPTER ---
+        const Icon = ({ name, size = 18, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons || !window.lucide.icons[name]) {
+                return <span className="text-[10px] font-mono border px-1">{name}</span>;
+            }
+            const iconData = window.lucide.icons[name];
+            const svgContent = iconData.map(child => {
+                const [tag, attrs] = child;
+                const attrString = Object.entries(attrs).map(([k,v]) => `${k}="${v}"`).join(' ');
+                return `<${tag} ${attrString} />`;
+            }).join('');
+
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: svgContent }} />
+            );
+        };
+
+        const Icons = {
+            Activity: (p) => <Icon name="Activity" {...p} />,
+            ClipboardList: (p) => <Icon name="ClipboardList" {...p} />,
+            FileText: (p) => <Icon name="FileText" {...p} />,
+            CheckCircle2: (p) => <Icon name="CheckCircle2" {...p} />,
+            AlertCircle: (p) => <Icon name="AlertCircle" {...p} />,
+            BrainCircuit: (p) => <Icon name="BrainCircuit" {...p} />,
+            Users: (p) => <Icon name="Users" {...p} />,
+            ArrowRight: (p) => <Icon name="ArrowRight" {...p} />,
+            Download: (p) => <Icon name="Download" {...p} />,
+            X: (p) => <Icon name="X" {...p} />,
+            Stethoscope: (p) => <Icon name="Stethoscope" {...p} />,
+            Microscope: (p) => <Icon name="Microscope" {...p} />,
+            School: (p) => <Icon name="School" {...p} />,
+            Home: (p) => <Icon name="Home" {...p} />,
+            Clock: (p) => <Icon name="Clock" {...p} />,
+            Eye: (p) => <Icon name="Eye" {...p} />,
+            Zap: (p) => <Icon name="Zap" {...p} />,
+            Menu: (p) => <Icon name="Menu" {...p} />,
+            Shield: (p) => <Icon name="Shield" {...p} />,
+            Heart: (p) => <Icon name="Heart" {...p} />,
+            BookOpen: (p) => <Icon name="BookOpen" {...p} />,
+            Check: (p) => <Icon name="Check" {...p} />,
+            Star: (p) => <Icon name="Star" {...p} />
+        };
+
+        // --- CONFIG ---
+        const APP_VERSION = "v15.2-Medical-Disclaimer-UI";
+        const DEVELOPER_NOTE = "Standardized Clinical Observation Tool";
+        
+        // --- TRANSLATIONS ---
+        const translations = {
+          de: {
+            slogan: "Präzisions-Screening.",
+            sub_slogan: "Standardisierte Erfassung psychopathologischer Auffälligkeiten.",
+            mode_select: "Beobachtungskontext",
+            mode_teacher: "Schulisches Setting",
+            mode_parent: "Häusliches Setting",
+            start_btn: "Screening beginnen",
+            screening_phase: "Psychometrische Erfassung",
+            screening_intro: "Bitte bewerten Sie die Ausprägung der beobachteten Merkmale.",
+            clinical_context: "Anamnestische Kontextfaktoren",
+            duration_label: "Symptomdauer / Chronizität",
+            distress_label: "Globales Funktionsniveau (Beeinträchtigung)",
+            organic_check: "Somatische Ausschlussdiagnostik (Visus/Auditus) erfolgt?",
+            deep_dive_title: "Phänomenologische Spezifizierung",
+            deep_dive_desc: "Differenzierung der klinischen Leitsymptome.",
+            resources_title: "Ressourcenanalyse",
+            resources_intro: "Erfassung protektiver Faktoren.",
+            generate_btn: "Befundbericht generieren",
+            // UPDATED TITLES AND DISCLAIMERS
+            dossier_title: "Screening-Ergebnis (Verdacht)",
+            confidential: "Vertraulich / Kein Befund",
+            diagnosis_title: "Verdachtsbereich (Screening)",
+            relevance_high: "Auffälliges Screening-Ergebnis",
+            resources_label: "Protektive Faktoren",
+            matrix_title: "Detaillierte Symptom-Matrix (Item-Ebene)",
+            disclaimer: "WARNUNG: Dies ist KEINE Diagnose. Es handelt sich ausschließlich um einen verdachtsweise erhobenen Screening-Befund. Er ersetzt keinesfalls eine fachärztliche oder psychologische Diagnostik nach ICD-10/11.",
+            medical_check: "Eine organische und fachärztliche Abklärung ist zwingend erforderlich.",
+            chat_intro_data: (name, diagnosis) => `Auffälligkeiten im Bereich ${diagnosis} bei ${name} erfasst.`,
+            context_badge: (mode) => mode === 'teacher' ? "Setting: Institutionell/Schule" : "Setting: Familiär/Häuslich",
+            score_0: "0 - Nie", score_1: "1 - Selten", score_2: "2 - Oft", score_3: "3 - Sehr oft", score_na: "n.b.",
+            duration_short: "< 6 Monate (Akut)", duration_long: "> 6 Monate (Chronisch)",
+            distress_low: "Geringe Einschränkung", distress_high: "Massive Einschränkung",
+            next: "Weiter", evaluate: "Auswertung", close: "Schließen", download_pdf: "Befund Exportieren", student_placeholder: "Patienten-ID / Referenznummer"
+          },
+          en: { slogan: "Clinical Screening.", sub_slogan: "Standardized assessment.", start_btn: "Start", mode_teacher: "School", mode_parent: "Home", screening_phase: "Assessment", screening_intro: "Rate observed traits.", clinical_context: "Clinical Context", duration_label: "Duration", distress_label: "Impairment", organic_check: "Somatic check?", deep_dive_title: "Specification", deep_dive_desc: "Detailing symptoms.", resources_title: "Resources", resources_intro: "Protective factors.", generate_btn: "Generate Report", dossier_title: "Screening Result (Suspicion)", confidential: "Confidential / No Diagnosis", diagnosis_title: "Suspected Cluster", relevance_high: "Referral Indicated", resources_label: "Protective Factors", matrix_title: "Symptom Matrix", disclaimer: "WARNING: This is NOT a medical diagnosis. It is a screening result only.", medical_check: "Professional medical assessment is mandatory.", chat_intro_data: (n,d) => `Signs of ${d} noted.`, context_badge: (m) => m==='teacher'?"School":"Home", score_0: "Never", score_1: "Rarely", score_2: "Often", score_3: "Very Often", score_na: "n/a", duration_short: "Acute", duration_long: "Chronic", distress_low: "Low", distress_high: "High", next: "Next", evaluate: "Evaluate", close: "Close", download_pdf: "Export Report", student_placeholder: "Patient ID" },
+          fr: { slogan: "Dépistage Clinique.", sub_slogan: "Évaluation standardisée.", start_btn: "Commencer", mode_teacher: "École", mode_parent: "Domicile", screening_phase: "Évaluation", screening_intro: "Évaluer les traits.", clinical_context: "Contexte Clinique", duration_label: "Durée", distress_label: "Déficience", organic_check: "Bilan somatique ?", deep_dive_title: "Spécification", deep_dive_desc: "Détails symptômes.", resources_title: "Ressources", resources_intro: "Facteurs de protection.", generate_btn: "Générer Rapport", dossier_title: "Résultat Dépistage (Suspicion)", confidential: "Confidentiel / Pas de Diagnostic", diagnosis_title: "Cluster Suspecté", relevance_high: "Indication diagnostique", resources_label: "Facteurs de protection", matrix_title: "Matrice des Symptômes", disclaimer: "ATTENTION : Ceci n'est PAS un diagnostic médical. C'est un outil de dépistage.", medical_check: "Bilan médical impératif.", chat_intro_data: (n,d) => `Signes de ${d} notés.`, context_badge: (m) => m==='teacher'?"École":"Domicile", score_0: "Jamais", score_1: "Rarement", score_2: "Souvent", score_3: "Très souvent", score_na: "n.d.", duration_short: "Aigu", duration_long: "Chronique", distress_low: "Faible", distress_high: "Élevée", next: "Suivant", evaluate: "Évaluer", close: "Fermer", download_pdf: "Exporter", student_placeholder: "ID Patient" },
+          pt: { slogan: "Triagem Clínica.", sub_slogan: "Avaliação padronizada.", start_btn: "Iniciar", mode_teacher: "Escola", mode_parent: "Casa", screening_phase: "Avaliação", screening_intro: "Avalie os traços.", clinical_context: "Contexto Clínico", duration_label: "Duração", distress_label: "Prejuízo", organic_check: "Exame somático?", deep_dive_title: "Especificação", deep_dive_desc: "Detalhes sintomas.", resources_title: "Recursos", resources_intro: "Fatores de proteção.", generate_btn: "Gerar Relatório", dossier_title: "Resultado Triagem (Suspeita)", confidential: "Confidencial / Não é Diagnóstico", diagnosis_title: "Cluster Suspeito", relevance_high: "Indicação diagnóstica", resources_label: "Fatores de proteção", matrix_title: "Matriz de Sintomas", disclaimer: "AVISO: Isto NÃO é um diagnóstico médico. É apenas uma triagem.", medical_check: "Avaliação médica obrigatória.", chat_intro_data: (n,d) => `Sinais de ${d} notados.`, context_badge: (m) => m==='teacher'?"Escola":"Casa", score_0: "Nunca", score_1: "Raramente", score_2: "Frequentemente", score_3: "Muito", score_na: "n/a", duration_short: "Agudo", duration_long: "Crônico", distress_low: "Baixo", distress_high: "Alto", next: "Próximo", evaluate: "Avaliar", close: "Fechar", download_pdf: "Exportar", student_placeholder: "ID Paciente" }
+        };
+
+        // --- KNOWLEDGE BASE (No Interventions) ---
+        const knowledgeBase = {
+            adhs: { 
+                id: 'adhs', 
+                name: { de: 'Aufmerksamkeits- & Exekutivstörung', en: 'Attention Deficit', fr: 'Trouble de l\'attention', pt: 'Déficit de Atenção' }, 
+                icd: 'ICD-10: F90.x / F98.8', 
+                clinicalName: { de: 'Cluster: Hyperkinetisch / Inattentiv', en: 'Cluster: Hyperkinetic', fr: 'Cluster: Hyperkinétique', pt: 'Cluster: Hipercinético' }, 
+                colorKey: 'amber', 
+                icon: 'Zap', 
+                deepDive: [
+                    {id: 'dd_motor', text: {de: 'Dominanz motorischer Hyperaktivität', en: 'Motor hyperactivity', fr: 'Hyperactivité motrice', pt: 'Hiperatividade motora'}}, 
+                    {id: 'dd_impuls', text: {de: 'Impulskontrollstörung im Vordergrund', en: 'Impulsivity', fr: 'Impulsivité', pt: 'Impulsividade'}}
+                ]
+            },
+            ass: { 
+                id: 'ass', 
+                name: { de: 'Störung der sozialen Kommunikation (ASS)', en: 'ASD', fr: 'TSA', pt: 'TEA' }, 
+                icd: 'ICD-10: F84.x', 
+                clinicalName: { de: 'Cluster: Soziale Interaktion / Stereotypien', en: 'Cluster: Social Interaction', fr: 'Cluster: Interaction Sociale', pt: 'Cluster: Interação Social' }, 
+                colorKey: 'indigo', 
+                icon: 'Menu', 
+                deepDive: [
+                    {id: 'dd_change', text: {de: 'Rigidität / Widerstand gegen Veränderungen', en: 'Rigidity', fr: 'Rigidité', pt: 'Rigidez'}},
+                    {id: 'dd_sensory', text: {de: 'Sensorische Hypersensibilität', en: 'Sensory hypersensitivity', fr: 'Hypersensibilité sensorielle', pt: 'Hipersensibilidade sensorial'}}
+                ]
+            },
+            opp: { 
+                id: 'opp', 
+                name: { de: 'Störung des Sozialverhaltens (OPP)', en: 'ODD', fr: 'TOP', pt: 'TOD' }, 
+                icd: 'ICD-10: F91.3', 
+                clinicalName: { de: 'Cluster: Externalisierend / Oppositonell', en: 'Cluster: Externalizing', fr: 'Cluster: Externalisé', pt: 'Cluster: Externalizante' }, 
+                colorKey: 'rose', 
+                icon: 'Shield', 
+                deepDive: [
+                    {id: 'dd_power', text: {de: 'Aktive Autoritätskonflikte / Machtkämpfe', en: 'Authority conflicts', fr: 'Conflits d\'autorité', pt: 'Conflitos de autoridade'}},
+                    {id: 'dd_emo', text: {de: 'Dysregulation des Affekts (Wut/Reizbarkeit)', en: 'Affect dysregulation', fr: 'Dérégulation de l\'affect', pt: 'Desregulação do afeto'}}
+                ]
+            },
+            anx: { 
+                id: 'anx', 
+                name: { de: 'Angst- & Emotionsstörung', en: 'Anxiety', fr: 'Anxiété', pt: 'Ansiedade' }, 
+                icd: 'ICD-10: F41.x / F93.x', 
+                clinicalName: { de: 'Cluster: Internalisierend / Ängstlich', en: 'Cluster: Internalizing', fr: 'Cluster: Internalisé', pt: 'Cluster: Internalizante' }, 
+                colorKey: 'sky', 
+                icon: 'Heart', 
+                deepDive: [
+                    {id: 'dd_social', text: {de: 'Soziale Phobie / Gehemmtheit', en: 'Social phobia', fr: 'Phobie sociale', pt: 'Fobia social'}},
+                    {id: 'dd_soma', text: {de: 'Somatisierungsstörung (funktionelle Beschwerden)', en: 'Somatization', fr: 'Somatisation', pt: 'Somatização'}}
+                ]
+            },
+            lern: { 
+                id: 'lern', 
+                name: { de: 'Umschriebene Entwicklungsstörung', en: 'Learning Disorder', fr: 'Trouble d\'apprentissage', pt: 'Transtorno de Aprendizagem' }, 
+                icd: 'ICD-10: F81.x', 
+                clinicalName: { de: 'Cluster: Lernleistung / Kognition', en: 'Cluster: Learning', fr: 'Cluster: Apprentissage', pt: 'Cluster: Aprendizagem' }, 
+                colorKey: 'emerald', 
+                icon: 'BookOpen', 
+                deepDive: [
+                    {id: 'dd_read', text: {de: 'Defizit: Leseflüssigkeit / Decodierung', en: 'Reading deficit', fr: 'Déficit lecture', pt: 'Déficit de leitura'}},
+                    {id: 'dd_math', text: {de: 'Defizit: Numerisches Verständnis', en: 'Math deficit', fr: 'Déficit calcul', pt: 'Déficit matemático'}}
+                ]
+            }
+        };
+
+        // --- PROFESSIONAL SCREENING QUESTIONS ---
+        const screeningQuestions = [
+          // ADHS
+          { id: 'a1', cat: 'adhs', text: { de: 'Zeigt mangelnde Sorgfalt bei Details oder begeht Flüchtigkeitsfehler.', en: 'Lacks attention to detail.', fr: 'Manque d\'attention aux détails.', pt: 'Falta de atenção aos detalhes.' } },
+          { id: 'a2', cat: 'adhs', text: { de: 'Zeigt Schwierigkeiten, die Aufmerksamkeit bei Aufgaben aufrechtzuerhalten.', en: 'Difficulty sustaining attention.', fr: 'Difficulté à maintenir l\'attention.', pt: 'Dificuldade em manter a atenção.' } },
+          { id: 'a3', cat: 'adhs', text: { de: 'Erscheint mental abwesend bei direkter Ansprache.', en: 'Seems mentally absent.', fr: 'Semble mentalement absent.', pt: 'Parece mentalmente ausente.' } },
+          { id: 'a4', cat: 'adhs', text: { de: 'Vermeidet Aufgaben, die anhaltende kognitive Anstrengung erfordern.', en: 'Avoids sustained mental effort.', fr: 'Évite l\'effort mental soutenu.', pt: 'Evita esforço mental sustentado.' } },
+          { id: 'a5', cat: 'adhs', text: { de: 'Zeigt Desorganisation beim Umgang mit Materialien (Verlieren von Objekten).', en: 'Disorganized with materials.', fr: 'Désorganisé avec le matériel.', pt: 'Desorganizado com materiais.' } },
+          { id: 'a6', cat: 'adhs', text: { de: 'Zeigt motorische Unruhe (Hände/Füße) oder windet sich auf dem Sitz.', en: 'Motor restlessness.', fr: 'Agitation motrice.', pt: 'Inquietação motora.' } },
+          { id: 'a7', cat: 'adhs', text: { de: 'Verlässt den Platz in Situationen, in denen Sitzenbleiben erwartet wird.', en: 'Leaves seat inappropriately.', fr: 'Quitte son siège de manière inappropriée.', pt: 'Sai do lugar inapropriadamente.' } },
+          { id: 'a8', cat: 'adhs', text: { de: 'Zeigt impulsives Antwortverhalten (platzt heraus) vor Abschluss der Frage.', en: 'Impulsive answering.', fr: 'Réponses impulsives.', pt: 'Respostas impulsivas.' } },
+          
+          // ASS
+          { id: 's1', cat: 'ass', text: { de: 'Zeigt Defizite in der sozio-emotionalen Reziprozität.', en: 'Deficits in socio-emotional reciprocity.', fr: 'Déficits de réciprocité socio-émotionnelle.', pt: 'Déficits na reciprocidade socioemocional.' } },
+          { id: 's2', cat: 'ass', text: { de: 'Auffälligkeiten in der nonverbalen Kommunikation (z.B. verminderter Blickkontakt).', en: 'Abnormalities in nonverbal communication.', fr: 'Anomalies de la communication non verbale.', pt: 'Anormalidades na comunicação não verbal.' } },
+          { id: 's3', cat: 'ass', text: { de: 'Zeigt hochgradig beschränkte, fixierte Interessen.', en: 'Restricted, fixated interests.', fr: 'Intérêts restreints et fixes.', pt: 'Interesses restritos e fixos.' } },
+          { id: 's4', cat: 'ass', text: { de: 'Hyper- oder Hyporeaktivität auf sensorische Reize.', en: 'Sensory hyper/hyporeactivity.', fr: 'Hyper/hyporéactivité sensorielle.', pt: 'Hiper/hiporreatividade sensorial.' } },
+          { id: 's5', cat: 'ass', text: { de: 'Insistenz auf Unveränderlichkeit (Rigidität bei Routinen).', en: 'Insistence on sameness.', fr: 'Insistance sur l\'immuabilité.', pt: 'Insistência na igualdade.' } },
+          { id: 's6', cat: 'ass', text: { de: 'Defizite im Verständnis von Pragmatik (z.B. Ironie, Metaphern).', en: 'Deficits in pragmatics.', fr: 'Déficits pragmatiques.', pt: 'Déficits na pragmática.' } },
+          { id: 's7', cat: 'ass', text: { de: 'Schwierigkeiten beim Aufbau altersentsprechender Beziehungen.', en: 'Difficulty maintaining relationships.', fr: 'Difficulté à maintenir des relations.', pt: 'Dificuldade em manter relacionamentos.' } },
+
+          // OPP
+          { id: 'o1', cat: 'opp', text: { de: 'Verliert unverhältnismäßig schnell die Affektkontrolle (Wutausbrüche).', en: 'Loses temper easily.', fr: 'Perd son calme facilement.', pt: 'Perde a calma facilmente.' } },
+          { id: 'o2', cat: 'opp', text: { de: 'Zeigt argumentatives/provokantes Verhalten gegenüber Autoritätspersonen.', en: 'Argumentative with authority.', fr: 'Argumentatif avec l\'autorité.', pt: 'Argumentativo com autoridade.' } },
+          { id: 'o3', cat: 'opp', text: { de: 'Schiebt die Verantwortung für eigene Fehler auf andere (Externalisierung).', en: 'Blames others.', fr: 'Blâme les autres.', pt: 'Culpa os outros.' } },
+          { id: 'o4', cat: 'opp', text: { de: 'Ist übermäßig empfindlich oder leicht verärgert durch andere.', en: 'Touchy or easily annoyed.', fr: 'Susceptible ou facilement agacé.', pt: 'Sensível ou facilmente irritado.' } },
+          { id: 'o5', cat: 'opp', text: { de: 'Verweigert aktiv die Befolgung von Regeln oder Anweisungen.', en: 'Refuses to comply.', fr: 'Refuse de se conformer.', pt: 'Recusa-se a cumprir.' } },
+          { id: 'o6', cat: 'opp', text: { de: 'Zeigt boshaftes oder rachsüchtiges Verhalten.', en: 'Spiteful or vindictive.', fr: 'Malveillant ou vindicatif.', pt: 'Rancoroso ou vingativo.' } },
+
+          // ANX
+          { id: 'x1', cat: 'anx', text: { de: 'Zeigt übermäßige Besorgnis/Erwartungsangst bezüglich diverser Ereignisse.', en: 'Excessive worry.', fr: 'Inquiétude excessive.', pt: 'Preocupação excessiva.' } },
+          { id: 'x2', cat: 'anx', text: { de: 'Berichtet über somatische Beschwerden (Kopf/Bauch) ohne medizinischen Befund.', en: 'Somatic complaints.', fr: 'Plaintes somatiques.', pt: 'Queixas somáticas.' } },
+          { id: 'x3', cat: 'anx', text: { de: 'Zeigt deutliche Vermeidungstendenzen bei sozialen Situationen.', en: 'Social avoidance.', fr: 'Évitement social.', pt: 'Evitação social.' } },
+          { id: 'x4', cat: 'anx', text: { de: 'Benötigt übermäßiges Rückversicherungsverhalten.', en: 'Excessive reassurance seeking.', fr: 'Recherche excessive de réassurance.', pt: 'Busca excessiva de tranquilização.' } },
+          { id: 'x5', cat: 'anx', text: { de: 'Schlafstörungen assoziiert mit Grübeln oder Trennungsangst.', en: 'Sleep disturbance.', fr: 'Troubles du sommeil.', pt: 'Distúrbios do sono.' } },
+          { id: 'x6', cat: 'anx', text: { de: 'Zeigt emotionale Erstarrung oder Rückzug in Leistungssituationen.', en: 'Freezing/withdrawal.', fr: 'Figement/retrait.', pt: 'Congelamento/retraimento.' } },
+
+          // LERN
+          { id: 'l1', cat: 'lern', text: { de: 'Signifikante Verlangsamung der Lesegeschwindigkeit.', en: 'Slow reading speed.', fr: 'Vitesse de lecture lente.', pt: 'Velocidade de leitura lenta.' } },
+          { id: 'l2', cat: 'lern', text: { de: 'Defizite in der graphomotorischen Umsetzung (Schriftbild/Tempo).', en: 'Graphomotor deficits.', fr: 'Déficits graphomoteurs.', pt: 'Déficits grafomotores.' } },
+          { id: 'l3', cat: 'lern', text: { de: 'Nutzt zählendes Rechnen statt Abruf von Faktenwissen.', en: 'Counting instead of calculating.', fr: 'Compter au lieu de calculer.', pt: 'Contar em vez de calcular.' } },
+          { id: 'l4', cat: 'lern', text: { de: 'Schwierigkeiten bei der Speicherung/dem Abruf von neuem Lernstoff.', en: 'Retention difficulties.', fr: 'Difficultés de rétention.', pt: 'Dificuldades de retenção.' } },
+          { id: 'l5', cat: 'lern', text: { de: 'Diskrepanz zwischen kognitivem Potential und Arbeitsergebnis.', en: 'Potential-performance discrepancy.', fr: 'Écart potentiel-performance.', pt: 'Discrepância potencial-desempenho.' } }
+        ];
+
+        const resourceItems = [
+          { id: 'soc', label: { de: 'Soziale Kompetenz', en: 'Social Skills', fr: 'Compétences sociales', pt: 'Habilidades Sociais' }, desc: { de: 'Empathiefähigkeit, Gruppenintegration.', en: 'Empathy.', fr: 'Empathie.', pt: 'Empatia.' } },
+          { id: 'cre', label: { de: 'Kreatives Potential', en: 'Creativity', fr: 'Créativité', pt: 'Criatividade' }, desc: { de: 'Problemlösefähigkeit, Ideenreichtum.', en: 'Problem solving.', fr: 'Résolution de problèmes.', pt: 'Resolução de problemas.' } },
+          { id: 'cog', label: { de: 'Kognitive Ressourcen', en: 'Cognition', fr: 'Cognition', pt: 'Cognição' }, desc: { de: 'Schnelle Auffassungsgabe, logisches Denken.', en: 'Quick learning.', fr: 'Apprentissage rapide.', pt: 'Aprendizado rápido.' } }
+        ];
+
+        // --- COMPONENTS ---
+        const Button = ({ children, onClick, variant = 'primary', icon: Icon, className='', disabled=false }) => (
+          <button disabled={disabled} onClick={onClick} className={`px-5 py-2.5 rounded text-sm uppercase tracking-wide font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${variant === 'primary' ? 'bg-slate-850 text-white hover:bg-slate-700' : variant === 'accent' ? 'bg-teal-700 text-white hover:bg-teal-800' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'} ${className}`}>
+            {Icon && <Icon size={16} />} {children}
+          </button>
+        );
+
+        // --- MAIN APP ---
+        function App() {
+          const [lang, setLang] = useState('de');
+          const [mode, setMode] = useState(null); 
+          const [step, setStep] = useState('landing');
+          
+          const [scores, setScores] = useState({});
+          const [deepDiveAnswers, setDeepDiveAnswers] = useState({});
+          const [selectedResources, setSelectedResources] = useState({});
+          const [studentName, setStudentName] = useState('');
+          
+          const [symptomDuration, setSymptomDuration] = useState('unknown');
+          const [distressLevel, setDistressLevel] = useState(50);
+          const [organicCheck, setOrganicCheck] = useState(false);
+          
+          const [resultProfile, setResultProfile] = useState(null);
+          
+          const t = translations[lang] || translations.de;
+
+          // PDF Export
+          const handleExport = () => {
+            if(window.html2pdf) {
+              const element = document.getElementById('clinical-dossier');
+              const opt = { 
+                margin: [5, 5, 5, 5], 
+                filename: `Screening_Report_${studentName.replace(/[^a-zA-Z0-9]/g,'_')}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+              };
+              window.html2pdf().set(opt).from(element).save();
+            } else {
+              alert("PDF Modul lädt...");
+            }
+          };
+
+          const handleScore = (id, val) => {
+            setScores(prev => ({...prev, [id]: val}));
+          };
+
+          const toggleDeepDive = (id) => {
+             setDeepDiveAnswers(prev => ({...prev, [id]: !prev[id]}));
+          };
+          
+          const toggleResource = (id) => {
+             setSelectedResources(prev => ({...prev, [id]: !prev[id]}));
+          };
+
+          const calculateResult = () => {
+            const sums = { adhs: 0, ass: 0, opp: 0, anx: 0, lern: 0 };
+            const maxPossible = { adhs: 0, ass: 0, opp: 0, anx: 0, lern: 0 };
+
+            screeningQuestions.forEach(q => {
+              if (scores[q.id] !== undefined && scores[q.id] !== -1) {
+                sums[q.cat] += scores[q.id];
+                maxPossible[q.cat] += 3;
+              }
+            });
+
+            let maxCat = 'adhs';
+            let maxPercent = 0;
+
+            Object.keys(sums).forEach(key => {
+              if (maxPossible[key] > 0) {
+                  const p = (sums[key] / maxPossible[key]) * 100;
+                  if (p > maxPercent) { maxPercent = p; maxCat = key; }
+              }
+            });
+
+            setResultProfile(knowledgeBase[maxCat] || knowledgeBase.adhs);
+            setStep('deep_dive');
+          };
+
+          // --- VIEWS ---
+
+          if (step === 'landing') {
+            return (
+              <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+                <nav className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-20 no-print">
+                  <div className="flex items-center gap-2 text-teal-800">
+                    <Icons.Microscope size={28} />
+                    <div className="leading-none">
+                      <span className="font-bold text-lg tracking-tight block text-slate-900">PsyNavi</span>
+                      <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Clinical Screening</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 bg-slate-100 p-1 rounded">
+                    {['de', 'fr', 'en', 'pt'].map(l => (
+                      <button key={l} onClick={() => setLang(l)} className={`px-2 py-0.5 text-[10px] font-bold rounded transition-all ${lang === l ? 'bg-white shadow text-teal-800' : 'text-slate-500 hover:text-slate-900'}`}>{l.toUpperCase()}</button>
+                    ))}
+                  </div>
+                </nav>
+
+                <main className="max-w-4xl mx-auto mt-12 p-6">
+                  
+                  {/* DISCLAIMER ON LANDING PAGE */}
+                  <div className="bg-rose-50 border-l-4 border-rose-500 p-4 mb-8 rounded-r">
+                    <div className="flex items-start gap-3">
+                        <Icons.AlertCircle className="text-rose-600 shrink-0 mt-0.5" size={20} />
+                        <div className="text-sm text-rose-800">
+                            <strong>{t.disclaimer}</strong><br/>
+                            {t.medical_check}
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-12 items-center mb-12">
+                    <div>
+                      <div className="inline-block px-3 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-bold mb-4 uppercase tracking-widest">{APP_VERSION}</div>
+                      <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight text-slate-900">{t.slogan}</h1>
+                      <p className="text-lg text-slate-600 mb-8 font-light">{t.sub_slogan}</p>
+                    </div>
+                    
+                    <div className="bg-white p-8 rounded border border-slate-200 shadow-sm">
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><Icons.Users size={16}/> {t.mode_select}</h2>
+                      <div className="grid gap-4">
+                        <button onClick={() => { setMode('teacher'); setStep('context'); }} className="flex items-center gap-4 p-4 border border-slate-100 rounded hover:border-teal-500 hover:bg-teal-50 transition-all group">
+                          <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors"><Icons.School size={20}/></div>
+                          <div className="text-left"><div className="font-bold text-slate-900 text-sm">{t.mode_teacher}</div></div>
+                        </button>
+                        <button onClick={() => { setMode('parent'); setStep('context'); }} className="flex items-center gap-4 p-4 border border-slate-100 rounded hover:border-teal-500 hover:bg-teal-50 transition-all group">
+                          <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors"><Icons.Home size={20}/></div>
+                          <div className="text-left"><div className="font-bold text-slate-900 text-sm">{t.mode_parent}</div></div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              </div>
+            );
+          }
+
+          // CONTEXT
+          if (step === 'context') {
+            return (
+              <div className="min-h-screen bg-slate-50 p-6 flex justify-center pb-24">
+                <div className="max-w-2xl w-full bg-white rounded border border-slate-200 p-8 shadow-sm">
+                  <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800"><Icons.Stethoscope size={20}/> {t.clinical_context}</h2>
+                  
+                  <div className="space-y-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.student_placeholder}</label>
+                        <input 
+                            type="text" 
+                            className="w-full p-3 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                            value={studentName}
+                            onChange={(e) => setStudentName(e.target.value)}
+                            placeholder="ID..."
+                        />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Icons.Clock size={14} className="inline mr-1"/> {t.duration_label}</label>
+                      <div className="flex gap-4">
+                        <button onClick={() => setSymptomDuration('short')} className={`flex-1 py-3 border rounded text-xs font-bold transition-all ${symptomDuration === 'short' ? 'bg-slate-800 text-white border-slate-800' : 'hover:bg-slate-50 text-slate-600'}`}>{t.duration_short}</button>
+                        <button onClick={() => setSymptomDuration('long')} className={`flex-1 py-3 border rounded text-xs font-bold transition-all ${symptomDuration === 'long' ? 'bg-slate-800 text-white border-slate-800' : 'hover:bg-slate-50 text-slate-600'}`}>{t.duration_long}</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Icons.Activity size={14} className="inline mr-1"/> {t.distress_label}</label>
+                      <input type="range" min="0" max="100" value={distressLevel} onChange={(e) => setDistressLevel(e.target.value)} className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600"/>
+                      <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-medium uppercase tracking-wider">
+                        <span>{t.distress_low}</span>
+                        <span>{t.distress_high}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded border border-slate-100">
+                        <Icons.Eye size={20} className="text-slate-400" />
+                        <div className="flex-1 font-bold text-sm text-slate-700">{t.organic_check}</div>
+                        <button onClick={() => setOrganicCheck(!organicCheck)} className={`w-10 h-6 rounded-full transition-all relative ${organicCheck ? 'bg-teal-600' : 'bg-slate-300'}`}>
+                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${organicCheck ? 'left-5' : 'left-1'}`}></div>
+                        </button>
+                    </div>
+
+                    <div className="pt-6 border-t flex justify-end">
+                        <Button onClick={() => setStep('screening')} disabled={studentName.length < 2} icon={Icons.ArrowRight}>
+                            {t.start_btn}
+                        </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // SCREENING
+          if (step === 'screening') {
+              return (
+                <div className="min-h-screen bg-slate-50 pb-32">
+                    <header className="bg-white border-b px-6 py-4 sticky top-0 z-10 shadow-sm flex justify-between items-center no-print">
+                        <h2 className="font-bold flex items-center gap-2 text-slate-800"><Icons.ClipboardList size={20} className="text-teal-600"/> {t.screening_phase}</h2>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{studentName}</div>
+                    </header>
+                    <main className="max-w-4xl mx-auto p-6 space-y-3">
+                        <div className="bg-slate-800 text-white p-4 rounded text-sm mb-6 flex gap-3 shadow-md">
+                            <Icons.Activity size={20} className="text-teal-400" />
+                            {t.screening_intro}
+                        </div>
+                        
+                        {screeningQuestions.map((q, idx) => (
+                            <div key={q.id} className="bg-white p-5 rounded border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <div className="font-medium text-sm text-slate-800">{q.text[lang]}</div>
+                                    <div className="text-[10px] text-slate-300 font-mono mt-1">ITEM ID: {q.id.toUpperCase()}</div>
+                                </div>
+                                <div className="flex gap-1 shrink-0">
+                                    {[0, 1, 2, 3].map(val => (
+                                        <button 
+                                            key={val} 
+                                            onClick={() => handleScore(q.id, val)}
+                                            className={`w-10 h-10 rounded text-xs font-bold transition-all border ${scores[q.id] === val 
+                                                ? 'bg-teal-700 text-white border-teal-700 shadow-inner' 
+                                                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`}
+                                            title={val}
+                                        >
+                                            {val}
+                                        </button>
+                                    ))}
+                                    <button 
+                                        onClick={() => handleScore(q.id, -1)}
+                                        className={`w-10 h-10 rounded text-xs font-bold transition-all border ml-2 ${scores[q.id] === -1 
+                                            ? 'bg-slate-200 text-slate-500 border-slate-300' 
+                                            : 'bg-slate-50 text-slate-300 border-slate-100 hover:bg-slate-100'}`}
+                                    >
+                                        NB
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </main>
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex justify-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-20 no-print">
+                        <Button onClick={calculateResult} variant="accent" icon={Icons.Zap} className="w-full max-w-sm">
+                            {t.evaluate}
+                        </Button>
+                    </div>
+                </div>
+              );
+          }
+
+          // DEEP DIVE & RESOURCES
+          if (step === 'deep_dive' || step === 'resources') {
+             const isRes = step === 'resources';
+             const profile = resultProfile || knowledgeBase.adhs;
+             
+             return (
+                 <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+                     <div className="max-w-xl w-full bg-white rounded border border-slate-200 shadow-lg overflow-hidden">
+                         <div className={`h-1.5 ${profile.colorKey === 'amber' ? 'bg-amber-600' : profile.colorKey === 'indigo' ? 'bg-indigo-600' : profile.colorKey === 'rose' ? 'bg-rose-600' : profile.colorKey === 'sky' ? 'bg-sky-600' : 'bg-emerald-600'}`}></div>
+                         <div className="p-8">
+                             <h2 className="text-xl font-bold mb-2 text-slate-900 flex items-center gap-2">
+                                 {isRes ? <Icons.Star size={24} className="text-teal-600"/> : <Icons.Microscope size={24} className="text-slate-700"/>}
+                                 {isRes ? t.resources_title : t.deep_dive_title}
+                             </h2>
+                             <p className="text-slate-500 mb-8 text-sm border-b pb-4">
+                                 {isRes ? t.resources_intro : t.deep_dive_desc}
+                             </p>
+
+                             <div className="space-y-2 mb-8">
+                                 {!isRes ? profile.deepDive.map(dd => (
+                                     <button 
+                                        key={dd.id}
+                                        onClick={() => toggleDeepDive(dd.id)}
+                                        className={`w-full p-4 rounded text-left flex items-center justify-between transition-all border ${deepDiveAnswers[dd.id] 
+                                            ? 'border-teal-600 bg-teal-50 text-teal-900 shadow-sm' 
+                                            : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+                                     >
+                                         <span className="font-medium text-sm">{dd.text[lang]}</span>
+                                         {deepDiveAnswers[dd.id] && <Icons.Check size={18} className="text-teal-600"/>}
+                                     </button>
+                                 )) : resourceItems.map(res => (
+                                     <button 
+                                        key={res.id}
+                                        onClick={() => toggleResource(res.id)}
+                                        className={`w-full p-4 rounded text-left flex items-center justify-between transition-all border ${selectedResources[res.id] 
+                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm' 
+                                            : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+                                     >
+                                         <div>
+                                            <div className="font-bold text-sm">{res.label[lang]}</div>
+                                            <div className="text-xs text-slate-500 mt-1">{res.desc[lang]}</div>
+                                         </div>
+                                         {selectedResources[res.id] && <Icons.CheckCircle2 size={18} className="text-indigo-600"/>}
+                                     </button>
+                                 ))}
+                             </div>
+
+                             <div className="flex justify-end">
+                                 <Button 
+                                    onClick={() => isRes ? setStep('result') : setStep('resources')} 
+                                    icon={Icons.ArrowRight}
+                                 >
+                                     {t.next}
+                                 </Button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             )
+          }
+
+          // RESULT / DOSSIER
+          if (step === 'result') {
+              const profile = resultProfile || knowledgeBase.adhs;
+              const ProfileIcon = Icons[profile.icon] || Icons.Activity;
+              
+              const colorText = profile.colorKey === 'amber' ? 'text-amber-700' : 
+                                 profile.colorKey === 'indigo' ? 'text-indigo-700' :
+                                 profile.colorKey === 'rose' ? 'text-rose-700' :
+                                 profile.colorKey === 'sky' ? 'text-sky-700' : 'text-emerald-700';
+
+              const bgLight = profile.colorKey === 'amber' ? 'bg-amber-50' : 
+                                 profile.colorKey === 'indigo' ? 'bg-indigo-50' :
+                                 profile.colorKey === 'rose' ? 'bg-rose-50' :
+                                 profile.colorKey === 'sky' ? 'bg-sky-50' : 'bg-emerald-50';
+
+              return (
+                  <div className="min-h-screen bg-slate-200 p-8 flex justify-center">
+                      <div className="fixed bottom-8 right-8 z-30 flex gap-4 no-print">
+                        <button onClick={() => window.location.reload()} className="bg-white text-slate-600 p-4 rounded-full shadow-lg hover:bg-slate-50 transition-all">
+                            <Icons.X size={24} />
+                        </button>
+                        <Button onClick={handleExport} variant="primary" icon={Icons.Download} className="shadow-2xl">
+                            {t.download_pdf}
+                        </Button>
+                      </div>
+
+                      {/* PDF CONTAINER */}
+                      <div id="clinical-dossier" className="bg-white max-w-[210mm] w-full min-h-[297mm] p-[12mm] shadow-2xl mx-auto relative text-slate-900">
+                          
+                          {/* HEADER - CLEAN CLINICAL STYLE */}
+                          <div className="flex justify-between items-end border-b-2 border-slate-900 pb-4 mb-6">
+                              <div>
+                                  <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{t.dossier_title}</h1>
+                                  <div className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">
+                                      {t.confidential}
+                                  </div>
+                              </div>
+                              <div className="text-right">
+                                  <div className="flex items-center gap-2 justify-end mb-1">
+                                      <span className="font-bold text-sm">ID: {studentName}</span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 font-mono">
+                                      Ref: {new Date().toISOString().split('T')[0]}-{Math.floor(Math.random()*1000)} | {APP_VERSION}
+                                  </div>
+                              </div>
+                          </div>
+
+                          {/* SUMMARY GRID */}
+                          <div className="grid grid-cols-2 gap-6 mb-6">
+                              {/* Clinical Context */}
+                              <div className="border border-slate-200 rounded p-4 text-xs">
+                                  <h3 className="font-bold text-slate-400 uppercase tracking-widest mb-3 border-b pb-1">{t.clinical_context}</h3>
+                                  <div className="grid grid-cols-2 gap-y-2">
+                                      <span className="text-slate-500">Setting:</span>
+                                      <span className="font-bold">{mode === 'teacher' ? 'Institutionell' : 'Häuslich'}</span>
+                                      
+                                      <span className="text-slate-500">Chronizität:</span>
+                                      <span className="font-bold">{symptomDuration === 'short' ? 'Akut' : 'Chronisch (>6M)'}</span>
+                                      
+                                      <span className="text-slate-500">Funktionsniveau:</span>
+                                      <span className="font-bold">{distressLevel}/100</span>
+                                      
+                                      <span className="text-slate-500">Somatik:</span>
+                                      <span className={`font-bold ${organicCheck ? 'text-emerald-600' : 'text-rose-600'}`}>{organicCheck ? 'o.B.' : 'Ausstehend'}</span>
+                                  </div>
+                              </div>
+
+                              {/* Resources */}
+                              <div className="border border-slate-200 rounded p-4 text-xs">
+                                  <h3 className="font-bold text-slate-400 uppercase tracking-widest mb-3 border-b pb-1">{t.resources_label}</h3>
+                                  <div className="flex flex-wrap gap-2">
+                                      {resourceItems.filter(r => selectedResources[r.id]).map(r => (
+                                          <span key={r.id} className="px-2 py-1 bg-slate-100 border border-slate-200 rounded font-semibold text-slate-700">
+                                              {r.label[lang]}
+                                          </span>
+                                      ))}
+                                      {!Object.values(selectedResources).some(Boolean) && <span className="text-slate-400 italic">Keine expliziten Ressourcen markiert.</span>}
+                                  </div>
+                              </div>
+                          </div>
+
+                          {/* SCREENING RESULT */}
+                          <div className={`p-6 rounded border-l-4 ${bgLight} ${profile.colorKey === 'amber' ? 'border-amber-600' : profile.colorKey === 'indigo' ? 'border-indigo-600' : profile.colorKey === 'rose' ? 'border-rose-600' : profile.colorKey === 'sky' ? 'border-sky-600' : 'border-emerald-600'} mb-8 print-break-avoid`}>
+                              <div className="flex justify-between items-start mb-2">
+                                  <h2 className={`text-sm font-bold uppercase tracking-wider ${colorText}`}>{t.diagnosis_title}</h2>
+                                  <div className="px-2 py-0.5 bg-white border rounded text-[10px] font-bold uppercase text-slate-500">{t.relevance_high}</div>
+                              </div>
+                              <h3 className="text-2xl font-black text-slate-900 mb-1">{profile.name[lang]}</h3>
+                              <p className="font-mono text-xs text-slate-500 mb-4">{profile.clinicalName[lang]} | {profile.icd}</p>
+                              
+                              <div className="space-y-1">
+                                  {profile.deepDive.filter(d => deepDiveAnswers[d.id]).map(d => (
+                                      <div key={d.id} className="flex items-center gap-2 text-sm font-medium text-slate-800">
+                                          <Icons.CheckCircle2 size={14} className={colorText} /> {d.text[lang]}
+                                      </div>
+                                  ))}
+                              </div>
+                          </div>
+
+                          {/* QUESTIONNAIRE MATRIX (THE NEW PART) */}
+                          <div className="mt-8 pt-4 border-t-4 border-slate-100">
+                              <h3 className="font-bold text-xs uppercase tracking-widest text-slate-400 mb-4">{t.matrix_title}</h3>
+                              
+                              <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-[10px]">
+                                  {screeningQuestions.map((q, idx) => (
+                                      <div key={q.id} className="flex justify-between items-center border-b border-dotted border-slate-200 py-1">
+                                          <span className={`truncate pr-2 ${q.cat === profile.id ? 'font-bold text-slate-900' : 'text-slate-500'}`}>
+                                              {q.id.toUpperCase()} - {q.text[lang]}
+                                          </span>
+                                          <span className="font-mono font-bold w-6 text-right">
+                                              {scores[q.id] !== undefined && scores[q.id] !== -1 ? scores[q.id] : '-'}
+                                          </span>
+                                      </div>
+                                  ))}
+                              </div>
+                              
+                              <div className="flex gap-4 mt-2 text-[8px] text-slate-400 justify-end">
+                                  <span>0 = {t.score_0}</span>
+                                  <span>1 = {t.score_1}</span>
+                                  <span>2 = {t.score_2}</span>
+                                  <span>3 = {t.score_3}</span>
+                              </div>
+                          </div>
+                          
+                          {/* DISCLAIMER FOOTER */}
+                          <div className="absolute bottom-[12mm] left-[12mm] right-[12mm] border-t-2 border-slate-900 pt-2">
+                             <div className="flex gap-4 items-start text-[9px] text-slate-500 leading-tight text-justify">
+                                <Icons.AlertCircle size={24} className="text-rose-600 shrink-0" />
+                                <div>
+                                    <strong className="text-rose-600 block mb-1">{t.disclaimer}</strong>
+                                    {t.medical_check} {DEVELOPER_NOTE}. Generated via PsyNavi {APP_VERSION}.
+                                </div>
+                             </div>
+                          </div>
+
+                      </div>
+                  </div>
+              )
+          }
+
+          return null;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

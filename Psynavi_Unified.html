@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi - Integriertes Screening & Interventions-Tool</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#1e293b' },
+                        amber: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' },
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                        rose: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' },
+                        sky: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
+                        emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        violet: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9' },
+                        teal: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
+                        orange: { 50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c' },
+                        red: { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c' },
+                        cyan: { 50: '#ecfeff', 100: '#cffafe', 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490' },
+                        pink: { 50: '#fdf2f8', 100: '#fce7f3', 500: '#ec4899', 600: '#db2777', 700: '#be185d' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICON ADAPTER ---
+        const Icon = ({ name, size = 18, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons || !window.lucide.icons[name]) {
+                return <span className="text-[10px] font-mono border px-1">{name}</span>;
+            }
+            const iconData = window.lucide.icons[name];
+            const svgContent = iconData.map(child => {
+                const [tag, attrs] = child;
+                const attrString = Object.entries(attrs).map(([k,v]) => `${k}="${v}"`).join(' ');
+                return `<${tag} ${attrString} />`;
+            }).join('');
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: svgContent }} />
+            );
+        };
+
+        const APP_VERSION = "v2.0-Unified";
+
+        // --- TRANSLATIONS ---
+        const translations = {
+            de: {
+                appTitle: "PsyNavi",
+                appSubtitle: "Integriertes Screening & Interventions-Tool",
+                slogan: "Systematisches Screening.",
+                sub_slogan: "Standardisierte Erfassung und evidenzbasierte Interventionen.",
+                mode_select: "Beobachtungskontext",
+                mode_teacher: "Schulisches Setting",
+                mode_parent: "Haeusliches Setting",
+                start_screening: "Screening starten",
+                direct_access: "Direktzugang zu Modulen",
+                screening_phase: "Psychometrische Erfassung",
+                screening_intro: "Bitte bewerten Sie die Auspraegung der beobachteten Merkmale.",
+                clinical_context: "Anamnestische Kontextfaktoren",
+                duration_label: "Symptomdauer / Chronizitaet",
+                distress_label: "Globales Funktionsniveau (Beeintraechtigung)",
+                organic_check: "Somatische Ausschlussdiagnostik erfolgt?",
+                deep_dive_title: "Phaenomenologische Spezifizierung",
+                resources_title: "Ressourcenanalyse",
+                resources_intro: "Erfassung protektiver Faktoren.",
+                generate_btn: "Befundbericht generieren",
+                dossier_title: "Screening-Ergebnis (Verdacht)",
+                confidential: "Vertraulich / Kein Befund",
+                diagnosis_title: "Verdachtsbereich (Screening)",
+                relevance_high: "Auffaelliges Screening-Ergebnis",
+                resources_label: "Protektive Faktoren",
+                disclaimer: "WARNUNG: Dies ist KEINE Diagnose. Es handelt sich ausschliesslich um einen verdachtsweise erhobenen Screening-Befund.",
+                medical_check: "Eine organische und fachaerztliche Abklaerung ist zwingend erforderlich.",
+                go_to_module: "Zum Interventions-Modul",
+                back_to_home: "Zurueck zur Startseite",
+                back_to_overview: "Zurueck zur Uebersicht",
+                score_0: "0 - Nie", score_1: "1 - Selten", score_2: "2 - Oft", score_3: "3 - Sehr oft",
+                duration_short: "< 6 Monate (Akut)", duration_long: "> 6 Monate (Chronisch)",
+                next: "Weiter", evaluate: "Auswertung", download_pdf: "PDF Export",
+                student_placeholder: "Patienten-ID / Referenznummer",
+                tabPrimary: "Primaerschule (C1-C4)",
+                tabSecondary: "Sekundarstufe (ESC/ESG)",
+                strategiesBtn: "Strategien ansehen",
+                interventionsTitle: "Professionelle Interventionen",
+                neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                symptomsTitle: "Spezifische Verhaltensmuster",
+                print: "PDF / Drucken"
+            },
+            fr: {
+                appTitle: "PsyNavi",
+                appSubtitle: "Outil integre de Depistage & Intervention",
+                slogan: "Depistage Systematique.",
+                sub_slogan: "Evaluation standardisee et interventions basees sur des preuves.",
+                mode_select: "Contexte d'observation",
+                mode_teacher: "Milieu Scolaire",
+                mode_parent: "Milieu Familial",
+                start_screening: "Commencer le depistage",
+                direct_access: "Acces direct aux modules",
+                screening_phase: "Evaluation Psychometrique",
+                screening_intro: "Veuillez evaluer l'intensite des traits observes.",
+                clinical_context: "Facteurs de Contexte Clinique",
+                duration_label: "Duree des Symptomes",
+                distress_label: "Niveau de Fonctionnement Global",
+                organic_check: "Bilan somatique effectue?",
+                deep_dive_title: "Specification Phenomenologique",
+                resources_title: "Analyse des Ressources",
+                resources_intro: "Identification des facteurs de protection.",
+                generate_btn: "Generer le Rapport",
+                dossier_title: "Resultat du Depistage (Suspicion)",
+                confidential: "Confidentiel / Pas de Diagnostic",
+                diagnosis_title: "Zone de Suspicion (Depistage)",
+                relevance_high: "Resultat de depistage significatif",
+                resources_label: "Facteurs de Protection",
+                disclaimer: "ATTENTION: Ceci n'est PAS un diagnostic. C'est uniquement un resultat de depistage.",
+                medical_check: "Une evaluation medicale professionnelle est obligatoire.",
+                go_to_module: "Vers le Module d'Intervention",
+                back_to_home: "Retour a l'accueil",
+                back_to_overview: "Retour a l'apercu",
+                score_0: "0 - Jamais", score_1: "1 - Rarement", score_2: "2 - Souvent", score_3: "3 - Tres souvent",
+                duration_short: "< 6 Mois (Aigu)", duration_long: "> 6 Mois (Chronique)",
+                next: "Suivant", evaluate: "Evaluer", download_pdf: "Export PDF",
+                student_placeholder: "ID Patient / Reference",
+                tabPrimary: "Fondamental (C1-C4)",
+                tabSecondary: "Secondaire (ESC/ESG)",
+                strategiesBtn: "Voir les strategies",
+                interventionsTitle: "Interventions Professionnelles",
+                neuroLogicTitle: "La Neuro-Logique (Psychoeducation)",
+                symptomsTitle: "Modeles de comportement specifiques",
+                print: "PDF / Imprimer"
+            }
+        };
+
+        // --- SCREENING QUESTIONS ---
+        const screeningQuestions = [
+            // ADHS
+            { id: 'a1', cat: 'adhs', text: { de: 'Zeigt mangelnde Sorgfalt bei Details oder begeht Fluechtigkeitsfehler.', fr: 'Manque d\'attention aux details.' } },
+            { id: 'a2', cat: 'adhs', text: { de: 'Zeigt Schwierigkeiten, die Aufmerksamkeit bei Aufgaben aufrechtzuerhalten.', fr: 'Difficulte a maintenir l\'attention.' } },
+            { id: 'a3', cat: 'adhs', text: { de: 'Erscheint mental abwesend bei direkter Ansprache.', fr: 'Semble mentalement absent.' } },
+            { id: 'a4', cat: 'adhs', text: { de: 'Vermeidet Aufgaben, die anhaltende kognitive Anstrengung erfordern.', fr: 'Evite l\'effort mental soutenu.' } },
+            { id: 'a5', cat: 'adhs', text: { de: 'Zeigt motorische Unruhe oder windet sich auf dem Sitz.', fr: 'Agitation motrice.' } },
+            { id: 'a6', cat: 'adhs', text: { de: 'Zeigt impulsives Antwortverhalten vor Abschluss der Frage.', fr: 'Reponses impulsives.' } },
+            // ASS
+            { id: 's1', cat: 'ass', text: { de: 'Zeigt Defizite in der sozio-emotionalen Reziprozitaet.', fr: 'Deficits de reciprocite socio-emotionnelle.' } },
+            { id: 's2', cat: 'ass', text: { de: 'Auffaelligkeiten in der nonverbalen Kommunikation.', fr: 'Anomalies de la communication non verbale.' } },
+            { id: 's3', cat: 'ass', text: { de: 'Zeigt hochgradig beschraenkte, fixierte Interessen.', fr: 'Interets restreints et fixes.' } },
+            { id: 's4', cat: 'ass', text: { de: 'Hyper- oder Hyporeaktivitaet auf sensorische Reize.', fr: 'Hyper/hyporeactivite sensorielle.' } },
+            { id: 's5', cat: 'ass', text: { de: 'Insistenz auf Unveraenderlichkeit (Rigiditaet bei Routinen).', fr: 'Insistance sur l\'immuabilite.' } },
+            // OPP (Verhalten)
+            { id: 'o1', cat: 'opp', text: { de: 'Verliert unverhältnismaessig schnell die Affektkontrolle.', fr: 'Perd son calme facilement.' } },
+            { id: 'o2', cat: 'opp', text: { de: 'Zeigt argumentatives Verhalten gegenueber Autoritaetspersonen.', fr: 'Argumentatif avec l\'autorite.' } },
+            { id: 'o3', cat: 'opp', text: { de: 'Schiebt die Verantwortung fuer eigene Fehler auf andere.', fr: 'Blame les autres.' } },
+            { id: 'o4', cat: 'opp', text: { de: 'Verweigert aktiv die Befolgung von Regeln oder Anweisungen.', fr: 'Refuse de se conformer.' } },
+            // ANX (Angst)
+            { id: 'x1', cat: 'anx', text: { de: 'Zeigt uebermaessige Besorgnis bezueglich diverser Ereignisse.', fr: 'Inquietude excessive.' } },
+            { id: 'x2', cat: 'anx', text: { de: 'Berichtet ueber somatische Beschwerden ohne medizinischen Befund.', fr: 'Plaintes somatiques.' } },
+            { id: 'x3', cat: 'anx', text: { de: 'Zeigt deutliche Vermeidungstendenzen bei sozialen Situationen.', fr: 'Evitement social.' } },
+            { id: 'x4', cat: 'anx', text: { de: 'Zeigt emotionale Erstarrung in Leistungssituationen.', fr: 'Figement/retrait.' } },
+            // LERN
+            { id: 'l1', cat: 'lern', text: { de: 'Signifikante Verlangsamung der Lesegeschwindigkeit.', fr: 'Vitesse de lecture lente.' } },
+            { id: 'l2', cat: 'lern', text: { de: 'Defizite in der graphomotorischen Umsetzung.', fr: 'Deficits graphomoteurs.' } },
+            { id: 'l3', cat: 'lern', text: { de: 'Nutzt zaehlendes Rechnen statt Abruf von Faktenwissen.', fr: 'Compter au lieu de calculer.' } },
+            // Depression
+            { id: 'd1', cat: 'dep', text: { de: 'Zeigt anhaltende Antriebslosigkeit oder Muedigkeit.', fr: 'Fatigue et manque d\'energie persistants.' } },
+            { id: 'd2', cat: 'dep', text: { de: 'Wirkt traurig, niedergeschlagen oder reizbar.', fr: 'Semble triste ou irritable.' } },
+            { id: 'd3', cat: 'dep', text: { de: 'Zeigt sozialen Rueckzug oder Interessenverlust.', fr: 'Retrait social ou perte d\'interet.' } },
+            // Essstoerung
+            { id: 'e1', cat: 'ess', text: { de: 'Zeigt auffaelliges Essverhalten oder Nahrungsverweigerung.', fr: 'Comportement alimentaire anormal.' } },
+            { id: 'e2', cat: 'ess', text: { de: 'Aeussert negative Gedanken ueber Koerper oder Gewicht.', fr: 'Pensees negatives sur le corps ou le poids.' } }
+        ];
+
+        const resourceItems = [
+            { id: 'soc', label: { de: 'Soziale Kompetenz', fr: 'Competences sociales' }, desc: { de: 'Empathiefaehigkeit, Gruppenintegration.', fr: 'Empathie.' } },
+            { id: 'cre', label: { de: 'Kreatives Potential', fr: 'Creativite' }, desc: { de: 'Problemloesefaehigkeit, Ideenreichtum.', fr: 'Resolution de problemes.' } },
+            { id: 'cog', label: { de: 'Kognitive Ressourcen', fr: 'Cognition' }, desc: { de: 'Schnelle Auffassungsgabe, logisches Denken.', fr: 'Apprentissage rapide.' } }
+        ];
+
+        // --- MODULE DEFINITIONS ---
+        const modules = {
+            adhs: {
+                id: 'adhs',
+                name: { de: 'ADHS', fr: 'TDAH' },
+                fullName: { de: 'Aufmerksamkeits- & Hyperaktivitaetsstoerung', fr: 'Trouble du Deficit de l\'Attention avec Hyperactivite' },
+                icd: 'ICD-10: F90.x',
+                colorKey: 'amber',
+                bgColor: '#fff7ed',
+                icon: 'Zap',
+                description: { de: 'Fokus, Impulskontrolle & Exekutivfunktionen', fr: 'Focus, controle des impulsions & fonctions executives' },
+                domains: {
+                    attention: {
+                        title: { de: 'Fokus & Aufmerksamkeit', fr: 'Focus & Attention' },
+                        subtitle: { de: 'Regulation des Aufmerksamkeits-Scheinwerfers', fr: 'Regulation du projecteur attentionnel' },
+                        icon: 'Focus',
+                        patterns: [
+                            {
+                                id: 'att_hypo',
+                                title: { de: 'Hypoaktivitaet & Traeumen', fr: 'Hypoactivite & Reverie' },
+                                icon: 'CloudFog',
+                                behavior: { de: 'Schueler wirkt abwesend, starrt ins Leere, reagiert verzoegert.', fr: 'L\'eleve semble absent, regarde dans le vide.' },
+                                neuro_logic: { de: 'Das Gehirn schaltet in den Energiesparmodus und driftet in Tagtraeume ab.', fr: 'Le cerveau passe en mode economie d\'energie.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Taktile Anker', tag: 'Sensorik', text: { de: 'Beruehren Sie den Tisch des Kindes. Der taktile Reiz durchbricht den Tagtraum.', fr: 'Touchez la table de l\'enfant. Le stimulus tactile interrompt la reverie.' } },
+                                        { name: 'Sanduhr-Druck', tag: 'Dopamin', text: { de: 'Nutzen Sie eine 5-Minuten-Sanduhr fuer Zeitdruck.', fr: 'Utilisez un sablier de 5 minutes.' } },
+                                        { name: 'Aktives Sitzen', tag: 'Ergo', text: { de: 'Sitzball oder Wackelkissen erlauben.', fr: 'Autoriser le ballon d\'assise.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Digitale Notizen', tag: 'Nachteilsausgleich', text: { de: 'Tippen ist motorisch stimulierender als Handschrift.', fr: 'Taper est plus stimulant que l\'ecriture.' } },
+                                        { name: 'Kaugummi erlauben', tag: 'Physiologie', text: { de: 'Kieferbewegung foerdert Durchblutung zum Gehirn.', fr: 'Macher du chewing-gum ameliore la circulation.' } }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 'att_distract',
+                                title: { de: 'Ablenkbarkeit durch Aussenreize', fr: 'Distractibilite par stimuli externes' },
+                                icon: 'EyeOff',
+                                behavior: { de: 'Jedes Geraeusch unterbricht die Arbeit.', fr: 'Chaque bruit interrompt le travail.' },
+                                neuro_logic: { de: 'ADHS ist keine Aufmerksamkeits-Defizit, sondern eine Filter-Schwaeche.', fr: 'Le TDAH est une faiblesse de filtrage, pas un deficit d\'attention.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Trennwaende', tag: 'Abschirmung', text: { de: 'Aufstellbare Sichtschutze aus Pappe.', fr: 'Paravents en carton.' } },
+                                        { name: 'Laermschutz-Kopfhoerer', tag: 'Hilfsmittel', text: { de: 'In Stillarbeitsphasen tragen lassen.', fr: 'Faire porter pendant le travail silencieux.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Noise-Cancelling', tag: 'Barrierefreiheit', text: { de: 'Eigene ANC-Kopfhoerer erlauben.', fr: 'Autoriser ses propres ecouteurs ANC.' } },
+                                        { name: 'Pruefungs-Isolation', tag: 'Nachteilsausgleich', text: { de: 'Separater Raum bei Tests.', fr: 'Salle separee pour les examens.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    inhibition: {
+                        title: { de: 'Impulskontrolle', fr: 'Controle des Impulsions' },
+                        subtitle: { de: 'Die neurologische Bremse', fr: 'Le frein neurologique' },
+                        icon: 'Hand',
+                        patterns: [
+                            {
+                                id: 'imp_verbal',
+                                title: { de: 'Dazwischenrufen', fr: 'Interruptions Verbales' },
+                                icon: 'MicOff',
+                                behavior: { de: 'Antwortet, bevor die Frage zu Ende ist.', fr: 'Repond avant la fin de la question.' },
+                                neuro_logic: { de: 'Der Impuls feuert schneller, als der Frontallappen Stopp senden kann.', fr: 'L\'impulsion se declenche avant que le lobe frontal puisse envoyer Stop.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Parkplatz-Methode', tag: 'Strategie', text: { de: 'Post-it fuer Gedanken, die geparkt werden.', fr: 'Post-it pour garer les pensees.' } },
+                                        { name: 'Rede-Gegenstand', tag: 'Haptik', text: { de: 'Nur wer den Ball hat, darf sprechen.', fr: 'Seul celui qui tient le ballon peut parler.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Schriftliche Teilnahme', tag: 'Differenzierung', text: { de: 'Kommentare aufschreiben und abgeben.', fr: 'Ecrire les commentaires et les rendre.' } },
+                                        { name: 'Wartemarken', tag: 'Gamification', text: { de: '3 Rede-Joker pro Stunde.', fr: '3 jokers de parole par heure.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            ass: {
+                id: 'ass',
+                name: { de: 'Autismus', fr: 'Autisme' },
+                fullName: { de: 'Autismus-Spektrum-Stoerung', fr: 'Trouble du Spectre de l\'Autisme' },
+                icd: 'ICD-10: F84.x',
+                colorKey: 'sky',
+                bgColor: '#f0f9ff',
+                icon: 'Infinity',
+                description: { de: 'Soziale Kommunikation, Sensorik & Routinen', fr: 'Communication sociale, sensoriel & routines' },
+                domains: {
+                    social: {
+                        title: { de: 'Soziale Interaktion', fr: 'Interaction Sociale' },
+                        subtitle: { de: 'Die fremde Sprache', fr: 'La langue etrangere' },
+                        icon: 'MessagesSquare',
+                        patterns: [
+                            {
+                                id: 'soc_literal',
+                                title: { de: 'Woertliches Verstehen', fr: 'Comprehension Litterale' },
+                                icon: 'Quote',
+                                behavior: { de: 'Versteht Metaphern woertlich, missversteht Ironie.', fr: 'Prend les metaphores au pied de la lettre.' },
+                                neuro_logic: { de: 'Autistische Gehirne verarbeiten Sprache semantisch praezise.', fr: 'Les cerveaux autistes traitent le langage de maniere precise.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Klartext reden', tag: 'Low Arousal', text: { de: 'Vermeiden Sie Redewendungen.', fr: 'Evitez les expressions idiomatiques.' } },
+                                        { name: 'Soziale Geschichten', tag: 'Social Stories', text: { de: 'Nutzen Sie Social Stories fuer soziale Situationen.', fr: 'Utilisez des Social Stories.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Explizite Regeln', tag: 'Hidden Curriculum', text: { de: 'Erklaeren Sie das Versteckte Curriculum.', fr: 'Expliquez le Curriculum Cache.' } },
+                                        { name: 'Mentor-System', tag: 'Circle of Friends', text: { de: 'Ein Mitschueler erklaert soziale Dynamiken.', fr: 'Un eleve explique les dynamiques sociales.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    sensory: {
+                        title: { de: 'Sensorik & Reizverarbeitung', fr: 'Sensoriel & Traitement' },
+                        subtitle: { de: 'Overload & Shutdown', fr: 'Surcharge & Shutdown' },
+                        icon: 'Ear',
+                        patterns: [
+                            {
+                                id: 'sens_overload',
+                                title: { de: 'Sensorischer Overload', fr: 'Surcharge Sensorielle' },
+                                icon: 'ZapOff',
+                                behavior: { de: 'Haelt sich die Ohren zu, wird aggressiv oder zieht sich zurueck.', fr: 'Se bouche les oreilles, devient agressif ou se retire.' },
+                                neuro_logic: { de: 'Das autistische Gehirn nimmt Reize ungefiltert und verstaerkt wahr.', fr: 'Le cerveau autiste percoit les stimuli sans filtre.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Noise-Cancelling', tag: 'Reizabschirmung', text: { de: 'Kopfhoerer muessen jederzeit erlaubt sein.', fr: 'Les ecouteurs doivent etre autorises.' } },
+                                        { name: 'Rueckzugsort', tag: 'Safe Space', text: { de: 'Ein reizarmer Ort zur Regulation.', fr: 'Un lieu calme pour la regulation.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Exit-Card', tag: 'Krisenintervention', text: { de: 'Karte zeigen = Raum verlassen ohne Diskussion.', fr: 'Montrer la carte = quitter la salle sans discussion.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            opp: {
+                id: 'opp',
+                name: { de: 'Verhalten', fr: 'Comportement' },
+                fullName: { de: 'Stoerung des Sozialverhaltens', fr: 'Trouble des Conduites' },
+                icd: 'ICD-10: F91.x',
+                colorKey: 'red',
+                bgColor: '#fef2f2',
+                icon: 'Shield',
+                description: { de: 'Opposition, Aggression & Kooperation', fr: 'Opposition, agression & cooperation' },
+                domains: {
+                    opposition: {
+                        title: { de: 'Opposition & Trotz', fr: 'Opposition & Defiance' },
+                        subtitle: { de: 'Der ewige Machtkampf', fr: 'La lutte de pouvoir' },
+                        icon: 'ShieldX',
+                        patterns: [
+                            {
+                                id: 'odd_defiance',
+                                title: { de: 'Verweigerung & Diskussion', fr: 'Refus & Discussion' },
+                                icon: 'MessageSquareX',
+                                behavior: { de: 'Sagt Nein, zieht in endlose Debatten.', fr: 'Dit non, entre dans des debats sans fin.' },
+                                neuro_logic: { de: 'Das Nein ist ein Versuch, Autonomie und Sicherheit wiederherzustellen.', fr: 'Le non est une tentative de retrouver autonomie et securite.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Wahlmoeglichkeiten', tag: 'Autonomie', text: { de: 'Nicht befehlen, sondern Wahl lassen.', fr: 'Ne pas ordonner, mais laisser le choix.' } },
+                                        { name: 'Kaputte Schallplatte', tag: 'Technik', text: { de: 'Ruhig die Kern-Aussage wiederholen.', fr: 'Repeter calmement le message principal.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Kaltes Eisen', tag: 'Neue Autoritaet', text: { de: 'Konflikte nicht in der Hitze loesen.', fr: 'Ne pas resoudre les conflits a chaud.' } },
+                                        { name: 'Schriftliche Vertraege', tag: 'Verbindlichkeit', text: { de: 'Verhaltensvertrag mit klaren Konsequenzen.', fr: 'Contrat de comportement avec consequences claires.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            anx: {
+                id: 'anx',
+                name: { de: 'Angst', fr: 'Anxiete' },
+                fullName: { de: 'Angst- & Emotionsstoerung', fr: 'Troubles Anxieux' },
+                icd: 'ICD-10: F41.x / F93.x',
+                colorKey: 'violet',
+                bgColor: '#f5f3ff',
+                icon: 'Heart',
+                description: { de: 'Pruefungsangst, Soziale Phobie & Schulvermeidung', fr: 'Anxiete de performance, phobie sociale' },
+                domains: {
+                    performance: {
+                        title: { de: 'Leistungs- & Pruefungsangst', fr: 'Anxiete de Performance' },
+                        subtitle: { de: 'Der Blackout vor dem Blatt', fr: 'Le blackout devant la feuille' },
+                        icon: 'FileX',
+                        patterns: [
+                            {
+                                id: 'perf_blackout',
+                                title: { de: 'Blackout & Blockade', fr: 'Blackout & Blocage' },
+                                icon: 'BrainCircuit',
+                                behavior: { de: 'Hat gelernt, aber weiss nichts mehr. Weinen, Zittern.', fr: 'A appris mais ne sait plus rien. Pleurs, tremblements.' },
+                                neuro_logic: { de: 'Cortisol blockiert den Zugriff auf das Gedaechtnis.', fr: 'Le cortisol bloque l\'acces a la memoire.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Mut-Stein', tag: 'Anker-Technik', text: { de: 'Ein kleiner Gegenstand zum Druecken.', fr: 'Un petit objet a presser.' } },
+                                        { name: 'Start-Hilfe', tag: 'Scaffolding', text: { de: 'Die erste Aufgabe gemeinsam beginnen.', fr: 'Commencer la premiere tache ensemble.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Separater Raum', tag: 'Reizreduktion', text: { de: 'Test im SePAS schreiben.', fr: 'Passer le test au SePAS.' } },
+                                        { name: 'Zeit-Zuschlag', tag: 'Tiers-Temps', text: { de: '33% mehr Zeit nimmt den Druck.', fr: '33% de temps en plus reduit la pression.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            lern: {
+                id: 'lern',
+                name: { de: 'Lernstoerung', fr: 'Trouble d\'Apprentissage' },
+                fullName: { de: 'Umschriebene Entwicklungsstoerung', fr: 'Troubles Specifiques des Apprentissages' },
+                icd: 'ICD-10: F81.x',
+                colorKey: 'cyan',
+                bgColor: '#ecfeff',
+                icon: 'BookOpen',
+                description: { de: 'Lesen, Schreiben & Rechnen', fr: 'Lecture, ecriture & calcul' },
+                domains: {
+                    reading: {
+                        title: { de: 'Lese-Rechtschreib-Stoerung', fr: 'Dyslexie' },
+                        subtitle: { de: 'Wenn Buchstaben tanzen', fr: 'Quand les lettres dansent' },
+                        icon: 'BookOpenCheck',
+                        patterns: [
+                            {
+                                id: 'read_decode',
+                                title: { de: 'Dekodierungs-Defizit', fr: 'Deficit de Decodage' },
+                                icon: 'FileText',
+                                behavior: { de: 'Langsames, stockendes Lesen, Buchstabenverwechslung.', fr: 'Lecture lente, confusion de lettres.' },
+                                neuro_logic: { de: 'Die phonologische Schleife arbeitet langsamer.', fr: 'La boucle phonologique fonctionne plus lentement.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Lesefenster', tag: 'Visuell', text: { de: 'Nur eine Zeile sichtbar machen.', fr: 'Rendre visible une seule ligne.' } },
+                                        { name: 'Vorlese-Apps', tag: 'Assistive Tech', text: { de: 'Text-to-Speech nutzen.', fr: 'Utiliser la synthese vocale.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Hoerbuecher', tag: 'Alternative', text: { de: 'Literatur als Hoerbuch erlauben.', fr: 'Autoriser les livres audio.' } },
+                                        { name: 'Rechtschreibung nicht bewerten', tag: 'Nachteilsausgleich', text: { de: 'Inhalt vor Form.', fr: 'Le contenu avant la forme.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            dep: {
+                id: 'dep',
+                name: { de: 'Depression', fr: 'Depression' },
+                fullName: { de: 'Depression & Stimmungsstoerung', fr: 'Depression & Troubles de l\'Humeur' },
+                icd: 'ICD-10: F32.x / F33.x',
+                colorKey: 'slate',
+                bgColor: '#f1f5f9',
+                icon: 'CloudRain',
+                description: { de: 'Antrieb, Stimmung & Motivation', fr: 'Motivation, humeur & energie' },
+                domains: {
+                    drive: {
+                        title: { de: 'Antrieb & Motivation', fr: 'Motivation & Energie' },
+                        subtitle: { de: 'Der leere Akku', fr: 'La batterie vide' },
+                        icon: 'BatteryLow',
+                        patterns: [
+                            {
+                                id: 'dep_avolition',
+                                title: { de: 'Antriebslosigkeit', fr: 'Avolition' },
+                                icon: 'Anchor',
+                                behavior: { de: 'Legt den Kopf auf den Tisch, macht keine Hausaufgaben.', fr: 'Pose la tete sur la table, ne fait pas ses devoirs.' },
+                                neuro_logic: { de: 'Depression ist eine neurobiologische Hemmung, keine Willensschwaeche.', fr: 'La depression est une inhibition neurobiologique.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: '5-Minuten-Regel', tag: 'Verhaltensaktivierung', text: { de: 'Nur 5 Minuten mitmachen, dann Pause.', fr: 'Seulement 5 minutes, puis pause.' } },
+                                        { name: 'Hausaufgaben-Reduktion', tag: 'Differenzierung', text: { de: 'Nur 1/3 der Aufgaben.', fr: 'Seulement 1/3 des taches.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Spaeterer Schulbeginn', tag: 'Chronobiologie', text: { de: 'Erlaubnis zur 2. Stunde zu kommen.', fr: 'Permission de venir a la 2e heure.' } },
+                                        { name: 'Teilnahme reicht', tag: 'Validierung', text: { de: 'Die Anwesenheit ist die Leistung.', fr: 'La presence est la performance.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            ess: {
+                id: 'ess',
+                name: { de: 'Essstoerung', fr: 'Trouble Alimentaire' },
+                fullName: { de: 'Essstoerungen', fr: 'Troubles du Comportement Alimentaire' },
+                icd: 'ICD-10: F50.x',
+                colorKey: 'pink',
+                bgColor: '#fdf2f8',
+                icon: 'Apple',
+                description: { de: 'Essverhalten, Koerperbild & Kontrolle', fr: 'Comportement alimentaire, image corporelle' },
+                domains: {
+                    eating: {
+                        title: { de: 'Essverhalten', fr: 'Comportement Alimentaire' },
+                        subtitle: { de: 'Kontrolle & Koerperbild', fr: 'Controle & Image Corporelle' },
+                        icon: 'UtensilsCrossed',
+                        patterns: [
+                            {
+                                id: 'eat_restrict',
+                                title: { de: 'Restriktives Essen', fr: 'Alimentation Restrictive' },
+                                icon: 'Ban',
+                                behavior: { de: 'Verweigert Nahrung, zaehlt Kalorien.', fr: 'Refuse la nourriture, compte les calories.' },
+                                neuro_logic: { de: 'Kontrolle ueber Essen als Bewaeltigungsstrategie.', fr: 'Controle de la nourriture comme strategie d\'adaptation.' },
+                                solutions: {
+                                    fondamental: [
+                                        { name: 'Nicht kommentieren', tag: 'Beziehung', text: { de: 'Kein Kommentar zum Essen.', fr: 'Pas de commentaire sur la nourriture.' } },
+                                        { name: 'SePAS informieren', tag: 'Vernetzung', text: { de: 'Fachpersonal einbeziehen.', fr: 'Impliquer les professionnels.' } }
+                                    ],
+                                    secondaire: [
+                                        { name: 'Kein Sport-Zwang', tag: 'Schutz', text: { de: 'Keine Wiegeaktionen im Sportunterricht.', fr: 'Pas de pesee en cours de sport.' } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // --- COMPONENTS ---
+        const Button = ({ children, onClick, variant = 'primary', icon: IconComp, className='', disabled=false }) => (
+            <button disabled={disabled} onClick={onClick} className={`px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${variant === 'primary' ? 'bg-slate-800 text-white hover:bg-slate-700' : variant === 'accent' ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'} ${className}`}>
+                {IconComp && <IconComp size={16} />} {children}
+            </button>
+        );
+
+        const ModuleCard = ({ module, onClick, lang }) => (
+            <button
+                onClick={() => onClick(module.id)}
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${module.colorKey}-100 p-6 hover:border-${module.colorKey}-500 card-hover relative overflow-hidden shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${module.colorKey}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                <div className="relative z-10 flex items-center gap-4">
+                    <div className={`p-3 bg-${module.colorKey}-100 text-${module.colorKey}-700 rounded-xl`}>
+                        <Icon name={module.icon} size={28} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-900">{module.name[lang]}</h3>
+                        <p className="text-sm text-slate-500">{module.description[lang]}</p>
+                    </div>
+                    <div className="ml-auto">
+                        <Icon name="ChevronRight" className={`text-${module.colorKey}-400 group-hover:text-${module.colorKey}-600`} />
+                    </div>
+                </div>
+            </button>
+        );
+
+        const DomainCard = ({ id, domain, colorKey, onClick, lang, t }) => (
+            <button
+                onClick={() => onClick(id)}
+                className={`text-left group w-full bg-white rounded-xl border-2 border-${colorKey}-100 p-5 hover:border-${colorKey}-500 card-hover`}
+            >
+                <div className="flex items-start gap-4">
+                    <div className={`p-2 bg-${colorKey}-100 text-${colorKey}-700 rounded-lg`}>
+                        <Icon name={domain.icon} size={24} />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="font-bold text-slate-900">{domain.title[lang]}</h4>
+                        <p className={`text-xs text-${colorKey}-600 font-medium`}>{domain.subtitle[lang]}</p>
+                    </div>
+                    <Icon name="ArrowRight" className={`text-${colorKey}-400 self-center`} size={18} />
+                </div>
+            </button>
+        );
+
+        const PatternItem = ({ pattern, colorKey, onClick, lang }) => (
+            <div onClick={onClick} className={`bg-white p-4 rounded-lg border border-slate-200 cursor-pointer hover:border-${colorKey}-500 hover:shadow-md transition-all group`}>
+                <div className="flex items-start gap-3">
+                    <div className={`p-2 bg-slate-50 rounded text-slate-400 group-hover:text-${colorKey}-600`}>
+                        <Icon name={pattern.icon} size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <h5 className="font-bold text-slate-800">{pattern.title[lang]}</h5>
+                        <p className="text-sm text-slate-500 mt-1">{pattern.behavior[lang]}</p>
+                    </div>
+                    <Icon name="ChevronRight" className={`text-slate-300 group-hover:text-${colorKey}-500 self-center`} />
+                </div>
+            </div>
+        );
+
+        const InterventionModal = ({ pattern, domain, module, onClose, lang, t }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+            const solutions = pattern.solutions[activeTab] || [];
+            const colorKey = module.colorKey;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl animate-fade-in my-8 flex flex-col max-h-[90vh]">
+                        <div className={`bg-gradient-to-r from-${colorKey}-500 to-${colorKey}-600 p-6 rounded-t-2xl text-white flex justify-between items-start`}>
+                            <div>
+                                <div className="text-white/80 text-xs font-bold uppercase tracking-wider mb-1">{domain.title[lang]}</div>
+                                <h2 className="text-2xl font-black">{pattern.title[lang]}</h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full">
+                                <Icon name="X" size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-3 bg-slate-50 border-b flex gap-2 no-print">
+                            <button onClick={() => setActiveTab('fondamental')} className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 ${activeTab === 'fondamental' ? `bg-white text-${colorKey}-700 shadow ring-1 ring-${colorKey}-200` : 'text-slate-500'}`}>
+                                <Icon name="School" size={16} /> {t.tabPrimary}
+                            </button>
+                            <button onClick={() => setActiveTab('secondaire')} className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 ${activeTab === 'secondaire' ? `bg-white text-${colorKey}-700 shadow ring-1 ring-${colorKey}-200` : 'text-slate-500'}`}>
+                                <Icon name="GraduationCap" size={16} /> {t.tabSecondary}
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto flex-grow">
+                            <div className={`mb-6 bg-${colorKey}-50 rounded-xl p-5 border-l-4 border-${colorKey}-500`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Icon name="BrainCircuit" size={18} className={`text-${colorKey}-700`} />
+                                    <h3 className={`text-${colorKey}-900 font-bold`}>{t.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-700">{pattern.neuro_logic[lang]}</p>
+                            </div>
+
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Icon name="Wrench" className={`text-${colorKey}-600`} /> {t.interventionsTitle}
+                            </h3>
+
+                            <div className="space-y-4">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-3">
+                                        <div className={`w-7 h-7 rounded-full bg-${colorKey}-100 text-${colorKey}-600 flex items-center justify-center font-bold text-sm shrink-0`}>
+                                            {idx + 1}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="font-bold text-slate-900">{sol.name}</span>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">{sol.tag}</span>
+                                            </div>
+                                            <p className="text-slate-600 text-sm">{sol.text[lang]}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-end no-print">
+                            <button onClick={onClose} className="px-5 py-2 rounded-lg bg-slate-800 text-white font-bold text-sm">
+                                Schliessen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        function App() {
+            const [lang, setLang] = useState('de');
+            const [view, setView] = useState('landing'); // landing, context, screening, deep_dive, resources, result, module, domain, pattern
+            const [mode, setMode] = useState(null);
+            const [scores, setScores] = useState({});
+            const [deepDiveAnswers, setDeepDiveAnswers] = useState({});
+            const [selectedResources, setSelectedResources] = useState({});
+            const [studentName, setStudentName] = useState('');
+            const [symptomDuration, setSymptomDuration] = useState('unknown');
+            const [distressLevel, setDistressLevel] = useState(50);
+            const [organicCheck, setOrganicCheck] = useState(false);
+            const [resultModule, setResultModule] = useState(null);
+            const [currentModule, setCurrentModule] = useState(null);
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentPattern, setCurrentPattern] = useState(null);
+
+            const t = translations[lang] || translations.de;
+
+            const handleScore = (id, val) => setScores(prev => ({...prev, [id]: val}));
+            const toggleDeepDive = (id) => setDeepDiveAnswers(prev => ({...prev, [id]: !prev[id]}));
+            const toggleResource = (id) => setSelectedResources(prev => ({...prev, [id]: !prev[id]}));
+
+            const calculateResult = () => {
+                const sums = { adhs: 0, ass: 0, opp: 0, anx: 0, lern: 0, dep: 0, ess: 0 };
+                const maxPossible = { adhs: 0, ass: 0, opp: 0, anx: 0, lern: 0, dep: 0, ess: 0 };
+
+                screeningQuestions.forEach(q => {
+                    if (scores[q.id] !== undefined && scores[q.id] !== -1) {
+                        sums[q.cat] += scores[q.id];
+                        maxPossible[q.cat] += 3;
+                    }
+                });
+
+                let maxCat = 'adhs';
+                let maxPercent = 0;
+                Object.keys(sums).forEach(key => {
+                    if (maxPossible[key] > 0) {
+                        const p = (sums[key] / maxPossible[key]) * 100;
+                        if (p > maxPercent) { maxPercent = p; maxCat = key; }
+                    }
+                });
+
+                setResultModule(modules[maxCat] || modules.adhs);
+                setView('result');
+            };
+
+            const goToModule = (moduleId) => {
+                setCurrentModule(modules[moduleId]);
+                setCurrentDomainId(null);
+                setCurrentPattern(null);
+                setView('module');
+            };
+
+            const goToDomain = (domainId) => {
+                setCurrentDomainId(domainId);
+                setView('domain');
+            };
+
+            const resetApp = () => {
+                setView('landing');
+                setMode(null);
+                setScores({});
+                setDeepDiveAnswers({});
+                setSelectedResources({});
+                setStudentName('');
+                setResultModule(null);
+                setCurrentModule(null);
+                setCurrentDomainId(null);
+                setCurrentPattern(null);
+            };
+
+            // --- LANDING ---
+            if (view === 'landing') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+                        <nav className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-20">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white p-2 rounded-lg">
+                                    <Icon name="Brain" size={24} />
+                                </div>
+                                <div>
+                                    <span className="font-black text-xl text-slate-900">{t.appTitle}</span>
+                                    <span className="text-xs text-slate-500 block">{t.appSubtitle}</span>
+                                </div>
+                            </div>
+                            <div className="flex gap-1 bg-slate-100 p-1 rounded">
+                                {['de', 'fr'].map(l => (
+                                    <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-sm font-bold rounded ${lang === l ? 'bg-white shadow text-teal-700' : 'text-slate-500'}`}>{l.toUpperCase()}</button>
+                                ))}
+                            </div>
+                        </nav>
+
+                        <main className="max-w-5xl mx-auto p-6 pt-12">
+                            <div className="bg-rose-50 border-l-4 border-rose-500 p-4 mb-8 rounded-r">
+                                <div className="flex items-start gap-3">
+                                    <Icon name="AlertCircle" className="text-rose-600 shrink-0 mt-0.5" size={20} />
+                                    <div className="text-sm text-rose-800">
+                                        <strong>{t.disclaimer}</strong><br/>{t.medical_check}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="text-center mb-12">
+                                <h1 className="text-4xl font-black text-slate-900 mb-4">{t.slogan}</h1>
+                                <p className="text-lg text-slate-600">{t.sub_slogan}</p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-8 mb-12">
+                                <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                                    <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                        <Icon name="ClipboardList" size={20} className="text-teal-600" />
+                                        {t.mode_select}
+                                    </h2>
+                                    <div className="space-y-3 mb-6">
+                                        <button onClick={() => { setMode('teacher'); setView('context'); }} className="w-full flex items-center gap-4 p-4 border rounded-xl hover:border-teal-500 hover:bg-teal-50 transition-all group">
+                                            <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white">
+                                                <Icon name="School" size={20}/>
+                                            </div>
+                                            <span className="font-bold text-slate-700">{t.mode_teacher}</span>
+                                        </button>
+                                        <button onClick={() => { setMode('parent'); setView('context'); }} className="w-full flex items-center gap-4 p-4 border rounded-xl hover:border-teal-500 hover:bg-teal-50 transition-all group">
+                                            <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white">
+                                                <Icon name="Home" size={20}/>
+                                            </div>
+                                            <span className="font-bold text-slate-700">{t.mode_parent}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                                    <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                        <Icon name="LayoutGrid" size={20} className="text-slate-600" />
+                                        {t.direct_access}
+                                    </h2>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {Object.values(modules).map(mod => (
+                                            <button key={mod.id} onClick={() => goToModule(mod.id)} className={`p-3 rounded-lg border-2 border-${mod.colorKey}-100 hover:border-${mod.colorKey}-400 text-left transition-all`}>
+                                                <div className="flex items-center gap-2">
+                                                    <Icon name={mod.icon} size={16} className={`text-${mod.colorKey}-600`} />
+                                                    <span className="font-bold text-sm text-slate-700">{mod.name[lang]}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                );
+            }
+
+            // --- CONTEXT ---
+            if (view === 'context') {
+                return (
+                    <div className="min-h-screen bg-slate-50 p-6 flex justify-center">
+                        <div className="max-w-xl w-full bg-white rounded-2xl border p-8 shadow-sm">
+                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
+                                <Icon name="Stethoscope" size={20}/> {t.clinical_context}
+                            </h2>
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.student_placeholder}</label>
+                                    <input type="text" className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-teal-500 outline-none" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="ID..." />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.duration_label}</label>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => setSymptomDuration('short')} className={`flex-1 py-3 border rounded-lg text-sm font-bold ${symptomDuration === 'short' ? 'bg-slate-800 text-white' : 'hover:bg-slate-50'}`}>{t.duration_short}</button>
+                                        <button onClick={() => setSymptomDuration('long')} className={`flex-1 py-3 border rounded-lg text-sm font-bold ${symptomDuration === 'long' ? 'bg-slate-800 text-white' : 'hover:bg-slate-50'}`}>{t.duration_long}</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.distress_label}</label>
+                                    <input type="range" min="0" max="100" value={distressLevel} onChange={(e) => setDistressLevel(e.target.value)} className="w-full accent-teal-600"/>
+                                </div>
+                                <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                                    <Icon name="Eye" size={20} className="text-slate-400" />
+                                    <span className="flex-1 font-bold text-sm">{t.organic_check}</span>
+                                    <button onClick={() => setOrganicCheck(!organicCheck)} className={`w-10 h-6 rounded-full relative ${organicCheck ? 'bg-teal-600' : 'bg-slate-300'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${organicCheck ? 'left-5' : 'left-1'}`}></div>
+                                    </button>
+                                </div>
+                                <div className="pt-4 border-t flex justify-between">
+                                    <button onClick={resetApp} className="text-slate-500 font-bold text-sm">{t.back_to_home}</button>
+                                    <Button onClick={() => setView('screening')} disabled={studentName.length < 2}>{t.start_screening}</Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- SCREENING ---
+            if (view === 'screening') {
+                return (
+                    <div className="min-h-screen bg-slate-50 pb-24">
+                        <header className="bg-white border-b px-6 py-4 sticky top-0 z-10 shadow-sm flex justify-between items-center">
+                            <h2 className="font-bold flex items-center gap-2"><Icon name="ClipboardList" size={20} className="text-teal-600"/> {t.screening_phase}</h2>
+                            <span className="text-sm font-bold text-slate-400">{studentName}</span>
+                        </header>
+                        <main className="max-w-3xl mx-auto p-6 space-y-3">
+                            <div className="bg-slate-800 text-white p-4 rounded-lg text-sm mb-6 flex gap-3">
+                                <Icon name="Info" size={20} className="text-teal-400" />
+                                {t.screening_intro}
+                            </div>
+                            {screeningQuestions.map((q) => (
+                                <div key={q.id} className="bg-white p-4 rounded-lg border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                    <div className="flex-1">
+                                        <div className="font-medium text-sm text-slate-800">{q.text[lang]}</div>
+                                        <div className="text-[10px] text-slate-300 font-mono mt-1">{q.id.toUpperCase()}</div>
+                                    </div>
+                                    <div className="flex gap-1">
+                                        {[0, 1, 2, 3].map(val => (
+                                            <button key={val} onClick={() => handleScore(q.id, val)} className={`w-9 h-9 rounded text-xs font-bold border ${scores[q.id] === val ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>{val}</button>
+                                        ))}
+                                        <button onClick={() => handleScore(q.id, -1)} className={`w-9 h-9 rounded text-xs font-bold border ml-1 ${scores[q.id] === -1 ? 'bg-slate-200 text-slate-500' : 'bg-slate-50 text-slate-300 border-slate-100'}`}>NB</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </main>
+                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex justify-center shadow-lg z-20">
+                            <Button onClick={calculateResult} variant="accent" className="w-full max-w-sm">
+                                <Icon name="Zap" size={16} /> {t.evaluate}
+                            </Button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- RESULT ---
+            if (view === 'result' && resultModule) {
+                const mod = resultModule;
+                return (
+                    <div className="min-h-screen bg-slate-100 p-6">
+                        <div className="max-w-2xl mx-auto">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div className={`h-2 bg-${mod.colorKey}-500`}></div>
+                                <div className="p-8">
+                                    <div className="text-center mb-8">
+                                        <div className={`w-20 h-20 mx-auto bg-${mod.colorKey}-100 rounded-full flex items-center justify-center mb-4`}>
+                                            <Icon name={mod.icon} size={40} className={`text-${mod.colorKey}-600`} />
+                                        </div>
+                                        <h1 className="text-2xl font-black text-slate-900 mb-2">{t.dossier_title}</h1>
+                                        <p className="text-slate-500">{t.confidential}</p>
+                                    </div>
+
+                                    <div className={`bg-${mod.colorKey}-50 border-l-4 border-${mod.colorKey}-500 rounded-r-lg p-6 mb-6`}>
+                                        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t.diagnosis_title}</div>
+                                        <h2 className="text-xl font-black text-slate-900">{mod.fullName[lang]}</h2>
+                                        <p className="text-sm text-slate-600 font-mono mt-1">{mod.icd}</p>
+                                    </div>
+
+                                    <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                                        <div className="flex gap-3">
+                                            <Icon name="AlertTriangle" className="text-rose-600 shrink-0" />
+                                            <div className="text-sm text-rose-800">
+                                                <strong>{t.disclaimer}</strong><br/>{t.medical_check}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        <Button onClick={() => goToModule(mod.id)} variant="accent" className="w-full">
+                                            <Icon name="ArrowRight" size={16} /> {t.go_to_module}: {mod.name[lang]}
+                                        </Button>
+                                        <button onClick={resetApp} className="text-slate-500 font-bold text-sm py-2">
+                                            {t.back_to_home}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- MODULE VIEW ---
+            if (view === 'module' && currentModule) {
+                const mod = currentModule;
+                return (
+                    <div className="min-h-screen" style={{backgroundColor: mod.bgColor}}>
+                        <nav className="bg-white/90 backdrop-blur-md border-b sticky top-0 z-30">
+                            <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+                                <div className="flex items-center gap-3 cursor-pointer" onClick={resetApp}>
+                                    <div className={`bg-${mod.colorKey}-500 text-white p-2 rounded-lg`}>
+                                        <Icon name={mod.icon} size={20} />
+                                    </div>
+                                    <span className="font-black text-slate-900">{t.appTitle}: <span className={`text-${mod.colorKey}-600`}>{mod.name[lang]}</span></span>
+                                </div>
+                                <div className="flex gap-1 bg-slate-100 p-1 rounded">
+                                    {['de', 'fr'].map(l => (
+                                        <button key={l} onClick={() => setLang(l)} className={`px-2 py-0.5 text-xs font-bold rounded ${lang === l ? 'bg-white shadow' : 'text-slate-500'}`}>{l.toUpperCase()}</button>
+                                    ))}
+                                </div>
+                            </div>
+                        </nav>
+
+                        <div className="max-w-5xl mx-auto px-4 pt-8 pb-12">
+                            <button onClick={resetApp} className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-700 font-bold text-sm">
+                                <Icon name="ArrowLeft" size={18} /> {t.back_to_home}
+                            </button>
+
+                            <header className="text-center mb-10">
+                                <h1 className="text-3xl font-black text-slate-900 mb-2">{mod.fullName[lang]}</h1>
+                                <p className="text-slate-500">{mod.description[lang]} | {mod.icd}</p>
+                            </header>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {Object.entries(mod.domains).map(([key, domain]) => (
+                                    <DomainCard key={key} id={key} domain={domain} colorKey={mod.colorKey} onClick={goToDomain} lang={lang} t={t} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- DOMAIN VIEW ---
+            if (view === 'domain' && currentModule && currentDomainId) {
+                const mod = currentModule;
+                const domain = mod.domains[currentDomainId];
+
+                return (
+                    <div className="min-h-screen" style={{backgroundColor: mod.bgColor}}>
+                        <nav className="bg-white/90 backdrop-blur-md border-b sticky top-0 z-30">
+                            <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`bg-${mod.colorKey}-500 text-white p-2 rounded-lg`}>
+                                        <Icon name={mod.icon} size={20} />
+                                    </div>
+                                    <span className="font-black text-slate-900">{mod.name[lang]}: <span className={`text-${mod.colorKey}-600`}>{domain.title[lang]}</span></span>
+                                </div>
+                            </div>
+                        </nav>
+
+                        <div className="max-w-4xl mx-auto px-4 pt-8 pb-12">
+                            <button onClick={() => setView('module')} className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-700 font-bold text-sm">
+                                <Icon name="ArrowLeft" size={18} /> {t.back_to_overview}
+                            </button>
+
+                            <div className="grid lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-1">
+                                    <div className={`bg-gradient-to-br from-${mod.colorKey}-500 to-${mod.colorKey}-600 text-white rounded-2xl p-6 sticky top-24`}>
+                                        <div className="bg-white/20 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                                            <Icon name={domain.icon} size={28} />
+                                        </div>
+                                        <h2 className="text-2xl font-black mb-1">{domain.title[lang]}</h2>
+                                        <p className="text-white/80 text-sm font-medium">{domain.subtitle[lang]}</p>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-2 space-y-4">
+                                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <Icon name="List" size={18} className={`text-${mod.colorKey}-600`} />
+                                        {t.symptomsTitle}
+                                    </h3>
+                                    {domain.patterns.map(pattern => (
+                                        <PatternItem key={pattern.id} pattern={pattern} colorKey={mod.colorKey} onClick={() => setCurrentPattern(pattern)} lang={lang} />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {currentPattern && (
+                            <InterventionModal pattern={currentPattern} domain={domain} module={mod} onClose={() => setCurrentPattern(null)} lang={lang} t={t} />
+                        )}
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

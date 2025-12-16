@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi: ADHS Expert Edition (Bilingual)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Framework -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fff7ed; }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -3px rgba(245, 158, 11, 0.15); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d97706; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-break-avoid { break-inside: avoid; }
+            body { background: white; color: black; }
+            .print-full-width { width: 100% !important; max-width: none !important; }
+            .shadow-xl { box-shadow: none !important; }
+            .bg-gradient-to-br { background: none !important; border: 1px solid #ccc; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-amber-200 selection:text-amber-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS WRAPPER ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            if (!window.lucide || !window.lucide.icons[name]) return null;
+            const iconData = window.lucide.icons[name];
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width={size} height={size} viewBox="0 0 24 24" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconData.map(child => `<${child[0]} ${Object.entries(child[1]).map(([k,v]) => `${k}="${v}"`).join(' ')} />`).join('') }}
+                />
+            );
+        };
+
+        // --- DATA CONTENT (DE & FR) ---
+        const content = {
+            de: {
+                ui: {
+                    title: "PsyNavi: ADHS Expert",
+                    subtitle: "Luxembourg Edition",
+                    levels: "C1-C4 & Secondaire",
+                    back: "Zurück zur Übersicht",
+                    print: "PDF / Drucken",
+                    sources: "Quellen: Barkley, Brown, Hallowell, SePAS Standards.",
+                    noteTitle: "Professional Note:",
+                    noteText: "Interventionen in diesem Bereich erfordern Geduld (Prefrontal Cortex Reifung). Nutzen Sie diese Strategien für das PEI.",
+                    symptomsTitle: "Spezifische Verhaltensmuster",
+                    strategiesBtn: "Strategien ansehen",
+                    headerTitle: "ADHS im schulischen Kontext",
+                    headerSubtitle: "Ein professioneller Methodenkoffer für die 6 Domänen der Exekutivfunktionen. Für Lehrkräfte, SePAS & ESEB.",
+                    tabPrimary: "Primärschule (C1-C4)",
+                    tabSecondary: "Sekundarstufe (ESC/ESG)",
+                    interventionsTitle: "Professionelle Interventionen & Nachteilsausgleich",
+                    neuroLogicTitle: "Die Neuro-Logik (Psychoedukation)",
+                    footer: "ADHS Expert Tool Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    attention: {
+                        title: "Fokus & Aufmerksamkeit",
+                        subtitle: "Regulation des Aufmerksamkeits-Scheinwerfers",
+                        color: "amber",
+                        icon: "Focus",
+                        desc: "Schwierigkeiten, den Fokus zu halten (Sustained Attention) oder ihn bewusst zu verlagern (Shifting).",
+                        patterns: [
+                            {
+                                id: "att_hypo",
+                                title: "Hypoaktivität & Träumen (SCT)",
+                                icon: "CloudFog",
+                                behavior: "Schüler wirkt abwesend, starrt ins Leere, reagiert verzögert auf Ansprache, 'Slow Processing Speed'.",
+                                neuro_logic: "Hypoaktive ADHS-Gehirne (früher ADS) leiden unter einem chronischen 'Under-Arousal'. Die Großhirnrinde (Cortex) bekommt zu wenig Stimulation. Das Gehirn schaltet in den Energiesparmodus (Default Mode Network) und driftet in Tagträume ab, um sich selbst zu stimulieren.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Taktile Anker", tag: "Sensorik", text: "Berühren Sie beim Erklären kurz den Tisch oder die Schulter des Kindes. Der taktile Reiz durchbricht den Tagtraum schneller als die Stimme." },
+                                        { name: "Sanduhr-Druck", tag: "Dopamin", text: "Nutzen Sie eine 5-Minuten-Sanduhr. 'Schaffst du 3 Sätze bevor der Sand unten ist?'. Zeitdruck generiert Noradrenalin, was die Wachheit steigert." },
+                                        { name: "Aktives Sitzen", tag: "Ergo", text: "Sitzball oder Wackelkissen (Galette) erlauben. Die Mikrobewegungen halten den Vestibularsinn aktiv und verhindern das 'Wegdämmern'." },
+                                        { name: "Peer-Prompting", tag: "Kooperation", text: "Sitznachbar als 'Co-Pilot': Hat den Auftrag, das Kind sanft anzustupsen, wenn das Heft gewechselt wird." },
+                                        { name: "Multisensorik", tag: "Lernen", text: "Lassen Sie das Kind beim Lernen stehen oder Dinge laut aussprechen. Je mehr Kanäle offen sind, desto wacher das Gehirn." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Digitale Notizen", tag: "Nachteilsausgleich", text: "Tippen auf Laptop/iPad ist motorisch stimulierender als Handschrift und hält wacher. Erlaubnis als Assistenztechnologie." },
+                                        { name: "Kaltes Wasser / Kaugummi", tag: "Physiologie", text: "Erlaubnis, Kaugummi zu kauen (Kieferbewegung fördert Durchblutung zum Gehirn) oder kaltes Wasser zu trinken bei Müdigkeit." },
+                                        { name: "Mitschriften-Pate", tag: "Inklusion", text: "Offizieller Nachteilsausgleich: Schüler darf Fotos der Tafel/Hefte von Mitschülern machen." },
+                                        { name: "Call-Cold Technik", tag: "Unterricht", text: "Stellen Sie die Frage an die ganze Klasse, warten Sie, und nennen DANN den Namen. Hält die Spannung (Arousal) bei allen hoch." },
+                                        { name: "Visual Timer App", tag: "Selbstmanagement", text: "Nutzung einer Timer-App auf dem Pult, um Arbeitsphasen (Pomodoro) sichtbar zu machen." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "att_distract",
+                                title: "Ablenkbarkeit durch Außenreize",
+                                icon: "EyeOff",
+                                behavior: "Jedes Geräusch, jede Bewegung am Fenster unterbricht die Arbeit. Der Kopf dreht sich ständig weg.",
+                                neuro_logic: "ADHS ist keine Aufmerksamkeits-Defizit, sondern eine Filter-Schwäche. Der Thalamus sortiert 'Wichtig' vs. 'Unwichtig' nicht. Das Gehirn orientiert sich reflexartig zum neuen Reiz.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Das 'Büro' (Trennwände)", tag: "Abschirmung", text: "Aufstellbare Sichtschutze aus Pappe. Framing: 'Das ist dein Piloten-Cockpit für Konzentration', keine Strafe!" },
+                                        { name: "Lärmschutz-Kopfhörer", tag: "Hilfsmittel", text: "In Stillarbeitsphasen Kopfhörer (Micky Mäuse) tragen lassen. Reduziert den auditiven Input massiv." },
+                                        { name: "Sitzplatz-Engineering", tag: "Raum", text: "T-Zone (Vorne Mitte). Rücken zur Klasse, Blick zur Tafel oder Wand. Weg von Fenstern." },
+                                        { name: "Clean Desk Policy", tag: "Reduktion", text: "Markierungen auf dem Tisch: Nur das Heft und das Etui. Alles andere muss in die Tasche." },
+                                        { name: "Farb-Fokus", tag: "Visuell", text: "Markieren Sie auf dem Arbeitsblatt mit Neon-Marker, wo gestartet wird. Lenkt den Blick." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Noise-Cancelling", tag: "Barrierefreiheit", text: "Erlaubnis, eigene ANC-Kopfhörer (ohne Musik oder mit White Noise) in Arbeitsphasen zu tragen." },
+                                        { name: "Prüfungs-Isolation", tag: "Nachteilsausgleich", text: "Anrecht auf separaten Raum oder Einzeltisch in einer reizarmen Ecke bei 'Devoirs en classe'." },
+                                        { name: "Ein-Kanal-Prinzip", tag: "Kognitiv", text: "Vermeiden Sie Multitasking (Zuhören + Abschreiben). Geben Sie das Skript aus." },
+                                        { name: "Dunkelmodus", tag: "Digital", text: "Bei digitalen Texten: Lesemodus nutzen, der Werbung/Menüs ausblendet." },
+                                        { name: "Selbstwahl des Platzes", tag: "Autonomie", text: "Lassen Sie den Schüler experimentieren: Arbeitet er besser vorne oder ganz hinten (Überblick)?" }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    inhibition: {
+                        title: "Impulskontrolle & Inhibition",
+                        subtitle: "Die neurologische Bremse",
+                        color: "orange",
+                        icon: "Hand",
+                        desc: "Unfähigkeit, erste Impulse zu stoppen (verbal oder motorisch). Das 'Nein' im Gehirn kommt zu spät.",
+                        patterns: [
+                            {
+                                id: "imp_verbal",
+                                title: "Dazwischenrufen & Unterbrechen",
+                                icon: "MicOff",
+                                behavior: "Antwortet, bevor die Frage zu Ende ist. Kommentiert alles. Platzt in Gespräche.",
+                                neuro_logic: "Der Frontallappen ist für die Inhibition zuständig. Bei ADHS feuert der Impuls (Limbisches System) schneller, als der Frontallappen 'Stopp' senden kann.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Der 'Parkplatz'", tag: "Strategie", text: "Post-it auf dem Tisch. Jeder Gedanke wird als Punkt/Stichwort 'geparkt'. Am Ende der Stunde darf 1 Punkt vorgetragen werden." },
+                                        { name: "Rede-Gegenstand", tag: "Haptik", text: "Nur wer den Ball/Teddy hat, darf sprechen. Der physische Gegenstand erinnert an die Regel." },
+                                        { name: "Response Cost (Token)", tag: "Verhalten", text: "5 Klammern am Pult. Jedes Reinrufen = 1 Klammer weg (wortlos). Bei >2 Restklammern Belohnung." },
+                                        { name: "Geheimzeichen", tag: "Beziehung", text: "Lehrer tippt sich an die Lippe oder auf den Tisch des Schülers. Non-verbale Korrektur." },
+                                        { name: "Murmel-Zeit", tag: "Kanalisierung", text: "Geben Sie offiziell 1 Minute 'Murmelzeit' mit dem Nachbarn, um den Rededruck abzubauen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Schriftliche Teilnahme", tag: "Differenzierung", text: "Schüler darf Kommentare aufschreiben und am Ende abgeben. Zählt zur mündlichen Note." },
+                                        { name: "Selbstinstruktion", tag: "Metakognition", text: "Training des inneren Monologs: 'Stopp. Erst denken. Dann melden.' Visualisierung (Stoppschild) am Mäppchen." },
+                                        { name: "Wartemarken", tag: "Gamification", text: "Schüler erhält 3 'Rede-Joker' pro Stunde. Er muss ökonomisch mit seinen Beiträgen umgehen." },
+                                        { name: "Kurze Auszeit", tag: "Deeskalation", text: "Erlaubnis, kurz vor die Tür zu gehen, tief zu atmen, wenn der Rededrang zu groß wird." },
+                                        { name: "Positives Feedback", tag: "Shaping", text: "Loben Sie explizit das Warten! 'Toll, dass du dich gemeldet und gewartet hast'." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "imp_motor",
+                                title: "Motorische Unruhe (Zappeln)",
+                                icon: "Move",
+                                behavior: "Kippeln, Aufstehen, Trommeln, Dinge kaputt machen (unabsichtlich), rennen.",
+                                neuro_logic: "Bewegung erhöht den Dopaminspiegel und die Wachheit. Das Zappeln ist oft ein unbewusster Versuch der Selbstmedikation.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Legale Bewegung", tag: "Ressource", text: "Geben Sie Ämter: Tafeldienst, Blätter austeilen. Kanalisiert den Drang produktiv." },
+                                        { name: "Theraband am Stuhl", tag: "Ergo", text: "Binden Sie ein dickes Gummiband (Theraband) um die vorderen Stuhlbeine. Das Kind kann dagegen treten." },
+                                        { name: "Knetball / Fidgets", tag: "Sensorik", text: "Erlauben Sie *lautlose* Hand-Tools (Igelball) unter dem Tisch." },
+                                        { name: "Steh-Tisch", tag: "Flexible Seating", text: "Einen Stehtisch oder ein hohes Regal im Raum anbieten, an dem das Kind zeitweise arbeiten darf." },
+                                        { name: "Bewegungs-Gutscheine", tag: "Struktur", text: "3 Karten pro Tag: Darf eingelöst werden für 1x um den Schulhof rennen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Doodle / Kritzeln", tag: "Entlastung", text: "Erlauben Sie das Kritzeln (Doodling) während des Zuhörens. Erhöht die auditive Merkfähigkeit." },
+                                        { name: "Diskrete Fidgets", tag: "Akzeptanz", text: "Spinner-Ringe oder Knetradiergummis tolerieren, solange der Unterricht nicht gestört wird." },
+                                        { name: "Aktive Pausen", tag: "Neurobiologie", text: "Ermutigen Sie den Schüler, in der Pause aufzustehen und sich zu strecken." },
+                                        { name: "Laufzettel", tag: "Verantwortung", text: "Schüler darf offizielle Dokumente zum SePAS/Büro bringen." },
+                                        { name: "Teppichfliesen", tag: "Schallschutz", text: "Filzgleiter unter Stühlen anbringen, damit das Kippeln nicht stört." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    emotion: {
+                        title: "Emotionale Regulation (DESR)",
+                        subtitle: "Defizitäre Emotionale Selbstregulation",
+                        color: "rose",
+                        icon: "HeartCrack",
+                        desc: "Geringe Frustrationstoleranz, Wutanfälle, RSD (Rejection Sensitive Dysphoria).",
+                        patterns: [
+                            {
+                                id: "emo_rage",
+                                title: "Der Vulkanausbruch (Wut)",
+                                icon: "Flame",
+                                behavior: "Explodiert bei Kleinigkeiten (z.B. Fehler, Kritik, Verlieren). Schreien, Werfen, Weinen.",
+                                neuro_logic: "Das limbische System ist hyperaktiv, der Frontallappen unteraktiv. Gefühle überfluten das Gehirn ungefiltert ('Emotional Flooding'). Amygdala-Hijack.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Co-Regulation", tag: "Bindung", text: "Bleiben Sie ruhig. Nicht mit-schreien. Leise, tiefe Stimme nutzen." },
+                                        { name: "Safe Place (Höhle)", tag: "Raum", text: "Ein Bereich (Kuschelecke/Zelt), in den das Kind gehen darf, um sich abzureagieren." },
+                                        { name: "Gefühls-Thermometer", tag: "Psychoedukation", text: "Skala 1-5 visualisieren. Lernen zu spüren: 'Ich bin auf Stufe 3, ich brauche eine Pause'." },
+                                        { name: "Wasser trinken", tag: "Physiologie", text: "Geben Sie ein Glas kaltes Wasser. Das Schlucken unterbricht den Schreireflex." },
+                                        { name: "Spiegeln", tag: "Validation", text: "'Du bist wütend, weil das nicht geklappt hat.' Benennen reduziert die Intensität." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Exit-Pass", tag: "Selbstschutz", text: "Dauerhafte Erlaubnis (im PEI verankert), den Raum wortlos zu verlassen, wenn die Wut kommt." },
+                                        { name: "Kein Publikum", tag: "Status", text: "Klären Sie Konflikte niemals vor der Klasse." },
+                                        { name: "Musik als Anker", tag: "Regulation", text: "Erlaubnis, für 10 Min Musik über Kopfhörer zu hören (Reset)." },
+                                        { name: "Kognitives Reframing", tag: "KVT", text: "In Ruhephasen: Analyse der 'Trigger'. 'War das wirklich ein Angriff?'." },
+                                        { name: "Schriftliche Reflexion", tag: "Verarbeitung", text: "Statt Diskussion: 'Schreib mir auf, was dich so wütend gemacht hat'." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "emo_rsd",
+                                title: "RSD - Empfindlichkeit bei Kritik",
+                                icon: "ShieldAlert",
+                                behavior: "Reagiert auf kleinste Kritik mit tiefer Verzweiflung oder Gegenangriff. Bezieht alles auf sich.",
+                                neuro_logic: "RSD (Rejection Sensitive Dysphoria) ist ein fast körperlicher Schmerz bei (wahrgenommener) Ablehnung.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Sandwich-Feedback", tag: "Kommunikation", text: "Verpacken Sie Korrekturen: Positiv - Korrektur - Positiv." },
+                                        { name: "Geheime Korrektur", tag: "Schutz", text: "Gehen Sie zum Tisch und flüstern Sie die Verbesserung." },
+                                        { name: "Fehler feiern", tag: "Mindset", text: "Etablieren Sie eine Fehlerkultur. 'Fehler sind Helfer'." },
+                                        { name: "Erfolgs-Tagebuch", tag: "Fokus", text: "Am Ende des Tages: 3 Dinge aufschreiben/malen, die gut geklappt haben." },
+                                        { name: "Wachstumssprache", tag: "Mindset", text: "Hängen Sie das Wort 'NOCH' groß auf. 'Ich kann das NICHT... noch nicht'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Sachlichkeit", tag: "Feedback", text: "Trennen Sie Person und Leistung strikt." },
+                                        { name: "Vorwarnung", tag: "Priming", text: "Kündigen Sie Feedback an: 'Es ist keine Kritik an dir'." },
+                                        { name: "Selbstkorrektur", tag: "Autonomie", text: "Geben Sie die Lösungsschablone aus. Lassen Sie den Schüler seine Fehler selbst finden." },
+                                        { name: "Privates Gespräch", tag: "Beziehung", text: "Kritische Gespräche nur unter vier Augen." },
+                                        { name: "Ressourcen-Fokus", tag: "Stärken", text: "Geben Sie Aufgaben im Expertenbereich des Schülers." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    exec: {
+                        title: "Exekutivfunktionen & Organisation",
+                        subtitle: "Der Manager im Kopf",
+                        color: "teal",
+                        icon: "BrainCircuit",
+                        desc: "Arbeitsgedächtnis, Zeitmanagement, Planung und Organisation von Material.",
+                        patterns: [
+                            {
+                                id: "exec_chaos",
+                                title: "Das schwarze Loch (Organisation)",
+                                icon: "Backpack",
+                                behavior: "Vergisst Hausaufgaben, verliert Zettel, Ranzen ist ein Chaos.",
+                                neuro_logic: "Das Arbeitsgedächtnis ist eingeschränkt. Informationen werden nicht lange genug gehalten. Die Fähigkeit zur Strukturierung fehlt.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Farb-System", tag: "TEACCH", text: "Jedes Fach hat EINE Farbe. Konsistenz ist vital." },
+                                        { name: "Der Hausaufgaben-Check", tag: "Routine", text: "Feste Routine 5 Min vor Schluss: Alle packen gemeinsam ein." },
+                                        { name: "Doppeltes Material", tag: "Nachteilsausgleich", text: "Ein Satz Bücher bleibt in der Schule, einer zu Hause." },
+                                        { name: "Foto-Gedächtnis", tag: "Digital", text: "Tafelbild fotografieren statt abschreiben." },
+                                        { name: "Eltern-Heft", tag: "Kooperation", text: "Wöchentlicher Austausch. Fokus auf Orga." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Teams / OneNote", tag: "Digital", text: "Nutzen Sie digitale Plattformen für Hausaufgaben." },
+                                        { name: "Chunking (Stückelung)", tag: "Planung", text: "Geben Sie wöchentliche Deadlines für Teilabschnitte bei großen Projekten." },
+                                        { name: "Body Doubling", tag: "Sozial", text: "Freistunden im SePAS verbringen, wo andere arbeiten." },
+                                        { name: "Checklisten", tag: "Visualisierung", text: "Laminierte 'Pack-Liste' am Rucksack." },
+                                        { name: "Keine losen Blätter", tag: "System", text: "Mappen nutzen, in die man Blätter einfach 'hineinwerfen' kann." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "exec_time",
+                                title: "Zeitblindheit (Time Blindness)",
+                                icon: "Hourglass",
+                                behavior: "Trödelt, wird nicht fertig, verschätzt sich massiv bei der Zeitdauer.",
+                                neuro_logic: "Kein inneres Gefühl für das Verstreichen von Zeit. Zeit muss 'physisch' sichtbar gemacht werden.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Time-Timer", tag: "Visualisierung", text: "Eine Uhr, die die restliche Zeit als rote Scheibe anzeigt." },
+                                        { name: "Musik-Timer", tag: "Auditiv", text: "'Wir räumen auf, solange das Lied läuft'." },
+                                        { name: "Start-Hilfe", tag: "Aktivierung", text: "Helfen Sie bei der ersten Aufgabe (Hürde nehmen)." },
+                                        { name: "Reduzierte Menge", tag: "Differenzierung", text: "Streichen Sie Aufgaben. Qualität vor Quantität." },
+                                        { name: "Pausen-Gong", tag: "Struktur", text: "Akustisches Signal für Phasenwechsel nutzen." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Externe Wecker", tag: "App", text: "Vibrationsalarme auf Smartwatch/Handy erlauben." },
+                                        { name: "Realistische Planung", tag: "Metakognition", text: "Vorher schätzen lassen: 'Wie lange brauchst du?'. Dann stoppen." },
+                                        { name: "Tiers-temps", tag: "Formal", text: "33% Zeitzuschlag bei Prüfungen." },
+                                        { name: "Pomodoro-Technik", tag: "Methodik", text: "25 Min arbeiten, 5 Min Pause." },
+                                        { name: "Uhr im Blickfeld", tag: "Raum", text: "Platz mit Blick auf die Wanduhr." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            fr: {
+                ui: {
+                    title: "PsyNavi: Expert TDAH",
+                    subtitle: "Édition Luxembourg",
+                    levels: "Fondamental & Secondaire",
+                    back: "Retour à l'aperçu",
+                    print: "PDF / Imprimer",
+                    sources: "Sources : Barkley, Brown, Hallowell, Standards SePAS.",
+                    noteTitle: "Note Professionnelle :",
+                    noteText: "Les interventions dans ce domaine nécessitent de la patience (maturation du cortex préfrontal). Utilisez ces stratégies pour le PEI.",
+                    symptomsTitle: "Modèles de comportement spécifiques",
+                    strategiesBtn: "Voir les stratégies",
+                    headerTitle: "Le TDAH en contexte scolaire",
+                    headerSubtitle: "Une boîte à outils méthodologique professionnelle pour les 6 domaines des fonctions exécutives. Pour les enseignants, le SePAS & l'ESEB.",
+                    tabPrimary: "Fondamental (C1-C4)",
+                    tabSecondary: "Secondaire (ESC/ESG)",
+                    interventionsTitle: "Interventions professionnelles & Aménagements",
+                    neuroLogicTitle: "La Neuro-Logique (Psychoéducation)",
+                    footer: "Outil Expert TDAH Luxembourg | © 2024 PsyNavi"
+                },
+                data: {
+                    attention: {
+                        title: "Focus & Attention",
+                        subtitle: "Régulation du projecteur attentionnel",
+                        color: "amber",
+                        icon: "Focus",
+                        desc: "Difficultés à maintenir l'attention (Sustained Attention) ou à la déplacer consciemment (Shifting).",
+                        patterns: [
+                            {
+                                id: "att_hypo",
+                                title: "Hypoactivité & Rêverie (SCT)",
+                                icon: "CloudFog",
+                                behavior: "L'élève semble absent, regarde dans le vide, réagit avec retard, 'Slow Processing Speed'.",
+                                neuro_logic: "Les cerveaux TDAH hypoactifs souffrent d'un 'sous-éveil' chronique. Le cortex reçoit trop peu de stimulation. Le cerveau passe en mode économie d'énergie (Default Mode Network).",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Ancrage Tactile", tag: "Sensoriel", text: "Touchez brièvement la table ou l'épaule de l'enfant. Le stimulus tactile interrompt la rêverie." },
+                                        { name: "Pression du Sablier", tag: "Dopamine", text: "Utilisez un sablier de 5 min. La pression du temps génère de la noradrénaline." },
+                                        { name: "Assise Active", tag: "Ergo", text: "Autoriser le ballon d'assise ou le coussin à picots (galette). Maintient le sens vestibulaire actif." },
+                                        { name: "Co-Pilotage (Pairs)", tag: "Coopération", text: "Le voisin de table agit comme 'copilote' pour les changements de cahier." },
+                                        { name: "Multisensoriel", tag: "Apprentissage", text: "Laissez l'enfant se tenir debout pour apprendre ou prononcer à voix haute." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Notes Numériques", tag: "Aménagement", text: "Taper sur ordinateur/iPad est plus stimulant motricement que l'écriture manuelle." },
+                                        { name: "Eau Froide / Chewing-gum", tag: "Physiologie", text: "Autorisation de mâcher du chewing-gum ou de boire de l'eau froide." },
+                                        { name: "Binôme de Prise de Notes", tag: "Inclusion", text: "Aménagement officiel : l'élève peut photographier le tableau ou les cahiers." },
+                                        { name: "Technique Cold-Call", tag: "Gestion", text: "Posez la question à toute la classe, attendez, PUIS nommez l'élève." },
+                                        { name: "App Visual Timer", tag: "Autogestion", text: "Utilisation d'une application Timer pour visualiser les phases de travail." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "att_distract",
+                                title: "Distractibilité par stimuli externes",
+                                icon: "EyeOff",
+                                behavior: "Chaque bruit, chaque mouvement à la fenêtre interrompt le travail. La tête se détourne constamment.",
+                                neuro_logic: "Le TDAH n'est pas un déficit d'attention, mais une faiblesse de filtrage. Le thalamus ne trie pas 'Important' vs 'Non important'.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Le 'Bureau' (Cloisons)", tag: "Isolation", text: "Paravents en carton à poser. Cadrage : 'Cockpit de pilote'." },
+                                        { name: "Casque Antibruit", tag: "Outil", text: "Faire porter un casque (coquilles) pendant les phases de travail silencieux." },
+                                        { name: "Ingénierie des Places", tag: "Gestion", text: "Zone T (Devant au milieu). Dos à la classe, loin des fenêtres." },
+                                        { name: "Politique Clean Desk", tag: "Réduction", text: "Seulement le cahier et la trousse sur la table." },
+                                        { name: "Focus Couleur", tag: "Visuel", text: "Marquez sur la fiche de travail avec un surligneur fluo où commencer." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Noise-Cancelling", tag: "Accessibilité", text: "Autorisation de porter ses propres écouteurs ANC (sans musique)." },
+                                        { name: "Isolement Examens", tag: "Aménagement", text: "Droit à une salle séparée ou une table individuelle lors des devoirs en classe." },
+                                        { name: "Principe Canal Unique", tag: "Cognitif", text: "Évitez le multitâche (écouter + copier). Distribuez le script." },
+                                        { name: "Mode Sombre", tag: "Numérique", text: "Utiliser le mode lecture qui cache les pubs/menus." },
+                                        { name: "Choix de la place", tag: "Autonomie", text: "Laissez l'élève expérimenter sa place idéale." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    inhibition: {
+                        title: "Contrôle de l'impulsivité",
+                        subtitle: "Le frein neurologique",
+                        color: "orange",
+                        icon: "Hand",
+                        desc: "Incapacité à stopper les premières impulsions (verbales ou motrices). Le 'Non' du cerveau arrive trop tard.",
+                        patterns: [
+                            {
+                                id: "imp_verbal",
+                                title: "Interruption verbale & Parole",
+                                icon: "MicOff",
+                                behavior: "Répond avant la fin de la question. Commente tout. Intervient dans les conversations.",
+                                neuro_logic: "Le lobe frontal est responsable de l'inhibition. L'impulsion se déclenche plus vite que le lobe frontal ne peut envoyer 'Stop'.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Le 'Parking'", tag: "Stratégie", text: "Post-it sur la table pour 'garer' les pensées." },
+                                        { name: "Bâton de parole", tag: "Haptique", text: "Seul celui qui tient l'objet peut parler." },
+                                        { name: "Coût de la Réponse", tag: "Comportement", text: "Système de pinces. Chaque interruption coûte une pince." },
+                                        { name: "Signe Secret", tag: "Relation", text: "Correction non-verbale par l'enseignant." },
+                                        { name: "Temps de Murmure", tag: "Canalisation", text: "1 minute de 'temps de murmure' officiel avec le voisin." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Participation Écrite", tag: "Différenciation", text: "L'élève peut noter ses commentaires et les rendre à la fin." },
+                                        { name: "Auto-Instruction", tag: "Métacognition", text: "Entraînement du monologue intérieur : 'Stop. D'abord penser.'." },
+                                        { name: "Jokers de Parole", tag: "Gamification", text: "3 'Jokers Parole' par heure pour apprendre à prioriser." },
+                                        { name: "Courte Pause", tag: "Désescalade", text: "Autorisation de sortir brièvement si l'envie de parler est trop forte." },
+                                        { name: "Feedback Positif", tag: "Shaping", text: "Félicitez explicitement l'attente !" }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "imp_motor",
+                                title: "Agitation Motrice (Bougeotte)",
+                                icon: "Move",
+                                behavior: "Se balance, se lève, tapote, casse des choses (involontairement), court.",
+                                neuro_logic: "Le mouvement augmente le niveau de dopamine. L'agitation est une tentative d'automédication.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Mouvement Légal", tag: "Ressource", text: "Donnez des responsabilités : effacer le tableau, distribuer." },
+                                        { name: "Theraband sur chaise", tag: "Ergo", text: "Bande élastique aux pieds de la chaise pour pousser contre." },
+                                        { name: "Fidgets", tag: "Sensoriel", text: "Autorisez les outils manuels *silencieux* sous la table." },
+                                        { name: "Bureau Debout", tag: "Flexible", text: "Proposer une table haute pour travailler debout." },
+                                        { name: "Bons de Mouvement", tag: "Structure", text: "Cartes échangeables pour courir 1x autour de la cour." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Doodle / Gribouillage", tag: "Cognitif", text: "Autorisez le gribouillage pendant l'écoute." },
+                                        { name: "Fidgets Discrets", tag: "Acceptation", text: "Tolérer les bagues rotatives ou gommes à malaxer." },
+                                        { name: "Pauses Actives", tag: "Neurobiologie", text: "Encouragez l'élève à se lever pendant la pause." },
+                                        { name: "Messager", tag: "Responsabilité", text: "L'élève peut apporter des documents au SePAS." },
+                                        { name: "Patins en feutre", tag: "Son", text: "Pour que le balancement ne dérange pas acoustiquement." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    emotion: {
+                        title: "Régulation Émotionnelle (DESR)",
+                        subtitle: "Déficit de Régulation Émotionnelle",
+                        color: "rose",
+                        icon: "HeartCrack",
+                        desc: "Faible tolérance à la frustration, crises de colère, RSD (Dysphorie Sensible au Rejet).",
+                        patterns: [
+                            {
+                                id: "emo_rage",
+                                title: "L'Éruption Volcanique (Colère)",
+                                icon: "Flame",
+                                behavior: "Explose pour des détails. Cris, jets d'objets, pleurs.",
+                                neuro_logic: "Le système limbique est hyperactif, le lobe frontal sous-actif. 'Emotional Flooding'.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Co-Régulation", tag: "Attachement", text: "Restez calme. Voix basse et grave." },
+                                        { name: "Safe Place (Refuge)", tag: "Espace", text: "Une zone où l'enfant peut aller pour se calmer." },
+                                        { name: "Thermomètre", tag: "Psychoéducation", text: "Visualiser l'échelle 1-5 des émotions." },
+                                        { name: "Boire de l'eau", tag: "Physiologie", text: "Donnez un verre d'eau froide. Interrompt le réflexe de cri." },
+                                        { name: "Refléter", tag: "Validation", text: "'Tu es en colère parce que ça n'a pas marché.'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Carte de Sortie", tag: "Protection", text: "Permission de quitter la salle sans mot dire quand la colère monte." },
+                                        { name: "Pas de Public", tag: "Statut", text: "Ne réglez jamais les conflits devant la classe." },
+                                        { name: "Musique Ancre", tag: "Régulation", text: "Autorisation d'écouter de la musique 10 min (Reset)." },
+                                        { name: "Recadrage", tag: "TCC", text: "Analyse des 'déclencheurs' au calme." },
+                                        { name: "Réflexion Écrite", tag: "Traitement", text: "'Écris-moi ce qui t'a mis si en colère'." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "emo_rsd",
+                                title: "RSD - Sensibilité à la Critique",
+                                icon: "ShieldAlert",
+                                behavior: "Réagit à la moindre critique par un profond désespoir ou contre-attaque.",
+                                neuro_logic: "La RSD est une douleur quasi physique lors d'un rejet perçu.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Feedback Sandwich", tag: "Communication", text: "Positif - Correction - Positif." },
+                                        { name: "Correction Secrète", tag: "Protection", text: "Chuchotez l'amélioration à la table." },
+                                        { name: "Célébrer les erreurs", tag: "Mindset", text: "'Les erreurs sont des aides'." },
+                                        { name: "Journal des Succès", tag: "Focus", text: "3 choses qui ont bien marché aujourd'hui." },
+                                        { name: "Langage 'Encore'", tag: "Mindset", text: "'Je ne sais pas faire ça... pas encore'." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Objectivité", tag: "Feedback", text: "Séparez strictement la personne et la performance." },
+                                        { name: "Préavis", tag: "Amorçage", text: "Annoncez le feedback comme une aide, pas une critique." },
+                                        { name: "Autocorrection", tag: "Autonomie", text: "Distribuez le correctif pour qu'il trouve ses fautes lui-même." },
+                                        { name: "Entretien Privé", tag: "Relation", text: "Discussions critiques seulement en tête-à-tête." },
+                                        { name: "Focus Forces", tag: "Ressource", text: "Donnez des tâches dans son domaine d'expertise." }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    exec: {
+                        title: "Fonctions Exécutives & Organisation",
+                        subtitle: "Le manager dans la tête",
+                        color: "teal",
+                        icon: "BrainCircuit",
+                        desc: "Mémoire de travail, gestion du temps, planification et organisation du matériel.",
+                        patterns: [
+                            {
+                                id: "exec_chaos",
+                                title: "Le Trou Noir (Organisation)",
+                                icon: "Backpack",
+                                behavior: "Oublie les devoirs, perd les feuilles, cartable chaotique.",
+                                neuro_logic: "Mémoire de travail limitée. Capacité de structuration manquante.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Code Couleur", tag: "TEACCH", text: "Chaque matière a UNE couleur." },
+                                        { name: "Check Devoirs", tag: "Routine", text: "Tout le monde range ensemble 5 min avant la fin." },
+                                        { name: "Double Matériel", tag: "Aménagement", text: "Un jeu de livres à l'école, un à la maison." },
+                                        { name: "Mémoire Photo", tag: "Numérique", text: "Photographier le tableau avec la tablette." },
+                                        { name: "Cahier de liaison", tag: "Coopération", text: "Échange hebdomadaire sur l'organisation." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Teams / OneNote", tag: "Numérique", text: "Utilisez les plateformes numériques pour les devoirs." },
+                                        { name: "Chunking", tag: "Planification", text: "4 deadlines hebdomadaires au lieu d'une seule lointaine." },
+                                        { name: "Body Doubling", tag: "Social", text: "Travailler au SePAS en présence d'autres." },
+                                        { name: "Checklists", tag: "Visuel", text: "'Liste de bagages' plastifiée sur le sac." },
+                                        { name: "Pas de feuilles volantes", tag: "Système", text: "Chemises à rabats au lieu de classeurs." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: "exec_time",
+                                title: "Cécité Temporelle (Time Blindness)",
+                                icon: "Hourglass",
+                                behavior: "Traîne, ne finit pas, estime mal la durée.",
+                                neuro_logic: "Pas de sentiment interne pour le temps. Le temps doit être visible.",
+                                solutions: {
+                                    fondamental: [
+                                        { name: "Time-Timer", tag: "Visuel", text: "Horloge avec disque rouge pour le temps restant." },
+                                        { name: "Timer Musical", tag: "Auditif", text: "Ranger tant que la musique joue." },
+                                        { name: "Aide au Démarrage", tag: "Activation", text: "Aidez pour la toute première tâche." },
+                                        { name: "Quantité Réduite", tag: "Différenciation", text: "Faire un numéro sur deux. Qualité avant quantité." },
+                                        { name: "Gong de Pause", tag: "Structure", text: "Signal acoustique pour les transitions." }
+                                    ],
+                                    secondaire: [
+                                        { name: "Réveils Externes", tag: "App", text: "Alarmes vibrantes autorisées." },
+                                        { name: "Planification Réaliste", tag: "Métacognition", text: "Estimation vs Réalité (Chronométrage)." },
+                                        { name: "Tiers-temps", tag: "Formal", text: "33% de temps supplémentaire aux examens." },
+                                        { name: "Pomodoro", tag: "Methodik", text: "25 min travail, 5 min pause." },
+                                        { name: "Horloge en vue", tag: "Espace", text: "Placer l'élève face à l'horloge." }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const DomainCard = ({ id, data, onClick, ui }) => (
+            <button 
+                onClick={() => onClick(id)} 
+                className={`text-left group w-full bg-white rounded-2xl border-2 border-${data.color}-100 p-6 hover:border-${data.color}-500 card-hover relative overflow-hidden h-full flex flex-col shadow-sm`}
+            >
+                <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${data.color}-50 rounded-full group-hover:scale-150 transition-transform duration-500`}></div>
+                
+                <div className="relative z-10 flex items-start justify-between mb-4">
+                    <div className={`p-3 bg-${data.color}-100 text-${data.color}-700 rounded-xl shadow-inner`}>
+                        <Icon name={data.icon} size={32} />
+                    </div>
+                </div>
+                
+                <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{data.title}</h3>
+                    <p className={`text-xs font-bold text-${data.color}-600 uppercase tracking-wider mb-3`}>{data.subtitle}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">{data.desc}</p>
+                </div>
+
+                <div className={`mt-auto pt-4 border-t border-slate-100 flex items-center text-${data.color}-600 font-bold text-sm group-hover:gap-2 transition-all`}>
+                    {ui.strategiesBtn} <Icon name="ArrowRight" size={16} className="ml-1" />
+                </div>
+            </button>
+        );
+
+        const SymptomItem = ({ item, color, onClick }) => (
+            <div 
+                onClick={onClick} 
+                className={`bg-white p-5 rounded-xl border border-slate-200 cursor-pointer hover:border-${color}-500 hover:shadow-lg transition-all group relative overflow-hidden`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-400 group-hover:bg-${color}-600 transition-colors`}></div>
+                <div className="flex items-start gap-4 pl-2">
+                    <div className={`p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-${color}-600 transition-colors`}>
+                        <Icon name={item.icon} size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">{item.behavior}</p>
+                    </div>
+                    <div className="ml-auto self-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                        <Icon name="ChevronRight" className={`text-${color}-500`} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DetailModal = ({ item, domain, onClose, ui, lang }) => {
+            const [activeTab, setActiveTab] = useState('fondamental');
+
+            const handlePrint = () => {
+                const element = document.getElementById('printable-area');
+                const opt = {
+                    margin: 15,
+                    filename: `ADHS_Expert_${lang}_${item.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                window.html2pdf().set(opt).from(element).save();
+            };
+
+            const solutions = item.solutions[activeTab] || [];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl animate-fade-in my-8 flex flex-col max-h-[95vh]">
+                        
+                        {/* Header */}
+                        <div className={`bg-gradient-to-r from-${domain.color}-500 to-${domain.color}-600 p-6 rounded-t-2xl text-white flex justify-between items-start shrink-0 shadow-md`}>
+                            <div>
+                                <div className="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-2">
+                                    <Icon name={domain.icon} size={14}/> {domain.title}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-black leading-tight flex items-center gap-3">
+                                    {item.title}
+                                </h2>
+                            </div>
+                            <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors text-white">
+                                <Icon name="X" size={24} />
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-3 bg-slate-50 border-b border-slate-200 flex gap-2 shrink-0 no-print overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('fondamental')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'fondamental' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="School" size={18} /> {ui.tabPrimary}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('secondaire')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${activeTab === 'secondaire' ? `bg-white text-${domain.color}-700 shadow-sm ring-1 ring-${domain.color}-300` : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <Icon name="GraduationCap" size={18} /> {ui.tabSecondary}
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div id="printable-area" className="p-8 overflow-y-auto bg-white flex-grow">
+                            {/* Print Header */}
+                            <div className="hidden print:block mb-6 border-b pb-4">
+                                <h1 className="text-3xl font-bold text-slate-900">{ui.title}</h1>
+                                <p className="text-sm text-slate-500">{item.title} | {activeTab === 'fondamental' ? ui.tabPrimary : ui.tabSecondary}</p>
+                            </div>
+
+                            {/* Neuro-Logic Box */}
+                            <div className={`mb-8 bg-${domain.color}-50 rounded-xl p-6 border-l-4 border-${domain.color}-500 relative print:border-slate-300 print:bg-white`}>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`bg-${domain.color}-100 p-1.5 rounded-lg text-${domain.color}-700`}>
+                                        <Icon name="BrainCircuit" size={20} />
+                                    </div>
+                                    <h3 className={`text-${domain.color}-900 font-bold text-lg`}>{ui.neuroLogicTitle}</h3>
+                                </div>
+                                <p className="text-slate-800 leading-relaxed font-medium">
+                                    {item.neuro_logic}
+                                </p>
+                            </div>
+
+                            {/* Interventionen */}
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b pb-2">
+                                <Icon name="Wrench" className={`text-${domain.color}-600`} /> 
+                                {ui.interventionsTitle}
+                            </h3>
+
+                            <div className="grid gap-6">
+                                {solutions.map((sol, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full bg-${domain.color}-100 text-${domain.color}-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0`}>
+                                                {idx + 1}
+                                            </div>
+                                            {idx !== solutions.length - 1 && <div className="w-0.5 flex-grow bg-slate-100 my-1 group-hover:bg-${domain.color}-100 transition-colors"></div>}
+                                        </div>
+                                        <div className="pb-2">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 text-lg">{sol.name}</h4>
+                                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full border border-slate-200">
+                                                    {sol.tag}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 leading-relaxed text-base">
+                                                {sol.text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="hidden print:block mt-8 pt-4 border-t text-xs text-slate-400">
+                                {ui.footer}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t bg-slate-50 rounded-b-2xl flex justify-between items-center shrink-0 no-print">
+                            <span className="text-xs text-slate-400 font-medium">
+                                {ui.sources}
+                            </span>
+                            <button 
+                                onClick={handlePrint}
+                                className={`px-6 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold flex items-center gap-2 shadow-lg transition-all`}
+                            >
+                                <Icon name="Printer" size={18} /> {ui.print}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [lang, setLang] = useState('de'); // 'de' or 'fr'
+            const [currentDomainId, setCurrentDomainId] = useState(null);
+            const [currentSymptom, setCurrentSymptom] = useState(null);
+
+            const handleDomainSelect = (id) => {
+                setCurrentDomainId(id);
+                setView('domain');
+                window.scrollTo(0,0);
+            };
+
+            const handleBack = () => {
+                setView('home');
+                setCurrentDomainId(null);
+            };
+
+            const toggleLang = () => {
+                setLang(prev => prev === 'de' ? 'fr' : 'de');
+            };
+
+            const currentContent = content[lang];
+            const currentData = currentContent.data;
+            const currentDomain = currentDomainId ? currentData[currentDomainId] : null;
+
+            return (
+                <div className="min-h-screen pb-12 bg-[#fff7ed] pattern-grid">
+                    {/* Header */}
+                    <nav className="bg-white/90 backdrop-blur-md border-b border-orange-100 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={handleBack}>
+                                <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="Zap" size={20} />
+                                </div>
+                                <span className="font-black text-slate-900 text-xl tracking-tight hidden md:inline">PsyNavi: <span className="text-orange-600">{currentContent.ui.uiTitle || "Expert"}</span></span>
+                                <span className="font-black text-slate-900 text-xl tracking-tight md:hidden">PsyNavi</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button 
+                                    onClick={toggleLang}
+                                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full font-bold text-sm transition-colors border border-slate-200"
+                                >
+                                    <span className={lang === 'de' ? "text-slate-900" : "text-slate-400"}>DE</span>
+                                    <span className="text-slate-300">|</span>
+                                    <span className={lang === 'fr' ? "text-slate-900" : "text-slate-400"}>FR</span>
+                                </button>
+
+                                <div className="hidden md:flex gap-3">
+                                    <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-bold border border-orange-100">{currentContent.ui.edition}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">{currentContent.ui.levels}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="max-w-7xl mx-auto px-4 pt-10">
+                        {/* HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="animate-fade-in">
+                                <header className="text-center mb-16 max-w-3xl mx-auto">
+                                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                                        {currentContent.ui.headerTitle}<span className="text-orange-500">.</span>
+                                    </h1>
+                                    <p className="text-lg text-slate-600 leading-relaxed">
+                                        {currentContent.ui.headerSubtitle}
+                                    </p>
+                                </header>
+
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                    {Object.entries(currentData).map(([key, data]) => (
+                                        <DomainCard key={key} id={key} data={data} onClick={handleDomainSelect} ui={currentContent.ui} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DOMAIN VIEW */}
+                        {view === 'domain' && currentDomain && (
+                            <div className="animate-fade-in">
+                                <button 
+                                    onClick={handleBack} 
+                                    className="mb-8 flex items-center gap-2 text-slate-500 hover:text-orange-600 font-bold transition-colors inline-flex px-4 py-2 hover:bg-white rounded-lg"
+                                >
+                                    <Icon name="ArrowLeft" size={20} /> {currentContent.ui.back}
+                                </button>
+
+                                <div className="grid lg:grid-cols-12 gap-8">
+                                    {/* Sidebar */}
+                                    <div className="lg:col-span-4">
+                                        <div className={`bg-gradient-to-br from-${currentDomain.color}-500 to-${currentDomain.color}-600 text-white rounded-3xl p-8 shadow-2xl sticky top-28`}>
+                                            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner">
+                                                <Icon name={currentDomain.icon} size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-black mb-2">{currentDomain.title}</h2>
+                                            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-6">{currentDomain.subtitle}</p>
+                                            <p className="text-white/90 leading-relaxed mb-8">{currentDomain.desc}</p>
+                                            
+                                            <div className="bg-black/10 rounded-xl p-4 border border-white/10">
+                                                <div className="flex items-center gap-2 font-bold mb-2 text-sm">
+                                                    <Icon name="Info" size={16}/> {currentContent.ui.noteTitle}
+                                                </div>
+                                                <p className="text-xs text-white/80 leading-relaxed">
+                                                    {currentContent.ui.noteText}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <span className={`bg-${currentDomain.color}-100 text-${currentDomain.color}-600 p-2 rounded-lg`}>
+                                                <Icon name="List" size={20} />
+                                            </span>
+                                            {currentContent.ui.symptomsTitle}
+                                        </h3>
+                                        {currentDomain.patterns.map(item => (
+                                            <SymptomItem 
+                                                key={item.id} 
+                                                item={item} 
+                                                color={currentDomain.color} 
+                                                onClick={() => setCurrentSymptom(item)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MODAL */}
+                    {currentSymptom && currentDomain && (
+                        <DetailModal 
+                            item={currentSymptom} 
+                            domain={currentDomain} 
+                            onClose={() => setCurrentSymptom(null)}
+                            ui={currentContent.ui}
+                            lang={lang}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
