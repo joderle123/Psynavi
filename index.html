@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Jahresreise 2025 ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #14b8a6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e1b4b;
+            --light: #f8fafc;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-5);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover {
+            background: rgba(255,255,255,0.6);
+            transform: scale(1.2);
+        }
+
+        .nav-dot.active {
+            background: var(--secondary);
+            box-shadow: 0 0 20px var(--secondary);
+        }
+
+        .nav-dot.completed {
+            background: var(--success);
+        }
+
+        .nav-dot::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+
+        /* Sections */
+        .section {
+            min-height: 100vh;
+            display: none;
+            padding: 40px 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: var(--gradient-5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-success {
+            background: var(--gradient-4);
+            color: #1a1a2e;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        textarea.input-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Welcome Section */
+        #welcome .logo {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-item .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Mindfulness Section */
+        .breathing-circle {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: var(--gradient-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            animation: breathe 8s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(79, 172, 254, 0.5);
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .breathing-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .mood-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            background: rgba(255,255,255,0.1);
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mood-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.2);
+        }
+
+        .mood-btn.selected {
+            border-color: var(--secondary);
+            background: rgba(236, 72, 153, 0.3);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+        }
+
+        /* Timeline Section */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            width: 45%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:nth-child(odd) {
+            margin-left: 5%;
+        }
+
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+        }
+
+        .timeline-item:hover {
+            transform: scale(1.02);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .timeline-item.active {
+            border: 2px solid var(--secondary);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -32px;
+        }
+
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -32px;
+        }
+
+        .quarter-label {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        /* Skills Section */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .skill-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-5px);
+        }
+
+        .skill-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .skill-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .skill-slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .skill-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--gradient-5);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(250, 112, 154, 0.5);
+        }
+
+        .skill-value {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Emotions Section */
+        .emotion-map {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .emotion-bubble {
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            user-select: none;
+        }
+
+        .emotion-bubble:hover {
+            transform: scale(1.05);
+        }
+
+        .emotion-bubble.selected {
+            box-shadow: 0 0 25px currentColor;
+            transform: scale(1.1);
+        }
+
+        .emotion-positive { background: rgba(34, 197, 94, 0.3); color: #4ade80; }
+        .emotion-negative { background: rgba(239, 68, 68, 0.3); color: #f87171; }
+        .emotion-neutral { background: rgba(251, 191, 36, 0.3); color: #fbbf24; }
+        .emotion-complex { background: rgba(168, 85, 247, 0.3); color: #c084fc; }
+
+        .selected-emotions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            min-height: 50px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+        }
+
+        .emotion-tag {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: var(--gradient-2);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .emotion-tag .remove {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .emotion-tag .remove:hover {
+            opacity: 1;
+        }
+
+        /* Success Gallery */
+        .success-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .success-item {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .success-number {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            flex-shrink: 0;
+        }
+
+        .success-content {
+            flex: 1;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .star {
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            opacity: 0.3;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star.active {
+            opacity: 1;
+            text-shadow: 0 0 20px #fbbf24;
+        }
+
+        /* Challenge Mountain */
+        .mountain-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .mountain-svg {
+            width: 100%;
+        }
+
+        .challenge-cards {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .challenge-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(251, 191, 36, 0.2));
+            border-radius: 20px;
+            padding: 25px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .challenge-card h4 {
+            color: var(--warning);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Gratitude Garden */
+        .garden-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(180deg, transparent 0%, rgba(34, 197, 94, 0.1) 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        .flower:hover {
+            transform: scale(1.3);
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .gratitude-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gratitude-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .gratitude-tag {
+            padding: 10px 20px;
+            background: var(--gradient-4);
+            color: #1a1a2e;
+            border-radius: 25px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Letter Section */
+        .letter-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        .letter-header {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .letter-textarea {
+            width: 100%;
+            min-height: 250px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-family: 'Quicksand', sans-serif;
+            line-height: 1.8;
+            resize: none;
+        }
+
+        .letter-textarea:focus {
+            outline: none;
+        }
+
+        .letter-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .letter-prompt {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .letter-prompt:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Group Activity */
+        .message-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .message-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .message-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .message-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 15px;
+        }
+
+        .message-name {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Certificate */
+        .certificate {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            color: #1a1a2e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 3px solid #d97706;
+            border-radius: 15px;
+        }
+
+        .certificate-badge {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .certificate-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .certificate-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d97706, #b45309);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+
+        .certificate-text {
+            font-size: 1.1rem;
+            color: #78350f;
+            margin-bottom: 30px;
+        }
+
+        .certificate-date {
+            font-size: 1rem;
+            color: #92400e;
+            font-weight: 500;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Timer */
+        .timer-display {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card {
+                padding: 25px;
+            }
+
+            .card-title {
+                font-size: 1.8rem;
+            }
+
+            .timeline-item {
+                width: 80%;
+                margin-left: 10% !important;
+            }
+
+            .timeline::before {
+                left: 10px;
+            }
+
+            .timeline-dot {
+                left: -25px !important;
+                right: auto !important;
+            }
+
+            .emotion-map {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-dots {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Audio Player */
+        .audio-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .audio-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Quote styling */
+        .quote-box {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            margin: 20px 0;
+            font-style: italic;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .quote-author {
+            margin-top: 10px;
+            font-style: normal;
+            font-weight: 600;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- Timer Display -->
+    <div class="timer-display" id="timer">
+        <span>⏱️</span>
+        <span id="timerText">00:00</span>
+    </div>
+
+    <!-- ==================== SECTION 1: WELCOME ==================== -->
+    <section class="section active" id="welcome">
+        <div class="card">
+            <div class="logo">🌟</div>
+            <h1 class="card-title">DBT Jahresreise 2025</h1>
+            <p class="card-subtitle">Eine interaktive Reflexion zum Jahresabschluss</p>
+
+            <div class="welcome-features">
+                <div class="feature-item">
+                    <div class="icon">🧘</div>
+                    <div>Achtsamkeit</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📅</div>
+                    <div>Zeitreise</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">💪</div>
+                    <div>Skills-Check</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🎯</div>
+                    <div>Erfolge</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🌸</div>
+                    <div>Dankbarkeit</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">✉️</div>
+                    <div>Brief an dich</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="userName">Wie heisst du?</label>
+                <input type="text" id="userName" class="input-field" placeholder="Dein Vorname..." maxlength="30">
+            </div>
+
+            <div class="quote-box">
+                "Das Leben ist eine Reise, keine Destination. Geniesse den Moment."
+                <div class="quote-author">— Ralph Waldo Emerson</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="startJourney()">
+                    Reise starten 🚀
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 2: MINDFULNESS ==================== -->
+    <section class="section" id="mindfulness">
+        <div class="card">
+            <h2 class="card-title">🧘 Achtsamkeits-Check-In</h2>
+            <p class="card-subtitle">Bevor wir starten, nimm dir einen Moment für dich selbst.</p>
+
+            <div class="breathing-circle" id="breathingCircle">
+                <span class="breathing-text" id="breathingText">Einatmen...</span>
+            </div>
+
+            <p style="text-align: center; margin: 20px 0; opacity: 0.8;">
+                Atme mit dem Kreis: Wenn er grösser wird, atme ein. Wenn er kleiner wird, atme aus.
+            </p>
+
+            <div class="input-group" style="margin-top: 30px;">
+                <label>Wie fühlst du dich gerade? Wähle ein oder mehrere Emojis:</label>
+                <div class="mood-selector">
+                    <button class="mood-btn" data-mood="super">😄</button>
+                    <button class="mood-btn" data-mood="gut">🙂</button>
+                    <button class="mood-btn" data-mood="neutral">😐</button>
+                    <button class="mood-btn" data-mood="müde">😴</button>
+                    <button class="mood-btn" data-mood="nervös">😰</button>
+                    <button class="mood-btn" data-mood="nachdenklich">🤔</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="mindfulnessNote">Was beschäftigt dich gerade? (optional)</label>
+                <textarea id="mindfulnessNote" class="input-field" placeholder="Schreibe kurz auf, was dir durch den Kopf geht..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 3: TIMELINE ==================== -->
+    <section class="section" id="timeline">
+        <div class="card">
+            <h2 class="card-title">📅 Zeitreise durch 2025</h2>
+            <p class="card-subtitle">Klicke auf die Quartale und notiere wichtige Momente.</p>
+
+            <div class="timeline">
+                <div class="timeline-item" data-quarter="q1">
+                    <div class="timeline-dot"></div>
+                    <div class="quarter-label">Januar - März</div>
+                    <p>Wie hast du das Jahr begonnen?</p>
+                    <textarea class="input-field" id="q1-input" placeholder="Was war wichtig? Was hast du erlebt?"></textarea>
+                </div>
+
+                <div class="timeline-item" data-quarter="q2">
+                    <div class="timeline-dot"></div>
+                    <div class="quarter-label">April - Juni</div>
+                    <p>Der Frühling brachte...</p>
+                    <textarea class="input-field" id="q2-input" placeholder="Welche Veränderungen gab es?"></textarea>
+                </div>
+
+                <div class="timeline-item" data-quarter="q3">
+                    <div class="timeline-dot"></div>
+                    <div class="quarter-label">Juli - September</div>
+                    <p>Der Sommer war geprägt von...</p>
+                    <textarea class="input-field" id="q3-input" placeholder="Ferien? Erlebnisse? Entwicklungen?"></textarea>
+                </div>
+
+                <div class="timeline-item" data-quarter="q4">
+                    <div class="timeline-dot"></div>
+                    <div class="quarter-label">Oktober - Dezember</div>
+                    <p>Das Jahr neigt sich dem Ende...</p>
+                    <textarea class="input-field" id="q4-input" placeholder="Wie geht es dir jetzt? Was hat sich verändert?"></textarea>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 4: SKILLS ==================== -->
+    <section class="section" id="skills">
+        <div class="card">
+            <h2 class="card-title">💪 Dein Skills-Inventar</h2>
+            <p class="card-subtitle">Wie gut beherrschst du diese DBT-Skills? Bewerte dich selbst von 1-10.</p>
+
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: var(--gradient-3);">🧘</div>
+                        <div class="skill-name">Achtsamkeit</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Im Hier und Jetzt sein, ohne zu urteilen</p>
+                    <input type="range" class="skill-slider" id="skill-achtsamkeit" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-achtsamkeit-value">5</span>/10</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: var(--gradient-2);">😤</div>
+                        <div class="skill-name">Stresstoleranz</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Krisen überstehen ohne sie schlimmer zu machen</p>
+                    <input type="range" class="skill-slider" id="skill-stress" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-stress-value">5</span>/10</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: var(--gradient-5);">❤️</div>
+                        <div class="skill-name">Emotionsregulation</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Gefühle verstehen und positiv beeinflussen</p>
+                    <input type="range" class="skill-slider" id="skill-emotion" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-emotion-value">5</span>/10</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: var(--gradient-4);">👥</div>
+                        <div class="skill-name">Zwischenmenschliche Skills</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Beziehungen pflegen und für sich einstehen</p>
+                    <input type="range" class="skill-slider" id="skill-social" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-social-value">5</span>/10</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: var(--gradient-1);">🎯</div>
+                        <div class="skill-name">Selbstfürsorge</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Gut für sich selbst sorgen</p>
+                    <input type="range" class="skill-slider" id="skill-self" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-self-value">5</span>/10</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-header">
+                        <div class="skill-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">⚡</div>
+                        <div class="skill-name">Radikale Akzeptanz</div>
+                    </div>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 10px;">Realität akzeptieren wie sie ist</p>
+                    <input type="range" class="skill-slider" id="skill-accept" min="1" max="10" value="5">
+                    <div class="skill-value"><span id="skill-accept-value">5</span>/10</div>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label for="favoriteSkill">Welcher Skill hat dir dieses Jahr am meisten geholfen und warum?</label>
+                <textarea id="favoriteSkill" class="input-field" placeholder="Beschreibe eine Situation, in der du einen Skill erfolgreich angewendet hast..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 5: EMOTIONS ==================== -->
+    <section class="section" id="emotions">
+        <div class="card">
+            <h2 class="card-title">🎭 Deine Emotions-Landkarte</h2>
+            <p class="card-subtitle">Welche Emotionen haben dich durch 2025 begleitet? Wähle alle aus, die du erlebt hast.</p>
+
+            <div class="emotion-map">
+                <div class="emotion-bubble emotion-positive" data-emotion="Freude">Freude 😊</div>
+                <div class="emotion-bubble emotion-positive" data-emotion="Stolz">Stolz 🦁</div>
+                <div class="emotion-bubble emotion-positive" data-emotion="Dankbarkeit">Dankbarkeit 🙏</div>
+                <div class="emotion-bubble emotion-positive" data-emotion="Hoffnung">Hoffnung 🌈</div>
+                <div class="emotion-bubble emotion-negative" data-emotion="Traurigkeit">Traurigkeit 😢</div>
+                <div class="emotion-bubble emotion-negative" data-emotion="Wut">Wut 😠</div>
+                <div class="emotion-bubble emotion-negative" data-emotion="Angst">Angst 😨</div>
+                <div class="emotion-bubble emotion-negative" data-emotion="Frustration">Frustration 😤</div>
+                <div class="emotion-bubble emotion-neutral" data-emotion="Überraschung">Überraschung 😲</div>
+                <div class="emotion-bubble emotion-neutral" data-emotion="Neugier">Neugier 🤔</div>
+                <div class="emotion-bubble emotion-neutral" data-emotion="Langeweile">Langeweile 😑</div>
+                <div class="emotion-bubble emotion-neutral" data-emotion="Gelassenheit">Gelassenheit 😌</div>
+                <div class="emotion-bubble emotion-complex" data-emotion="Nostalgie">Nostalgie 🥹</div>
+                <div class="emotion-bubble emotion-complex" data-emotion="Ambivalenz">Ambivalenz 🫤</div>
+                <div class="emotion-bubble emotion-complex" data-emotion="Überwältigung">Überwältigung 🤯</div>
+                <div class="emotion-bubble emotion-complex" data-emotion="Erleichterung">Erleichterung 😮‍💨</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label>Deine ausgewählten Emotionen:</label>
+                <div class="selected-emotions" id="selectedEmotions">
+                    <span style="opacity: 0.5; font-size: 0.9rem;">Klicke oben auf Emotionen, um sie hinzuzufügen...</span>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label for="emotionReflection">Welche Emotion war am stärksten? Wie bist du damit umgegangen?</label>
+                <textarea id="emotionReflection" class="input-field" placeholder="Reflektiere über deine emotionale Reise..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 6: SUCCESS ==================== -->
+    <section class="section" id="success">
+        <div class="card">
+            <h2 class="card-title">🏆 Deine Erfolgs-Galerie</h2>
+            <p class="card-subtitle">Feiere deine Erfolge! Nenne mindestens 3 Dinge, auf die du stolz bist.</p>
+
+            <div class="success-container">
+                <div class="success-item">
+                    <div class="success-number">1</div>
+                    <div class="success-content">
+                        <input type="text" class="input-field success-input" id="success1" placeholder="Ich bin stolz auf...">
+                        <div class="star-rating" data-success="1">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-item">
+                    <div class="success-number">2</div>
+                    <div class="success-content">
+                        <input type="text" class="input-field success-input" id="success2" placeholder="Ich bin stolz auf...">
+                        <div class="star-rating" data-success="2">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-item">
+                    <div class="success-number">3</div>
+                    <div class="success-content">
+                        <input type="text" class="input-field success-input" id="success3" placeholder="Ich bin stolz auf...">
+                        <div class="star-rating" data-success="3">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-item">
+                    <div class="success-number">4</div>
+                    <div class="success-content">
+                        <input type="text" class="input-field success-input" id="success4" placeholder="Bonus: Noch ein Erfolg? (optional)">
+                        <div class="star-rating" data-success="4">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 25px;">
+                <label for="successHelper">Was oder wer hat dir bei diesen Erfolgen geholfen?</label>
+                <textarea id="successHelper" class="input-field" placeholder="Menschen, Skills, Umstände..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 7: CHALLENGES ==================== -->
+    <section class="section" id="challenges">
+        <div class="card">
+            <h2 class="card-title">⛰️ Dein Herausforderungs-Berg</h2>
+            <p class="card-subtitle">Jede Herausforderung, die du gemeistert hast, hat dich stärker gemacht.</p>
+
+            <div class="mountain-container">
+                <svg class="mountain-svg" viewBox="0 0 400 200" fill="none">
+                    <defs>
+                        <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#818cf8"/>
+                            <stop offset="100%" style="stop-color:#4f46e5"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,200 L100,100 L150,130 L200,50 L250,120 L300,80 L350,140 L400,200 Z" fill="url(#mountainGrad)"/>
+                    <circle cx="200" cy="50" r="15" fill="#fbbf24"/>
+                    <text x="200" y="35" text-anchor="middle" fill="white" font-size="10">🏆</text>
+                    <text x="200" y="55" text-anchor="middle" fill="white" font-size="8">Geschafft!</text>
+                </svg>
+            </div>
+
+            <div class="challenge-cards">
+                <div class="challenge-card">
+                    <h4>🔥 Grösste Herausforderung</h4>
+                    <input type="text" class="input-field" id="challenge1" placeholder="Was war die grösste Herausforderung 2025?">
+                    <textarea class="input-field" id="challenge1-how" style="margin-top: 15px;" placeholder="Wie hast du sie gemeistert? Welche Skills haben geholfen?"></textarea>
+                </div>
+
+                <div class="challenge-card">
+                    <h4>💔 Schwieriger Moment</h4>
+                    <input type="text" class="input-field" id="challenge2" placeholder="Ein Moment, der besonders schwer war...">
+                    <textarea class="input-field" id="challenge2-how" style="margin-top: 15px;" placeholder="Was hast du daraus gelernt?"></textarea>
+                </div>
+
+                <div class="challenge-card">
+                    <h4>🌱 Wachstum durch Schmerz</h4>
+                    <textarea class="input-field" id="challenge3" placeholder="Wie haben dich die Herausforderungen wachsen lassen? Was kannst du jetzt besser als vorher?"></textarea>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 25px;">
+                "Der Bambus, der sich biegt, ist stärker als die Eiche, die Widerstand leistet."
+                <div class="quote-author">— Japanisches Sprichwort</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 8: GRATITUDE ==================== -->
+    <section class="section" id="gratitude">
+        <div class="card">
+            <h2 class="card-title">🌸 Dein Dankbarkeits-Garten</h2>
+            <p class="card-subtitle">Pflanze Blumen der Dankbarkeit! Für jeden Eintrag wächst eine Blume.</p>
+
+            <div class="garden-container" id="gardenContainer">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(180deg, transparent, rgba(34, 197, 94, 0.3));"></div>
+            </div>
+
+            <div class="gratitude-input-container">
+                <input type="text" class="input-field" id="gratitudeInput" placeholder="Wofür bist du dankbar?" style="flex: 1;">
+                <button class="btn btn-success" onclick="addGratitude()">🌷 Pflanzen</button>
+            </div>
+
+            <div class="gratitude-tags" id="gratitudeTags"></div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="margin-bottom: 15px;">Inspiration:</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span class="letter-prompt" onclick="addGratitudePrompt('Menschen, die für mich da waren')">👥 Menschen</span>
+                    <span class="letter-prompt" onclick="addGratitudePrompt('Momente, die mich glücklich gemacht haben')">✨ Momente</span>
+                    <span class="letter-prompt" onclick="addGratitudePrompt('Dinge, die ich gelernt habe')">📚 Learnings</span>
+                    <span class="letter-prompt" onclick="addGratitudePrompt('Orte, die mir gut getan haben')">🏞️ Orte</span>
+                    <span class="letter-prompt" onclick="addGratitudePrompt('Musik, die mich begleitet hat')">🎵 Musik</span>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 25px;">
+                <label for="gratitudeReflection">Was hat dich dieses Jahr am dankbarsten gemacht?</label>
+                <textarea id="gratitudeReflection" class="input-field" placeholder="Reflektiere über das Gute in deinem Leben..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 9: LETTER ==================== -->
+    <section class="section" id="letter">
+        <div class="card">
+            <h2 class="card-title">✉️ Brief an dein zukünftiges Ich</h2>
+            <p class="card-subtitle">Schreibe einen Brief an dich selbst in einem Jahr. Was möchtest du dir sagen?</p>
+
+            <div class="letter-prompts">
+                <span class="letter-prompt" onclick="insertLetterPrompt('Ich wünsche mir für 2026, dass...')">🎯 Wünsche</span>
+                <span class="letter-prompt" onclick="insertLetterPrompt('Vergiss nicht, dass du...')">💪 Erinnerung</span>
+                <span class="letter-prompt" onclick="insertLetterPrompt('Ich bin stolz auf dich, weil...')">🏆 Stolz</span>
+                <span class="letter-prompt" onclick="insertLetterPrompt('Denk daran, dass...')">💭 Gedanken</span>
+                <span class="letter-prompt" onclick="insertLetterPrompt('Mein grösstes Ziel für 2026 ist...')">🚀 Ziele</span>
+            </div>
+
+            <div class="letter-container">
+                <div class="letter-header">
+                    Liebe/r <span id="letterName">___</span>, am <span id="letterDate">___</span>
+                </div>
+                <textarea class="letter-textarea" id="letterContent" placeholder="Beginne hier deinen Brief...
+
+Du könntest schreiben über:
+• Was du dir für 2026 wünschst
+• Welche Ziele du erreichen möchtest
+• Was du nicht vergessen solltest
+• Worauf du stolz sein kannst
+• Ratschläge für schwierige Zeiten"></textarea>
+
+                <div style="text-align: right; margin-top: 20px; opacity: 0.8;">
+                    In Liebe,<br>
+                    Dein Ich aus 2025
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 25px;">
+                <label for="goalFor2026">Nenne EIN konkretes Ziel für 2026:</label>
+                <input type="text" id="goalFor2026" class="input-field" placeholder="2026 möchte ich...">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Weiter →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 10: GROUP ACTIVITY ==================== -->
+    <section class="section" id="group">
+        <div class="card">
+            <h2 class="card-title">👥 Positive Nachrichten</h2>
+            <p class="card-subtitle">Schreibe deinen Mitschülern eine positive Nachricht oder ein Kompliment.</p>
+
+            <div class="message-board" id="messageBoard">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <div class="quote-box" style="margin-top: 25px;">
+                "Freundliche Worte können kurz und einfach sein, aber ihr Echo ist wirklich endlos."
+                <div class="quote-author">— Mutter Teresa</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-primary" onclick="nextSection()">Zum Abschluss →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 11: CERTIFICATE ==================== -->
+    <section class="section" id="certificate">
+        <div class="card">
+            <h2 class="card-title">🎉 Herzlichen Glückwunsch!</h2>
+            <p class="card-subtitle">Du hast die DBT Jahresreise 2025 abgeschlossen!</p>
+
+            <div class="certificate" id="certificateCard">
+                <div class="certificate-badge">🏅</div>
+                <div class="certificate-title">ZERTIFIKAT</div>
+                <div style="font-size: 1rem; color: #78350f;">Hiermit wird bestätigt, dass</div>
+                <div class="certificate-name" id="certName">___</div>
+                <div class="certificate-text">
+                    die DBT Jahresreise 2025 erfolgreich abgeschlossen hat und damit
+                    wichtige Reflexionsarbeit geleistet hat.
+                </div>
+                <div class="certificate-date" id="certDate">Dezember 2025</div>
+            </div>
+
+            <div class="summary-stats" style="margin-top: 30px;">
+                <div class="stat-item">
+                    <div class="stat-number" id="statEmotions">0</div>
+                    <div class="stat-label">Emotionen erkundet</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statSuccesses">0</div>
+                    <div class="stat-label">Erfolge gefeiert</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statGratitude">0</div>
+                    <div class="stat-label">Dankbarkeiten</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statSkillAvg">0</div>
+                    <div class="stat-label">Skill-Durchschnitt</div>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 25px;">
+                "Das Ende ist nur ein neuer Anfang. Du hast alle Werkzeuge, die du brauchst."
+                <div class="quote-author">— Dein DBT-Kurs 2025</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevSection()">← Zurück</button>
+                <button class="btn btn-success" onclick="downloadSummary()">📥 Zusammenfassung speichern</button>
+                <button class="btn btn-primary" onclick="celebrateFinish()">🎊 Feiern!</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Confetti Container -->
+    <div class="confetti" id="confetti"></div>
+
+    <script>
+        // ==================== GLOBAL STATE ====================
+        const state = {
+            currentSection: 0,
+            userName: '',
+            startTime: null,
+            selectedMoods: [],
+            selectedEmotions: [],
+            gratitudeItems: [],
+            starRatings: {},
+            groupMessages: {},
+            sections: [
+                { id: 'welcome', name: 'Start', completed: false },
+                { id: 'mindfulness', name: 'Achtsamkeit', completed: false },
+                { id: 'timeline', name: 'Zeitreise', completed: false },
+                { id: 'skills', name: 'Skills', completed: false },
+                { id: 'emotions', name: 'Emotionen', completed: false },
+                { id: 'success', name: 'Erfolge', completed: false },
+                { id: 'challenges', name: 'Herausforderungen', completed: false },
+                { id: 'gratitude', name: 'Dankbarkeit', completed: false },
+                { id: 'letter', name: 'Brief', completed: false },
+                { id: 'group', name: 'Gruppe', completed: false },
+                { id: 'certificate', name: 'Abschluss', completed: false }
+            ],
+            classmates: ['Schüler 1', 'Schüler 2', 'Schüler 3']
+        };
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load classmates from localStorage if available
+            const savedNames = localStorage.getItem('dbt-classmates');
+            if (savedNames) {
+                state.classmates = JSON.parse(savedNames);
+            }
+
+            createStars();
+            createNavDots();
+            setupEventListeners();
+            startTimer();
+            setupSkillSliders();
+            setupStarRatings();
+            setupMessageBoard();
+            startBreathingAnimation();
+        });
+
+        function createStars() {
+            const bg = document.getElementById('bgAnimation');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                bg.appendChild(star);
+            }
+        }
+
+        function createNavDots() {
+            const nav = document.getElementById('navDots');
+            state.sections.forEach((section, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (index === 0 ? ' active' : '');
+                dot.setAttribute('data-tooltip', section.name);
+                dot.onclick = () => goToSection(index);
+                nav.appendChild(dot);
+            });
+        }
+
+        function setupEventListeners() {
+            // Mood buttons
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.onclick = () => {
+                    btn.classList.toggle('selected');
+                    const mood = btn.dataset.mood;
+                    if (btn.classList.contains('selected')) {
+                        state.selectedMoods.push(mood);
+                    } else {
+                        state.selectedMoods = state.selectedMoods.filter(m => m !== mood);
+                    }
+                };
+            });
+
+            // Emotion bubbles
+            document.querySelectorAll('.emotion-bubble').forEach(bubble => {
+                bubble.onclick = () => {
+                    const emotion = bubble.dataset.emotion;
+                    if (bubble.classList.contains('selected')) {
+                        bubble.classList.remove('selected');
+                        state.selectedEmotions = state.selectedEmotions.filter(e => e !== emotion);
+                    } else {
+                        bubble.classList.add('selected');
+                        state.selectedEmotions.push(emotion);
+                    }
+                    updateSelectedEmotions();
+                };
+            });
+
+            // Enter key for name input
+            document.getElementById('userName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') startJourney();
+            });
+
+            // Gratitude input enter key
+            document.getElementById('gratitudeInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addGratitude();
+            });
+        }
+
+        // ==================== NAVIGATION ====================
+        function startJourney() {
+            const name = document.getElementById('userName').value.trim();
+            if (!name) {
+                document.getElementById('userName').classList.add('shake');
+                setTimeout(() => document.getElementById('userName').classList.remove('shake'), 500);
+                return;
+            }
+            state.userName = name;
+            state.startTime = new Date();
+
+            // Update letter section
+            document.getElementById('letterName').textContent = name;
+            document.getElementById('letterDate').textContent = new Date().toLocaleDateString('de-CH');
+
+            nextSection();
+        }
+
+        function nextSection() {
+            if (state.currentSection < state.sections.length - 1) {
+                state.sections[state.currentSection].completed = true;
+                state.currentSection++;
+                updateView();
+            }
+        }
+
+        function prevSection() {
+            if (state.currentSection > 0) {
+                state.currentSection--;
+                updateView();
+            }
+        }
+
+        function goToSection(index) {
+            // Allow navigation to completed sections or next uncompleted
+            if (index <= state.currentSection || (index === state.currentSection + 1 && state.sections[state.currentSection].completed)) {
+                state.currentSection = index;
+                updateView();
+            }
+        }
+
+        function updateView() {
+            // Update sections
+            document.querySelectorAll('.section').forEach((section, index) => {
+                section.classList.remove('active');
+                if (index === state.currentSection) {
+                    section.classList.add('active');
+                }
+            });
+
+            // Update nav dots
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index === state.currentSection) {
+                    dot.classList.add('active');
+                } else if (state.sections[index].completed) {
+                    dot.classList.add('completed');
+                }
+            });
+
+            // Update progress bar
+            const progress = ((state.currentSection + 1) / state.sections.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Update certificate if on last section
+            if (state.currentSection === state.sections.length - 1) {
+                updateCertificate();
+            }
+        }
+
+        // ==================== TIMER ====================
+        function startTimer() {
+            setInterval(() => {
+                if (state.startTime) {
+                    const elapsed = Math.floor((new Date() - state.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    document.getElementById('timerText').textContent = `${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        // ==================== BREATHING ANIMATION ====================
+        function startBreathingAnimation() {
+            const texts = ['Einatmen...', 'Halten...', 'Ausatmen...', 'Halten...'];
+            let index = 0;
+
+            setInterval(() => {
+                const textEl = document.getElementById('breathingText');
+                if (textEl) {
+                    textEl.textContent = texts[index];
+                    index = (index + 1) % texts.length;
+                }
+            }, 2000);
+        }
+
+        // ==================== SKILLS ====================
+        function setupSkillSliders() {
+            const skills = ['achtsamkeit', 'stress', 'emotion', 'social', 'self', 'accept'];
+            skills.forEach(skill => {
+                const slider = document.getElementById(`skill-${skill}`);
+                const value = document.getElementById(`skill-${skill}-value`);
+                if (slider && value) {
+                    slider.oninput = () => {
+                        value.textContent = slider.value;
+                    };
+                }
+            });
+        }
+
+        // ==================== EMOTIONS ====================
+        function updateSelectedEmotions() {
+            const container = document.getElementById('selectedEmotions');
+            if (state.selectedEmotions.length === 0) {
+                container.innerHTML = '<span style="opacity: 0.5; font-size: 0.9rem;">Klicke oben auf Emotionen, um sie hinzuzufügen...</span>';
+            } else {
+                container.innerHTML = state.selectedEmotions.map(emotion => `
+                    <div class="emotion-tag bounce-in">
+                        ${emotion}
+                        <span class="remove" onclick="removeEmotion('${emotion}')">&times;</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function removeEmotion(emotion) {
+            state.selectedEmotions = state.selectedEmotions.filter(e => e !== emotion);
+            document.querySelector(`.emotion-bubble[data-emotion="${emotion}"]`)?.classList.remove('selected');
+            updateSelectedEmotions();
+        }
+
+        // ==================== STAR RATINGS ====================
+        function setupStarRatings() {
+            document.querySelectorAll('.star-rating').forEach(rating => {
+                const successId = rating.dataset.success;
+                rating.querySelectorAll('.star').forEach(star => {
+                    star.onclick = () => {
+                        const value = parseInt(star.dataset.value);
+                        state.starRatings[successId] = value;
+                        rating.querySelectorAll('.star').forEach((s, i) => {
+                            s.classList.toggle('active', i < value);
+                        });
+                    };
+                });
+            });
+        }
+
+        // ==================== GRATITUDE GARDEN ====================
+        function addGratitude() {
+            const input = document.getElementById('gratitudeInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            state.gratitudeItems.push(text);
+            input.value = '';
+
+            // Add tag
+            const tagsContainer = document.getElementById('gratitudeTags');
+            const tag = document.createElement('div');
+            tag.className = 'gratitude-tag bounce-in';
+            tag.innerHTML = `🌷 ${text}`;
+            tagsContainer.appendChild(tag);
+
+            // Add flower to garden
+            const garden = document.getElementById('gardenContainer');
+            const flowers = ['🌸', '🌺', '🌷', '🌻', '🌼', '💐', '🪻', '🌹'];
+            const flower = document.createElement('div');
+            flower.className = 'flower bounce-in';
+            flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+            flower.style.left = (10 + Math.random() * 80) + '%';
+            flower.style.bottom = (10 + Math.random() * 50) + '%';
+            flower.style.animationDelay = Math.random() * 2 + 's';
+            garden.appendChild(flower);
+        }
+
+        function addGratitudePrompt(text) {
+            document.getElementById('gratitudeInput').value = text;
+            document.getElementById('gratitudeInput').focus();
+        }
+
+        // ==================== LETTER ====================
+        function insertLetterPrompt(text) {
+            const textarea = document.getElementById('letterContent');
+            const cursorPos = textarea.selectionStart;
+            const currentText = textarea.value;
+            textarea.value = currentText.slice(0, cursorPos) + text + '\n' + currentText.slice(cursorPos);
+            textarea.focus();
+        }
+
+        // ==================== GROUP ACTIVITY ====================
+        function setupMessageBoard() {
+            const board = document.getElementById('messageBoard');
+            const avatars = ['🧑', '👩', '🧑‍🦱', '👨‍🦰', '👩‍🦳', '🧔'];
+
+            state.classmates.forEach((name, index) => {
+                const card = document.createElement('div');
+                card.className = 'message-card';
+                card.innerHTML = `
+                    <div class="message-avatar">${avatars[index % avatars.length]}</div>
+                    <div class="message-name">${name}</div>
+                    <textarea class="input-field" id="message-${index}" placeholder="Schreibe ${name} eine positive Nachricht..." oninput="saveGroupMessage(${index}, this.value)"></textarea>
+                `;
+                board.appendChild(card);
+            });
+        }
+
+        function saveGroupMessage(index, value) {
+            state.groupMessages[index] = value;
+        }
+
+        // ==================== CERTIFICATE ====================
+        function updateCertificate() {
+            document.getElementById('certName').textContent = state.userName || '___';
+            document.getElementById('certDate').textContent = new Date().toLocaleDateString('de-CH', {
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Calculate stats
+            document.getElementById('statEmotions').textContent = state.selectedEmotions.length;
+
+            const successCount = [1, 2, 3, 4].filter(i =>
+                document.getElementById(`success${i}`)?.value.trim()
+            ).length;
+            document.getElementById('statSuccesses').textContent = successCount;
+
+            document.getElementById('statGratitude').textContent = state.gratitudeItems.length;
+
+            const skills = ['achtsamkeit', 'stress', 'emotion', 'social', 'self', 'accept'];
+            const skillSum = skills.reduce((sum, skill) => {
+                const slider = document.getElementById(`skill-${skill}`);
+                return sum + (slider ? parseInt(slider.value) : 5);
+            }, 0);
+            document.getElementById('statSkillAvg').textContent = (skillSum / skills.length).toFixed(1);
+        }
+
+        function celebrateFinish() {
+            createConfetti();
+            setTimeout(createConfetti, 500);
+            setTimeout(createConfetti, 1000);
+        }
+
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            const colors = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6'];
+
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confettiContainer.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        // ==================== DOWNLOAD SUMMARY ====================
+        function downloadSummary() {
+            const skills = ['achtsamkeit', 'stress', 'emotion', 'social', 'self', 'accept'];
+            const skillValues = skills.map(skill => {
+                const slider = document.getElementById(`skill-${skill}`);
+                return `${skill.charAt(0).toUpperCase() + skill.slice(1)}: ${slider ? slider.value : 5}/10`;
+            }).join('\n');
+
+            const successes = [1, 2, 3, 4].map(i => {
+                const input = document.getElementById(`success${i}`);
+                return input?.value.trim() || '';
+            }).filter(s => s).join('\n- ');
+
+            const summary = `
+═══════════════════════════════════════════════════════════
+         DBT JAHRESREISE 2025 - ZUSAMMENFASSUNG
+═══════════════════════════════════════════════════════════
+
+Name: ${state.userName}
+Datum: ${new Date().toLocaleDateString('de-CH')}
+Dauer: ${document.getElementById('timerText').textContent}
+
+───────────────────────────────────────────────────────────
+ACHTSAMKEIT CHECK-IN
+───────────────────────────────────────────────────────────
+Stimmung: ${state.selectedMoods.join(', ') || 'Nicht angegeben'}
+Gedanken: ${document.getElementById('mindfulnessNote')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+ZEITREISE DURCH 2025
+───────────────────────────────────────────────────────────
+Q1 (Jan-Mär): ${document.getElementById('q1-input')?.value || '-'}
+Q2 (Apr-Jun): ${document.getElementById('q2-input')?.value || '-'}
+Q3 (Jul-Sep): ${document.getElementById('q3-input')?.value || '-'}
+Q4 (Okt-Dez): ${document.getElementById('q4-input')?.value || '-'}
+
+───────────────────────────────────────────────────────────
+SKILLS-INVENTAR
+───────────────────────────────────────────────────────────
+${skillValues}
+
+Lieblings-Skill: ${document.getElementById('favoriteSkill')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+EMOTIONEN
+───────────────────────────────────────────────────────────
+Erlebte Emotionen: ${state.selectedEmotions.join(', ') || 'Keine ausgewählt'}
+
+Reflexion: ${document.getElementById('emotionReflection')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+ERFOLGE
+───────────────────────────────────────────────────────────
+${successes ? '- ' + successes : 'Keine Erfolge eingetragen'}
+
+Was geholfen hat: ${document.getElementById('successHelper')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+HERAUSFORDERUNGEN
+───────────────────────────────────────────────────────────
+Grösste Herausforderung: ${document.getElementById('challenge1')?.value || '-'}
+Wie gemeistert: ${document.getElementById('challenge1-how')?.value || '-'}
+
+Schwieriger Moment: ${document.getElementById('challenge2')?.value || '-'}
+Was gelernt: ${document.getElementById('challenge2-how')?.value || '-'}
+
+Wachstum: ${document.getElementById('challenge3')?.value || '-'}
+
+───────────────────────────────────────────────────────────
+DANKBARKEIT
+───────────────────────────────────────────────────────────
+${state.gratitudeItems.length > 0 ? state.gratitudeItems.map(g => '🌷 ' + g).join('\n') : 'Keine Einträge'}
+
+Reflexion: ${document.getElementById('gratitudeReflection')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+BRIEF AN MEIN ZUKÜNFTIGES ICH
+───────────────────────────────────────────────────────────
+${document.getElementById('letterContent')?.value || 'Kein Brief geschrieben'}
+
+Ziel für 2026: ${document.getElementById('goalFor2026')?.value || 'Nicht angegeben'}
+
+───────────────────────────────────────────────────────────
+NACHRICHTEN AN MITSCHÜLER
+───────────────────────────────────────────────────────────
+${Object.entries(state.groupMessages).map(([i, msg]) => `An ${state.classmates[i]}: ${msg}`).join('\n') || 'Keine Nachrichten'}
+
+═══════════════════════════════════════════════════════════
+           🏅 ZERTIFIKAT: DBT JAHRESREISE 2025 🏅
+           Erfolgreich abgeschlossen von ${state.userName}
+═══════════════════════════════════════════════════════════
+            `.trim();
+
+            const blob = new Blob([summary], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DBT-Jahresreise-2025-${state.userName}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

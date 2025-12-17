@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DBT Jahresreise 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --dark: #1e1b4b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #a78bfa;
+        }
+
+        p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: #1a1a2e;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .student-inputs {
+            display: grid;
+            gap: 15px;
+        }
+
+        .student-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-row input {
+            flex: 1;
+        }
+
+        .student-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .remove-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.3);
+            border: none;
+            color: #f87171;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 15px;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .add-btn:hover {
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .preview {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview h3 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+        }
+
+        .preview code {
+            display: block;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #818cf8;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            opacity: 0.9;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        a {
+            color: #818cf8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .link-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .link-box a {
+            font-size: 1.2rem;
+            color: #38f9d7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Admin-Bereich</h1>
+            <p>Konfiguriere die DBT Jahresreise 2025 App für deine Klasse.</p>
+
+            <div class="info-box">
+                <h4>Anleitung</h4>
+                <ul>
+                    <li>Trage die Namen deiner Schüler ein</li>
+                    <li>Klicke auf "Konfiguration speichern"</li>
+                    <li>Die App ist sofort einsatzbereit</li>
+                    <li>Dauer: ca. 1,5 Stunden (10 Stationen)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Schüler-Namen</h2>
+            <p>Gib die Namen der Schüler ein, die an der Jahresreise teilnehmen:</p>
+
+            <div class="student-inputs" id="studentInputs">
+                <div class="student-row">
+                    <div class="student-number">1</div>
+                    <input type="text" class="student-name" placeholder="Name Schüler 1" value="Schüler 1">
+                    <button class="remove-btn" onclick="removeStudent(this)" title="Entfernen">&times;</button>
+                </div>
+                <div class="student-row">
+                    <div class="student-number">2</div>
+                    <input type="text" class="student-name" placeholder="Name Schüler 2" value="Schüler 2">
+                    <button class="remove-btn" onclick="removeStudent(this)" title="Entfernen">&times;</button>
+                </div>
+                <div class="student-row">
+                    <div class="student-number">3</div>
+                    <input type="text" class="student-name" placeholder="Name Schüler 3" value="Schüler 3">
+                    <button class="remove-btn" onclick="removeStudent(this)" title="Entfernen">&times;</button>
+                </div>
+            </div>
+
+            <button class="add-btn" onclick="addStudent()">+ Schüler hinzufügen</button>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-primary" onclick="saveConfig()">Konfiguration speichern</button>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                Konfiguration gespeichert! Die Schüler-Namen wurden aktualisiert.
+            </div>
+
+            <div class="link-box">
+                <p>App starten:</p>
+                <a href="index.html" target="_blank">index.html öffnen</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Stationen-Übersicht</h2>
+            <p>Die App besteht aus 10 interaktiven Stationen:</p>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+                    <th style="text-align: left; padding: 10px; color: #fbbf24;">Nr.</th>
+                    <th style="text-align: left; padding: 10px; color: #fbbf24;">Station</th>
+                    <th style="text-align: left; padding: 10px; color: #fbbf24;">Beschreibung</th>
+                    <th style="text-align: left; padding: 10px; color: #fbbf24;">ca. Zeit</th>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">1</td>
+                    <td style="padding: 10px;">Willkommen</td>
+                    <td style="padding: 10px;">Name eingeben, Einführung</td>
+                    <td style="padding: 10px;">3 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">2</td>
+                    <td style="padding: 10px;">Achtsamkeit</td>
+                    <td style="padding: 10px;">Atemübung, Stimmungs-Check</td>
+                    <td style="padding: 10px;">8 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">3</td>
+                    <td style="padding: 10px;">Zeitreise</td>
+                    <td style="padding: 10px;">Quartals-Reflexion 2025</td>
+                    <td style="padding: 10px;">12 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">4</td>
+                    <td style="padding: 10px;">Skills-Inventar</td>
+                    <td style="padding: 10px;">DBT-Skills bewerten</td>
+                    <td style="padding: 10px;">10 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">5</td>
+                    <td style="padding: 10px;">Emotionen</td>
+                    <td style="padding: 10px;">Emotions-Landkarte</td>
+                    <td style="padding: 10px;">10 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">6</td>
+                    <td style="padding: 10px;">Erfolge</td>
+                    <td style="padding: 10px;">Erfolgs-Galerie mit Sternen</td>
+                    <td style="padding: 10px;">10 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">7</td>
+                    <td style="padding: 10px;">Herausforderungen</td>
+                    <td style="padding: 10px;">Schwierigkeiten & Learnings</td>
+                    <td style="padding: 10px;">10 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">8</td>
+                    <td style="padding: 10px;">Dankbarkeit</td>
+                    <td style="padding: 10px;">Interaktiver Garten</td>
+                    <td style="padding: 10px;">8 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">9</td>
+                    <td style="padding: 10px;">Brief</td>
+                    <td style="padding: 10px;">Brief an zukünftiges Ich</td>
+                    <td style="padding: 10px;">10 Min</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;">10</td>
+                    <td style="padding: 10px;">Gruppe</td>
+                    <td style="padding: 10px;">Nachrichten an Mitschüler</td>
+                    <td style="padding: 10px;">5 Min</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">11</td>
+                    <td style="padding: 10px;">Abschluss</td>
+                    <td style="padding: 10px;">Zertifikat & Zusammenfassung</td>
+                    <td style="padding: 10px;">4 Min</td>
+                </tr>
+            </table>
+
+            <p style="margin-top: 20px; font-weight: 600; color: #38f9d7;">
+                Gesamtdauer: ca. 90 Minuten
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Tipps für die Durchführung</h2>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>Jeder Schüler braucht ein eigenes Gerät (Laptop/Tablet)</li>
+                <li>Sorge für eine ruhige Atmosphäre</li>
+                <li>Eventuell leise Hintergrundmusik abspielen</li>
+                <li>Die Schüler können ihr eigenes Tempo bestimmen</li>
+                <li>Am Ende können alle ihre Zusammenfassung herunterladen</li>
+                <li>Die "Gruppen-Aktivität" kann auch mündlich ergänzt werden</li>
+                <li>Das Zertifikat kann ausgedruckt werden</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Load saved config on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedNames = localStorage.getItem('dbt-classmates');
+            if (savedNames) {
+                const names = JSON.parse(savedNames);
+                const container = document.getElementById('studentInputs');
+                container.innerHTML = '';
+                names.forEach((name, index) => {
+                    addStudentRow(name, index + 1);
+                });
+            }
+        });
+
+        function addStudentRow(name = '', number = null) {
+            const container = document.getElementById('studentInputs');
+            const currentCount = container.children.length + 1;
+            const num = number || currentCount;
+
+            const row = document.createElement('div');
+            row.className = 'student-row';
+            row.innerHTML = `
+                <div class="student-number">${num}</div>
+                <input type="text" class="student-name" placeholder="Name Schüler ${num}" value="${name}">
+                <button class="remove-btn" onclick="removeStudent(this)" title="Entfernen">&times;</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function addStudent() {
+            addStudentRow();
+            updateNumbers();
+        }
+
+        function removeStudent(btn) {
+            const container = document.getElementById('studentInputs');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+                updateNumbers();
+            }
+        }
+
+        function updateNumbers() {
+            const rows = document.querySelectorAll('.student-row');
+            rows.forEach((row, index) => {
+                row.querySelector('.student-number').textContent = index + 1;
+                row.querySelector('input').placeholder = `Name Schüler ${index + 1}`;
+            });
+        }
+
+        function saveConfig() {
+            const inputs = document.querySelectorAll('.student-name');
+            const names = Array.from(inputs).map(input => input.value.trim() || `Schüler ${Array.from(inputs).indexOf(input) + 1}`);
+
+            // Save to localStorage
+            localStorage.setItem('dbt-classmates', JSON.stringify(names));
+
+            // Show success message
+            document.getElementById('successMessage').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
