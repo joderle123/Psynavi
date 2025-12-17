@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyNavi - 20 Zauberhafte Aktivitäten für kleine Entdecker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #dbeafe 0%, #fce7f3 50%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+        .title-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        .activity-card {
+            transition: all 0.3s ease;
+        }
+        .activity-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+        .bounce-icon {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .pulse-bg {
+            animation: pulse-bg 3s infinite;
+        }
+        @keyframes pulse-bg {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .rainbow-border {
+            background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444);
+            background-size: 200% 100%;
+            animation: rainbow 3s linear infinite;
+        }
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .activity-card { break-inside: avoid; page-break-inside: avoid; }
+        }
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Icon Komponente
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current && lucide[name]) {
+                    iconRef.current.innerHTML = '';
+                    const icon = lucide.createElement(lucide[name]);
+                    icon.setAttribute('width', size);
+                    icon.setAttribute('height', size);
+                    iconRef.current.appendChild(icon);
+                }
+            }, [name, size]);
+            return <span ref={iconRef} className={className} />;
+        };
+
+        // Aktivitäten Daten
+        const activities = [
+            {
+                id: 1,
+                emoji: "🌋",
+                title: "Vulkan-Explosion",
+                category: "experiment",
+                categoryName: "Experiment",
+                time: "15 Min",
+                difficulty: 1,
+                theme: "from-red-400 to-orange-500",
+                materials: ["Backpulver", "Essig", "Spülmittel", "Lebensmittelfarbe", "Flasche oder Becher"],
+                description: "Bau deinen eigenen Vulkan und lass ihn explodieren!",
+                steps: [
+                    "Stell eine Flasche in die Mitte eines Tellers oder einer Schüssel",
+                    "Fülle 2 Esslöffel Backpulver in die Flasche",
+                    "Gib einen Tropfen Spülmittel und rote Lebensmittelfarbe dazu",
+                    "Gieße langsam Essig hinein und... BOOM! 🌋",
+                    "Beobachte wie die 'Lava' ausbricht!"
+                ],
+                funFact: "Echte Vulkane haben flüssiges Gestein (Magma) im Bauch, das sehr sehr heiß ist!",
+                safetyTip: "Mach das Experiment draußen oder leg Zeitungen unter!"
+            },
+            {
+                id: 2,
+                emoji: "💃",
+                title: "Stopp-Tanz-Party",
+                category: "movement",
+                categoryName: "Bewegung",
+                time: "20 Min",
+                difficulty: 1,
+                theme: "from-pink-400 to-purple-500",
+                materials: ["Musik", "Gute Laune", "Tanzfläche"],
+                description: "Tanze wild und friere ein wenn die Musik stoppt!",
+                steps: [
+                    "Räume etwas Platz zum Tanzen frei",
+                    "Starte deine Lieblingsmusik",
+                    "Tanze so verrückt wie du möchtest!",
+                    "Wenn die Musik stoppt: EINFRIEREN wie eine Statue! 🗿",
+                    "Wer sich bewegt, macht eine lustige Tierpose!"
+                ],
+                funFact: "Tanzen macht nicht nur Spaß, sondern macht auch schlau!",
+                variations: ["Tanze wie verschiedene Tiere!", "Tanze in Zeitlupe!", "Tanze nur mit den Armen!"]
+            },
+            {
+                id: 3,
+                emoji: "🎨",
+                title: "Regenbogen-Milch-Magie",
+                category: "experiment",
+                categoryName: "Experiment",
+                time: "10 Min",
+                difficulty: 1,
+                theme: "from-blue-400 to-cyan-500",
+                materials: ["Milch", "Teller", "Lebensmittelfarben", "Spülmittel", "Wattestäbchen"],
+                description: "Zaubere tanzende Farben in Milch!",
+                steps: [
+                    "Gieße etwas Milch auf einen flachen Teller",
+                    "Tropfe verschiedene Lebensmittelfarben in die Milch",
+                    "Tunke ein Wattestäbchen in Spülmittel",
+                    "Berühre damit die Milch in der Mitte",
+                    "WOOOOW! Schau wie die Farben tanzen! 🌈"
+                ],
+                funFact: "Das Spülmittel jagt die Fett-Teilchen in der Milch davon und nimmt die Farben mit!",
+                safetyTip: "Die Milch kann man danach nicht mehr trinken!"
+            },
+            {
+                id: 4,
+                emoji: "🏃",
+                title: "Ninja-Parcours",
+                category: "movement",
+                categoryName: "Bewegung",
+                time: "30 Min",
+                difficulty: 2,
+                theme: "from-green-400 to-emerald-500",
+                materials: ["Kissen", "Stühle", "Decken", "Seil/Band", "Kuscheltiere"],
+                description: "Bau deinen eigenen Hindernisparcours wie ein Ninja!",
+                steps: [
+                    "Bau mit Kissen einen Weg zum Drüberhüpfen",
+                    "Spanne ein Seil zum Drunterkriechen (Laserstrahl!)",
+                    "Stell Stühle auf zum Durchschlängeln",
+                    "Leg Kuscheltiere als Zielpunkte aus",
+                    "Stoppe die Zeit! Wer ist der schnellste Ninja? 🥷"
+                ],
+                funFact: "Echte Ninjas trainierten Balance, Schleichen und Klettern!",
+                variations: ["Rückwärts durch den Parcours!", "Mit geschlossenen Augen (mit Hilfe)!", "Auf einem Bein hüpfen!"]
+            },
+            {
+                id: 5,
+                emoji: "🎭",
+                title: "Tier-Theater",
+                category: "creative",
+                categoryName: "Kreativ",
+                time: "25 Min",
+                difficulty: 1,
+                theme: "from-amber-400 to-yellow-500",
+                materials: ["Fantasie", "Vielleicht Verkleidungen", "Tierbilder zur Inspiration"],
+                description: "Verwandle dich in verschiedene Tiere!",
+                steps: [
+                    "Wähle ein Tier aus (oder ziehe eine Tierkarte)",
+                    "Wie bewegt sich das Tier? Zeig es!",
+                    "Welche Geräusche macht es?",
+                    "Was frisst das Tier? Tu so als ob du es isst!",
+                    "Die anderen raten welches Tier du bist! 🦁🐸🦋"
+                ],
+                funFact: "Schauspieler nennen das 'Methode Acting' - ganz in eine Rolle schlüpfen!",
+                animalIdeas: ["Elefant", "Frosch", "Schmetterling", "Schlange", "Känguru", "Pinguin", "Affe", "Katze"]
+            },
+            {
+                id: 6,
+                emoji: "🧪",
+                title: "Geheime Zaubertinte",
+                category: "experiment",
+                categoryName: "Experiment",
+                time: "20 Min",
+                difficulty: 2,
+                theme: "from-violet-400 to-purple-500",
+                materials: ["Zitronensaft", "Wasser", "Wattestäbchen", "Weißes Papier", "Lampe oder Kerze (mit Erwachsenem)"],
+                description: "Schreibe geheime Botschaften die niemand lesen kann!",
+                steps: [
+                    "Mische Zitronensaft mit etwas Wasser",
+                    "Tunke ein Wattestäbchen hinein",
+                    "Schreibe eine geheime Nachricht auf weißes Papier",
+                    "Lass das Papier trocknen - die Schrift verschwindet!",
+                    "Halte das Papier an eine warme Lampe - MAGIE! Die Schrift erscheint! ✨"
+                ],
+                funFact: "Spione haben früher wirklich so geheime Nachrichten geschrieben!",
+                safetyTip: "Nur mit einem Erwachsenen an die Wärmequelle!"
+            },
+            {
+                id: 7,
+                emoji: "🎵",
+                title: "Küchen-Orchester",
+                category: "music",
+                categoryName: "Musik",
+                time: "20 Min",
+                difficulty: 1,
+                theme: "from-rose-400 to-pink-500",
+                materials: ["Töpfe & Pfannen", "Holzlöffel", "Plastikdosen mit Reis", "Gläser mit Wasser"],
+                description: "Bau Instrumente aus Küchensachen und mach Musik!",
+                steps: [
+                    "Sammle verschiedene Töpfe und Pfannen als Trommeln",
+                    "Fülle Reis in eine Dose - jetzt hast du eine Rassel!",
+                    "Fülle Gläser unterschiedlich voll mit Wasser",
+                    "Klopfe mit einem Löffel dagegen - verschiedene Töne!",
+                    "Spielt zusammen ein Lied! 🎶"
+                ],
+                funFact: "Die ersten Instrumente der Menschen waren auch aus Alltagsgegenständen!",
+                songIdeas: ["Alle meine Entchen", "Bruder Jakob", "Backe backe Kuchen"]
+            },
+            {
+                id: 8,
+                emoji: "🏴‍☠️",
+                title: "Schatzsuche",
+                category: "adventure",
+                categoryName: "Abenteuer",
+                time: "30 Min",
+                difficulty: 2,
+                theme: "from-yellow-500 to-amber-600",
+                materials: ["Papier für Schatzkarte", "Versteck für Schatz", "Kleine Belohnung/Schatz", "Buntstifte"],
+                description: "Finde den versteckten Schatz mit einer echten Schatzkarte!",
+                steps: [
+                    "Ein Erwachsener versteckt einen 'Schatz'",
+                    "Zeichne eine Karte mit Hinweisen (Sofa = Insel, Tisch = Berg)",
+                    "Folge den Hinweisen auf der Karte",
+                    "Such nach dem X auf der Karte!",
+                    "HURRA! Du hast den Schatz gefunden! 💎"
+                ],
+                funFact: "Echte Piraten haben selten Schätze vergraben - das ist eine Legende!",
+                treasureIdeas: ["Goldmünzen (Schokolade)", "Kleine Spielzeuge", "Sticker", "Ausmal-Bilder"]
+            },
+            {
+                id: 9,
+                emoji: "🧘",
+                title: "Tier-Yoga",
+                category: "movement",
+                categoryName: "Bewegung",
+                time: "15 Min",
+                difficulty: 1,
+                theme: "from-teal-400 to-cyan-500",
+                materials: ["Matte oder Teppich", "Bequeme Kleidung", "Ruhige Musik (optional)"],
+                description: "Mach Yoga-Posen wie verschiedene Tiere!",
+                steps: [
+                    "🐱 KATZE: Auf alle Viere, Buckel machen wie eine Katze",
+                    "🐕 HUND: Po hoch in die Luft, Dreieck mit dem Körper",
+                    "🦋 SCHMETTERLING: Sitzen, Fußsohlen zusammen, mit Knien flattern",
+                    "🐍 SCHLANGE: Auf dem Bauch liegen, Oberkörper hochdrücken",
+                    "🦩 FLAMINGO: Auf einem Bein stehen, Arme ausbreiten"
+                ],
+                funFact: "Yoga kommt aus Indien und ist über 5000 Jahre alt!",
+                breathingTip: "Atme tief ein durch die Nase, und langsam aus durch den Mund!"
+            },
+            {
+                id: 10,
+                emoji: "🎪",
+                title: "Socken-Puppenshow",
+                category: "creative",
+                categoryName: "Kreativ",
+                time: "30 Min",
+                difficulty: 2,
+                theme: "from-indigo-400 to-blue-500",
+                materials: ["Alte Socken", "Wackelaugen oder Knöpfe", "Wolle für Haare", "Filzstifte", "Kleber"],
+                description: "Bastle lustige Handpuppen und spiele Theater!",
+                steps: [
+                    "Zieh eine Socke über deine Hand",
+                    "Klebe Augen auf (oder male sie)",
+                    "Füge Wolle als Haare hinzu",
+                    "Male einen Mund und andere Details",
+                    "Erfinde eine Geschichte und spiele sie! 🎭"
+                ],
+                funFact: "Puppentheater gibt es seit über 3000 Jahren!",
+                characterIdeas: ["Lustiger Drache", "Freche Prinzessin", "Mutiger Ritter", "Witziger Alien"]
+            },
+            {
+                id: 11,
+                emoji: "🔬",
+                title: "Regenwurm-Beobachtung",
+                category: "nature",
+                categoryName: "Natur",
+                time: "30 Min",
+                difficulty: 1,
+                theme: "from-lime-400 to-green-500",
+                materials: ["Durchsichtiges Glas/Dose", "Erde", "Sand", "Blätter", "Regenwürmer aus dem Garten"],
+                description: "Bau ein Regenwurm-Hotel und beobachte sie!",
+                steps: [
+                    "Fülle abwechselnd Schichten aus Erde und Sand ins Glas",
+                    "Lege oben Blätter drauf",
+                    "Setze vorsichtig 2-3 Regenwürmer hinein",
+                    "Wickle dunkles Papier drum herum (Würmer mögen Dunkelheit)",
+                    "Schau jeden Tag nach - sie bauen Tunnel! 🪱"
+                ],
+                funFact: "Regenwürmer können 8 Jahre alt werden und haben 5 Herzen!",
+                safetyTip: "Lass die Würmer nach ein paar Tagen wieder frei in den Garten!"
+            },
+            {
+                id: 12,
+                emoji: "🎈",
+                title: "Ballon-Rakete",
+                category: "experiment",
+                categoryName: "Experiment",
+                time: "15 Min",
+                difficulty: 1,
+                theme: "from-red-400 to-rose-500",
+                materials: ["Luftballon", "Strohhalm", "Schnur/Faden (3-4 Meter)", "Klebeband", "2 Stühle"],
+                description: "Lass eine Rakete durch dein Zimmer fliegen!",
+                steps: [
+                    "Spanne die Schnur zwischen zwei Stühlen",
+                    "Fädle den Strohhalm auf die Schnur",
+                    "Puste den Ballon auf (nicht zuknoten!)",
+                    "Klebe den Ballon an den Strohhalm",
+                    "Lass los und... WUUUUSCH! Die Rakete fliegt! 🚀"
+                ],
+                funFact: "Echte Raketen funktionieren genauso - Gas strömt nach hinten raus und schiebt die Rakete nach vorne!",
+                variations: ["Wer fliegt am weitesten?", "Verziere deine Rakete!", "Probiere verschiedene Ballongrößen!"]
+            },
+            {
+                id: 13,
+                emoji: "🌿",
+                title: "Natur-Mandala",
+                category: "nature",
+                categoryName: "Natur",
+                time: "30 Min",
+                difficulty: 1,
+                theme: "from-emerald-400 to-teal-500",
+                materials: ["Blätter", "Steine", "Blumen", "Stöcke", "Alles was du draußen findest!"],
+                description: "Lege ein wunderschönes Kunstwerk aus Naturmaterialien!",
+                steps: [
+                    "Geh nach draußen und sammle schöne Naturmaterialien",
+                    "Suche einen flachen Platz (Boden oder großes Brett)",
+                    "Beginne in der Mitte mit einem besonderen Stück",
+                    "Lege Kreise drum herum aus verschiedenen Materialien",
+                    "Mach ein Foto von deinem Kunstwerk! 📸"
+                ],
+                funFact: "Mandalas kommen aus Asien und bedeuten 'Kreis' - sie stehen für Harmonie!",
+                collectionIdeas: ["Bunte Blätter", "Kleine Steine", "Tannenzapfen", "Muscheln", "Grashalme"]
+            },
+            {
+                id: 14,
+                emoji: "👐",
+                title: "Zauber-Knete selbermachen",
+                category: "creative",
+                categoryName: "Kreativ",
+                time: "20 Min",
+                difficulty: 2,
+                theme: "from-fuchsia-400 to-pink-500",
+                materials: ["2 Tassen Mehl", "1 Tasse Salz", "1 Tasse Wasser", "Lebensmittelfarbe", "Öl"],
+                description: "Mach deine eigene super-weiche Knete!",
+                steps: [
+                    "Mische Mehl und Salz in einer großen Schüssel",
+                    "Gib Lebensmittelfarbe ins Wasser",
+                    "Gieße das farbige Wasser langsam zum Mehl",
+                    "Knete alles gut durch (hilft auch beim Stress abbauen!)",
+                    "Füge etwas Öl hinzu für extra Weichheit ✨"
+                ],
+                funFact: "Diese Knete hält im Kühlschrank mehrere Wochen!",
+                creationIdeas: ["Tiere formen", "Buchstaben kneten", "Eine Fantasiewelt bauen", "Essen aus Knete"]
+            },
+            {
+                id: 15,
+                emoji: "☁️",
+                title: "Wolken-Geschichten",
+                category: "imagination",
+                categoryName: "Fantasie",
+                time: "20 Min",
+                difficulty: 1,
+                theme: "from-sky-400 to-blue-500",
+                materials: ["Decke zum Hinlegen", "Wolkiger Tag", "Fantasie!"],
+                description: "Entdecke Bilder in den Wolken und erfinde Geschichten!",
+                steps: [
+                    "Leg dich auf eine Decke und schau in den Himmel",
+                    "Suche Formen in den Wolken - Tiere? Gesichter? Drachen?",
+                    "Zeige anderen was du siehst!",
+                    "Erfinde eine Geschichte über die Wolkenfiguren",
+                    "Schau wie sich die Formen langsam verändern! ☁️"
+                ],
+                funFact: "Wolken bestehen aus winzigen Wassertröpfchen - wie Nebel am Himmel!",
+                storyStarters: ["Es war einmal ein Wolkendrache...", "Die Wolkenprinzessin hatte ein Problem...", "Zwei Wolkentiere wurden Freunde..."]
+            },
+            {
+                id: 16,
+                emoji: "🏠",
+                title: "Karton-Kreationen",
+                category: "creative",
+                categoryName: "Kreativ",
+                time: "45 Min",
+                difficulty: 2,
+                theme: "from-orange-400 to-red-500",
+                materials: ["Große Kartons", "Schere (mit Hilfe)", "Klebeband", "Farben/Stifte", "Fantasie"],
+                description: "Bau etwas Großartiges aus alten Kartons!",
+                steps: [
+                    "Sammle große Kartons (Lieferboxen sind perfekt!)",
+                    "Überlege: Was möchtest du bauen? Auto? Haus? Rakete?",
+                    "Schneide Fenster und Türen aus (mit Hilfe)",
+                    "Verbinde mehrere Kartons mit Klebeband",
+                    "Bemale und dekoriere dein Meisterwerk! 🎨"
+                ],
+                funFact: "Architekten machen auch zuerst Modelle aus Pappe!",
+                buildIdeas: ["Ritterburg", "Rennwagen", "Raumschiff", "Puppenhaus", "Roboter", "Laden/Kiosk"]
+            },
+            {
+                id: 17,
+                emoji: "🔦",
+                title: "Schatten-Monster",
+                category: "imagination",
+                categoryName: "Fantasie",
+                time: "15 Min",
+                difficulty: 1,
+                theme: "from-slate-500 to-gray-700",
+                materials: ["Taschenlampe", "Dunkles Zimmer", "Weiße Wand", "Deine Hände!"],
+                description: "Mach coole Schattenbilder an der Wand!",
+                steps: [
+                    "Mach das Licht aus und die Taschenlampe an",
+                    "Halte deine Hände vor das Licht",
+                    "Probiere: Daumen + Zeigefinger = Hund!",
+                    "Zwei Hände zusammen = Vogel der fliegt!",
+                    "Erfinde eigene Schattenmonster! 👻"
+                ],
+                funFact: "Schattenspiele gibt es seit Tausenden von Jahren in China!",
+                shadowGuide: [
+                    "Hund: Faust mit abgespreiztem Daumen und kleinem Finger",
+                    "Vogel: Beide Hände verschränken, Daumen abspreizen = Flügel",
+                    "Hase: Zwei Finger hoch = Ohren"
+                ]
+            },
+            {
+                id: 18,
+                emoji: "🎲",
+                title: "Geschichten-Würfel",
+                category: "imagination",
+                categoryName: "Fantasie",
+                time: "20 Min",
+                difficulty: 1,
+                theme: "from-purple-400 to-violet-500",
+                materials: ["Papier", "Schere", "Stifte", "Oder: normale Würfel mit Stickern"],
+                description: "Würfle dir eine verrückte Geschichte zusammen!",
+                steps: [
+                    "Bastle 3 Würfel aus Papier (oder nimm normale)",
+                    "Würfel 1: Male Figuren drauf (Prinz, Hexe, Drache...)",
+                    "Würfel 2: Male Orte drauf (Schloss, Wald, Meer...)",
+                    "Würfel 3: Male Gegenstände drauf (Schwert, Schlüssel, Krone...)",
+                    "Würfle alle 3 und erzähle eine Geschichte damit! 📖"
+                ],
+                funFact: "Die ältesten Würfel sind 5000 Jahre alt!",
+                storyExample: "Der Drache (Würfel 1) im Wald (Würfel 2) fand einen Schlüssel (Würfel 3)..."
+            },
+            {
+                id: 19,
+                emoji: "🧁",
+                title: "Mini-Koch-Party",
+                category: "cooking",
+                categoryName: "Kochen",
+                time: "30 Min",
+                difficulty: 2,
+                theme: "from-yellow-400 to-orange-500",
+                materials: ["Brot/Toast", "Frischkäse", "Gemüse zum Dekorieren", "Ausstecher (optional)"],
+                description: "Mach lustige Gesichter-Brote zum Essen!",
+                steps: [
+                    "Schmiere Frischkäse auf eine Brotscheibe",
+                    "Schneide Gemüse in Formen: Gurke = Augen, Paprika = Mund",
+                    "Lege ein lustiges Gesicht auf das Brot",
+                    "Karotte als Nase, Schnittlauch als Haare",
+                    "Fotografiere dein Kunstwerk - dann aufessen! 😋"
+                ],
+                funFact: "Essen mit lustigen Gesichtern schmeckt Kindern besser - sagen Wissenschaftler!",
+                faceIdeas: ["Monster", "Clown", "Tier", "Alien", "Sonne"]
+            },
+            {
+                id: 20,
+                emoji: "🌟",
+                title: "Glitzer-Galaxie-Flasche",
+                category: "creative",
+                categoryName: "Kreativ",
+                time: "15 Min",
+                difficulty: 1,
+                theme: "from-indigo-500 to-purple-600",
+                materials: ["Plastikflasche mit Deckel", "Wasser", "Glitzer", "Lebensmittelfarbe", "Öl", "Kleber für Deckel"],
+                description: "Bastle deine eigene magische Galaxie zum Schütteln!",
+                steps: [
+                    "Fülle die Flasche zu 3/4 mit Wasser",
+                    "Gib reichlich Glitzer hinein (verschiedene Farben!)",
+                    "Tropfe blaue und lila Lebensmittelfarbe hinein",
+                    "Füge einen Schuss Öl hinzu für coole Blasen",
+                    "Deckel fest zukleben - jetzt SCHÜTTELN! ✨🌌"
+                ],
+                funFact: "Unsere echte Galaxie heißt Milchstraße und hat 200 Milliarden Sterne!",
+                variations: ["Verschiedene Farben ausprobieren!", "Kleine Sternchen-Konfetti hinzufügen!", "Als Nachtlicht nutzen (mit Lampe dahinter)!"]
+            }
+        ];
+
+        // Kategorie-Farben
+        const categoryColors = {
+            experiment: "bg-purple-100 text-purple-700",
+            movement: "bg-green-100 text-green-700",
+            creative: "bg-pink-100 text-pink-700",
+            music: "bg-rose-100 text-rose-700",
+            adventure: "bg-amber-100 text-amber-700",
+            nature: "bg-emerald-100 text-emerald-700",
+            imagination: "bg-blue-100 text-blue-700",
+            cooking: "bg-orange-100 text-orange-700"
+        };
+
+        // Schwierigkeits-Sterne
+        const DifficultyStars = ({ level }) => (
+            <div className="flex gap-1">
+                {[1, 2, 3].map(i => (
+                    <span key={i} className={i <= level ? "text-yellow-400" : "text-gray-300"}>★</span>
+                ))}
+            </div>
+        );
+
+        // Aktivitäts-Karte Komponente
+        const ActivityCard = ({ activity, onClick }) => (
+            <div
+                onClick={() => onClick(activity)}
+                className={`activity-card bg-gradient-to-br ${activity.theme} rounded-3xl p-6 cursor-pointer shadow-xl`}
+            >
+                <div className="flex items-start justify-between mb-4">
+                    <span className="text-6xl">{activity.emoji}</span>
+                    <div className="text-right">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${categoryColors[activity.category]}`}>
+                            {activity.categoryName}
+                        </span>
+                    </div>
+                </div>
+                <h3 className="title-font text-2xl text-white mb-2 drop-shadow-lg">{activity.title}</h3>
+                <p className="text-white/90 text-sm mb-4">{activity.description}</p>
+                <div className="flex items-center justify-between text-white/80 text-sm">
+                    <span className="flex items-center gap-1">
+                        <Icon name="Clock" size={16} />
+                        {activity.time}
+                    </span>
+                    <DifficultyStars level={activity.difficulty} />
+                </div>
+            </div>
+        );
+
+        // Detail-Modal Komponente
+        const ActivityModal = ({ activity, onClose, onDownload }) => {
+            if (!activity) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" id={`activity-detail-${activity.id}`}>
+                        {/* Header */}
+                        <div className={`bg-gradient-to-br ${activity.theme} p-6 rounded-t-3xl relative`}>
+                            <button
+                                onClick={onClose}
+                                className="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors no-print"
+                            >
+                                <Icon name="X" size={24} />
+                            </button>
+                            <div className="flex items-center gap-4">
+                                <span className="text-7xl">{activity.emoji}</span>
+                                <div>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${categoryColors[activity.category]} mb-2 inline-block`}>
+                                        {activity.categoryName}
+                                    </span>
+                                    <h2 className="title-font text-3xl text-white drop-shadow-lg">{activity.title}</h2>
+                                    <div className="flex items-center gap-4 text-white/90 mt-2">
+                                        <span className="flex items-center gap-1">
+                                            <Icon name="Clock" size={16} />
+                                            {activity.time}
+                                        </span>
+                                        <DifficultyStars level={activity.difficulty} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-6">
+                            {/* Beschreibung */}
+                            <p className="text-lg text-gray-700">{activity.description}</p>
+
+                            {/* Materialien */}
+                            <div className="bg-gray-50 rounded-2xl p-4">
+                                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                    <span className="text-xl">📦</span> Das brauchst du:
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {activity.materials.map((material, i) => (
+                                        <span key={i} className="px-3 py-1 bg-white rounded-full text-sm shadow-sm">
+                                            {material}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Schritte */}
+                            <div>
+                                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                    <span className="text-xl">📝</span> So geht's:
+                                </h3>
+                                <div className="space-y-3">
+                                    {activity.steps.map((step, i) => (
+                                        <div key={i} className="flex gap-3 items-start">
+                                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${activity.theme} text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md`}>
+                                                {i + 1}
+                                            </div>
+                                            <p className="text-gray-700 pt-1">{step}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Fun Fact */}
+                            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-4">
+                                <h3 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                                    <span className="text-xl">💡</span> Wusstest du?
+                                </h3>
+                                <p className="text-yellow-900">{activity.funFact}</p>
+                            </div>
+
+                            {/* Variationen/Tipps falls vorhanden */}
+                            {activity.variations && (
+                                <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4">
+                                    <h3 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                                        <span className="text-xl">🎯</span> Variationen:
+                                    </h3>
+                                    <ul className="list-disc list-inside text-blue-900 space-y-1">
+                                        {activity.variations.map((v, i) => <li key={i}>{v}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Sicherheitstipp falls vorhanden */}
+                            {activity.safetyTip && (
+                                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
+                                    <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                                        <span className="text-xl">⚠️</span> Sicherheits-Tipp:
+                                    </h3>
+                                    <p className="text-red-900">{activity.safetyTip}</p>
+                                </div>
+                            )}
+
+                            {/* Download Button */}
+                            <button
+                                onClick={() => onDownload(activity)}
+                                className={`w-full py-4 bg-gradient-to-r ${activity.theme} text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 no-print`}
+                            >
+                                <Icon name="Download" size={24} />
+                                Als PDF herunterladen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Hauptkomponente
+        const App = () => {
+            const [selectedActivity, setSelectedActivity] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+
+            const categories = [
+                { id: 'all', name: 'Alle', emoji: '🌈' },
+                { id: 'experiment', name: 'Experimente', emoji: '🧪' },
+                { id: 'movement', name: 'Bewegung', emoji: '🏃' },
+                { id: 'creative', name: 'Kreativ', emoji: '🎨' },
+                { id: 'nature', name: 'Natur', emoji: '🌿' },
+                { id: 'imagination', name: 'Fantasie', emoji: '✨' },
+            ];
+
+            const filteredActivities = activities.filter(act => {
+                const matchesCategory = selectedCategory === 'all' || act.category === selectedCategory;
+                const matchesSearch = act.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    act.description.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            const downloadPDF = async (activity) => {
+                const element = document.getElementById(`activity-detail-${activity.id}`);
+
+                const opt = {
+                    margin: 10,
+                    filename: `Aktivitaet_${activity.id}_${activity.title.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Hide buttons temporarily
+                const buttons = element.querySelectorAll('.no-print');
+                buttons.forEach(btn => btn.style.display = 'none');
+
+                await html2pdf().set(opt).from(element).save();
+
+                // Show buttons again
+                buttons.forEach(btn => btn.style.display = '');
+            };
+
+            const downloadAllPDF = async () => {
+                for (const activity of activities) {
+                    setSelectedActivity(activity);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await downloadPDF(activity);
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                setSelectedActivity(null);
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className="bg-white/80 backdrop-blur-lg shadow-lg sticky top-0 z-40">
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rainbow-border p-1 rounded-2xl">
+                                        <div className="w-full h-full bg-white rounded-xl flex items-center justify-center">
+                                            <span className="text-3xl bounce-icon">🎉</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h1 className="title-font text-3xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+                                            PsyNavi Aktivitäten
+                                        </h1>
+                                        <p className="text-gray-500">20 Zauberhafte Abenteuer für kleine Entdecker</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={downloadAllPDF}
+                                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                                >
+                                    <Icon name="Download" size={20} />
+                                    <span className="font-bold">Alle herunterladen</span>
+                                </button>
+                            </div>
+
+                            {/* Suche & Filter */}
+                            <div className="mt-4 flex flex-col md:flex-row gap-4">
+                                <div className="relative flex-1">
+                                    <Icon name="Search" size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Aktivität suchen..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                    {categories.map(cat => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => setSelectedCategory(cat.id)}
+                                            className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                                                selectedCategory === cat.id
+                                                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg'
+                                                    : 'bg-white text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            <span className="mr-1">{cat.emoji}</span>
+                                            {cat.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Info Banner */}
+                    <div className="bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 py-4">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex items-center justify-center gap-4 text-gray-700 flex-wrap">
+                                <span className="text-2xl bounce-icon">🎈</span>
+                                <p className="text-center">
+                                    <strong>Für Kinder von 4-6 Jahren</strong> • Spielen, Entdecken, Staunen!
+                                </p>
+                                <span className="text-2xl bounce-icon" style={{animationDelay: '0.5s'}}>🎈</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white rounded-2xl p-4 shadow-md text-center">
+                                <span className="text-3xl">🎯</span>
+                                <p className="text-2xl font-bold text-purple-600">20</p>
+                                <p className="text-gray-500 text-sm">Aktivitäten</p>
+                            </div>
+                            <div className="bg-white rounded-2xl p-4 shadow-md text-center">
+                                <span className="text-3xl">🧪</span>
+                                <p className="text-2xl font-bold text-pink-600">5</p>
+                                <p className="text-gray-500 text-sm">Experimente</p>
+                            </div>
+                            <div className="bg-white rounded-2xl p-4 shadow-md text-center">
+                                <span className="text-3xl">🏃</span>
+                                <p className="text-2xl font-bold text-green-600">3</p>
+                                <p className="text-gray-500 text-sm">Bewegungsspiele</p>
+                            </div>
+                            <div className="bg-white rounded-2xl p-4 shadow-md text-center">
+                                <span className="text-3xl">🎨</span>
+                                <p className="text-2xl font-bold text-blue-600">100%</p>
+                                <p className="text-gray-500 text-sm">Spaßgarantie</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Aktivitäten Grid */}
+                    <main className="max-w-7xl mx-auto px-4 pb-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredActivities.map(activity => (
+                                <ActivityCard
+                                    key={activity.id}
+                                    activity={activity}
+                                    onClick={setSelectedActivity}
+                                />
+                            ))}
+                        </div>
+
+                        {filteredActivities.length === 0 && (
+                            <div className="text-center py-12">
+                                <span className="text-6xl">🔍</span>
+                                <p className="text-gray-500 mt-4">Keine Aktivitäten gefunden</p>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t py-6">
+                        <div className="max-w-7xl mx-auto px-4 text-center">
+                            <p className="text-gray-500">
+                                🎉 PsyNavi Aktivitäten • Erstellt mit Liebe für kleine Abenteurer
+                            </p>
+                            <p className="text-gray-400 text-sm mt-2">
+                                Alle Aktivitäten sind kindersicher und für den Einsatz mit Erwachsenen konzipiert.
+                            </p>
+                        </div>
+                    </footer>
+
+                    {/* Modal */}
+                    {selectedActivity && (
+                        <ActivityModal
+                            activity={selectedActivity}
+                            onClose={() => setSelectedActivity(null)}
+                            onDownload={downloadPDF}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
