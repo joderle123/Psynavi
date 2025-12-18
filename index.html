@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Jahresabschluss 2025 - Deine Reflexionsreise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #14b8a6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(20, 184, 166, 0.1) 0%, transparent 40%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Navigation */
+        .phase-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .phase-indicators {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .phase-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .phase-dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .phase-dot.completed {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .current-phase-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 2rem 2rem;
+        }
+
+        /* Phase Sections */
+        .phase {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .phase.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phase-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .phase-number {
+            font-size: 0.9rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .phase-description {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+        }
+
+        .btn-large {
+            padding: 1.5rem 3rem;
+            font-size: 1.2rem;
+        }
+
+        /* Form Elements */
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        /* Student Selector */
+        .student-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .student-tab {
+            padding: 1rem 2rem;
+            background: var(--bg-card);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .student-tab:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .student-tab.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .student-tab .name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .student-tab .status {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            min-height: calc(100vh - 100px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .start-screen h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .start-screen p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 2rem;
+        }
+
+        .student-setup {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .student-setup input {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Breathing Exercise */
+        .breathing-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .breathing-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: transform 4s ease-in-out;
+        }
+
+        .breathing-circle.inhale {
+            transform: scale(1.5);
+        }
+
+        .breathing-circle.exhale {
+            transform: scale(1);
+        }
+
+        .breathing-instruction {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Mood Selector */
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .mood-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .mood-item:hover {
+            transform: translateY(-5px);
+            background: var(--bg-card-hover);
+        }
+
+        .mood-item.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .mood-item .emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-item .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            width: 45%;
+        }
+
+        .timeline-item:nth-child(odd) {
+            margin-left: 5%;
+        }
+
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+        }
+
+        .timeline-item .month {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .timeline-item .month:hover {
+            transform: scale(1.02);
+            border-color: var(--primary);
+        }
+
+        .timeline-item .month.has-content {
+            border-color: var(--success);
+        }
+
+        .month-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .month-preview {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        /* Skill Cards */
+        .skill-categories {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .skill-category {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .skill-category-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .skill-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .skill-card {
+            padding: 0.75rem 1.25rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .skill-card:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .skill-card.selected {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
+        /* Skill Rating */
+        .skill-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .rating-star {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            filter: grayscale(1);
+        }
+
+        .rating-star:hover {
+            transform: scale(1.2);
+        }
+
+        .rating-star.active {
+            filter: grayscale(0);
+        }
+
+        /* Group Activity */
+        .group-activity {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .activity-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .feedback-cards {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feedback-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .feedback-card .recipient {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        /* Letter to Future Self */
+        .letter-container {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px dashed rgba(99, 102, 241, 0.4);
+        }
+
+        .letter-header {
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .letter-textarea {
+            min-height: 200px;
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .letter-textarea:focus {
+            border: none;
+            box-shadow: none;
+        }
+
+        /* Goals */
+        .goal-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .goal-input-group input {
+            flex: 1;
+        }
+
+        .goals-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+
+        .goal-item .icon {
+            font-size: 1.5rem;
+        }
+
+        .goal-item .text {
+            flex: 1;
+        }
+
+        .goal-item .remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+
+        .goal-item .remove:hover {
+            color: var(--secondary);
+        }
+
+        /* Final Ritual */
+        .ritual-container {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .ritual-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5)); }
+            to { filter: drop-shadow(0 0 40px rgba(236, 72, 153, 0.8)); }
+        }
+
+        .statements-container {
+            display: grid;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .statement-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: left;
+        }
+
+        .statement-card .student-name {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .statement-card .statement {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Time Capsule */
+        .time-capsule {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            border-radius: 24px;
+            padding: 3rem;
+            margin-top: 2rem;
+            text-align: center;
+            border: 2px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .capsule-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .phase-title {
+                font-size: 1.8rem;
+            }
+
+            .mood-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                width: calc(100% - 50px);
+                margin-left: 50px !important;
+            }
+
+            .student-tabs {
+                flex-direction: column;
+            }
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--bg-card);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Print styles */
+        @media print {
+            .phase-nav, .nav-buttons, .btn {
+                display: none !important;
+            }
+
+            .phase {
+                display: block !important;
+                page-break-after: always;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="phase-nav hidden" id="mainNav">
+        <div>
+            <div class="current-phase-name" id="currentPhaseName">Phase 1</div>
+            <div class="phase-indicators">
+                <div class="phase-dot" data-phase="1"></div>
+                <div class="phase-dot" data-phase="2"></div>
+                <div class="phase-dot" data-phase="3"></div>
+                <div class="phase-dot" data-phase="4"></div>
+                <div class="phase-dot" data-phase="5"></div>
+                <div class="phase-dot" data-phase="6"></div>
+            </div>
+        </div>
+        <div class="timer-display" id="timer">90:00</div>
+    </nav>
+
+    <div class="container">
+        <!-- Start Screen -->
+        <section class="phase active" id="phase-start">
+            <div class="start-screen">
+                <div class="logo">🌟</div>
+                <h1>Jahresabschluss 2025</h1>
+                <p>Willkommen zu eurer DBT-Skills Reflexionsreise! Eine gemeinsame Zeit zum Nachdenken, Teilen und Vorausschauen.</p>
+
+                <div class="student-setup">
+                    <input type="text" id="student1" placeholder="Name Schüler*in 1" maxlength="20">
+                    <input type="text" id="student2" placeholder="Name Schüler*in 2" maxlength="20">
+                    <input type="text" id="student3" placeholder="Name Schüler*in 3" maxlength="20">
+                </div>
+
+                <button class="btn btn-primary btn-large" onclick="startJourney()">
+                    Reise starten 🚀
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 1: Ankommen -->
+        <section class="phase" id="phase-1">
+            <div class="phase-header">
+                <div class="phase-number">Phase 1 von 6</div>
+                <h2 class="phase-title">Ankommen im Moment</h2>
+                <p class="phase-description">Lasst uns gemeinsam zur Ruhe kommen und im Hier und Jetzt ankommen.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🫁 Atemübung - 4-7-8 Technik</div>
+                <div class="breathing-container">
+                    <div class="breathing-circle" id="breathingCircle">
+                        Bereit
+                    </div>
+                    <div class="breathing-instruction" id="breathingInstruction">
+                        Klicke um zu starten
+                    </div>
+                    <button class="btn btn-secondary" onclick="startBreathing()" id="breathingBtn">
+                        Atemübung starten
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💭 Check-In: Wie kommst du heute hier an?</div>
+                <div class="student-tabs" id="checkInTabs">
+                    <!-- Generated dynamically -->
+                </div>
+
+                <div id="checkInContent">
+                    <p style="margin-bottom: 1rem; color: var(--text-muted);">Wähle deine aktuelle Stimmung:</p>
+                    <div class="mood-grid">
+                        <div class="mood-item" data-mood="super">
+                            <span class="emoji">🤩</span>
+                            <span class="label">Super!</span>
+                        </div>
+                        <div class="mood-item" data-mood="gut">
+                            <span class="emoji">😊</span>
+                            <span class="label">Gut</span>
+                        </div>
+                        <div class="mood-item" data-mood="neutral">
+                            <span class="emoji">😐</span>
+                            <span class="label">Neutral</span>
+                        </div>
+                        <div class="mood-item" data-mood="müde">
+                            <span class="emoji">😴</span>
+                            <span class="label">Müde</span>
+                        </div>
+                        <div class="mood-item" data-mood="gestresst">
+                            <span class="emoji">😤</span>
+                            <span class="label">Gestresst</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">
+                            Was beschäftigt dich gerade? (optional)
+                        </label>
+                        <textarea id="checkInText" placeholder="Schreibe hier, was dir durch den Kopf geht..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <div></div>
+                <button class="btn btn-primary" onclick="nextPhase()">
+                    Weiter zu Phase 2 →
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 2: Zeitreise -->
+        <section class="phase" id="phase-2">
+            <div class="phase-header">
+                <div class="phase-number">Phase 2 von 6</div>
+                <h2 class="phase-title">Deine Zeitreise durch 2025</h2>
+                <p class="phase-description">Klicke auf die Monate und halte deine wichtigsten Erinnerungen fest.</p>
+            </div>
+
+            <div class="student-tabs" id="timelineTabs">
+                <!-- Generated dynamically -->
+            </div>
+
+            <div class="timeline" id="timeline">
+                <!-- Generated dynamically -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-title">📊 Dein Jahr auf einen Blick</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="text-align: center; padding: 1.5rem; background: rgba(34, 197, 94, 0.2); border-radius: 12px;">
+                        <div style="font-size: 2rem;">✨</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">Höhepunkte</div>
+                        <div style="font-size: 1.5rem; font-weight: 600;" id="highlightCount">0</div>
+                    </div>
+                    <div style="text-align: center; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border-radius: 12px;">
+                        <div style="font-size: 2rem;">💪</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">Herausforderungen gemeistert</div>
+                        <div style="font-size: 1.5rem; font-weight: 600;" id="challengeCount">0</div>
+                    </div>
+                    <div style="text-align: center; padding: 1.5rem; background: rgba(99, 102, 241, 0.2); border-radius: 12px;">
+                        <div style="font-size: 2rem;">📝</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">Monate dokumentiert</div>
+                        <div style="font-size: 1.5rem; font-weight: 600;" id="monthsFilledCount">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevPhase()">
+                    ← Zurück
+                </button>
+                <button class="btn btn-primary" onclick="nextPhase()">
+                    Weiter zu Phase 3 →
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 3: Skill-Reflexion -->
+        <section class="phase" id="phase-3">
+            <div class="phase-header">
+                <div class="phase-number">Phase 3 von 6</div>
+                <h2 class="phase-title">Deine DBT-Skills im Rückblick</h2>
+                <p class="phase-description">Welche Skills hast du dieses Jahr gelernt und angewendet?</p>
+            </div>
+
+            <div class="student-tabs" id="skillTabs">
+                <!-- Generated dynamically -->
+            </div>
+
+            <div class="skill-categories">
+                <div class="skill-category">
+                    <div class="skill-category-title">
+                        <span>🧘</span> Achtsamkeit (Mindfulness)
+                    </div>
+                    <div class="skill-cards">
+                        <div class="skill-card" data-skill="wise-mind">Wise Mind</div>
+                        <div class="skill-card" data-skill="beobachten">Beobachten</div>
+                        <div class="skill-card" data-skill="beschreiben">Beschreiben</div>
+                        <div class="skill-card" data-skill="teilnehmen">Teilnehmen</div>
+                        <div class="skill-card" data-skill="nicht-bewerten">Nicht bewerten</div>
+                        <div class="skill-card" data-skill="eins-im-moment">Eins im Moment</div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <div class="skill-category-title">
+                        <span>🌊</span> Stresstoleranz
+                    </div>
+                    <div class="skill-cards">
+                        <div class="skill-card" data-skill="tipp">TIPP-Skills</div>
+                        <div class="skill-card" data-skill="stop">STOP-Skill</div>
+                        <div class="skill-card" data-skill="ablenkung">Ablenkung (ACCEPTS)</div>
+                        <div class="skill-card" data-skill="selbstberuhigung">Selbstberuhigung</div>
+                        <div class="skill-card" data-skill="pros-cons">Pro & Contra</div>
+                        <div class="skill-card" data-skill="radikale-akzeptanz">Radikale Akzeptanz</div>
+                        <div class="skill-card" data-skill="krisen-survival">Krisen-Survival</div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <div class="skill-category-title">
+                        <span>❤️</span> Emotionsregulation
+                    </div>
+                    <div class="skill-cards">
+                        <div class="skill-card" data-skill="abc-please">ABC PLEASE</div>
+                        <div class="skill-card" data-skill="gegenteiliges-handeln">Gegenteiliges Handeln</div>
+                        <div class="skill-card" data-skill="emotionen-benennen">Emotionen benennen</div>
+                        <div class="skill-card" data-skill="emotionswellen-reiten">Emotionswellen reiten</div>
+                        <div class="skill-card" data-skill="positives-sammeln">Positives sammeln</div>
+                        <div class="skill-card" data-skill="problemloesen">Problemlösen</div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <div class="skill-category-title">
+                        <span>🤝</span> Zwischenmenschliche Fertigkeiten
+                    </div>
+                    <div class="skill-cards">
+                        <div class="skill-card" data-skill="dear-man">DEAR MAN</div>
+                        <div class="skill-card" data-skill="give">GIVE</div>
+                        <div class="skill-card" data-skill="fast">FAST</div>
+                        <div class="skill-card" data-skill="grenzen-setzen">Grenzen setzen</div>
+                        <div class="skill-card" data-skill="nein-sagen">Nein sagen</div>
+                        <div class="skill-card" data-skill="um-hilfe-bitten">Um Hilfe bitten</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-title">⭐ Dein Top-Skill 2025</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Welcher Skill hat dir am meisten geholfen? Wähle oben aus und beschreibe eine konkrete Situation:
+                </p>
+                <textarea id="topSkillStory" placeholder="Beschreibe eine Situation, in der dir dieser Skill besonders geholfen hat..."></textarea>
+
+                <div style="margin-top: 1.5rem;">
+                    <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Wie sicher fühlst du dich mit diesem Skill? (1-5 Sterne)</p>
+                    <div class="skill-rating" id="skillRating">
+                        <span class="rating-star" data-rating="1">⭐</span>
+                        <span class="rating-star" data-rating="2">⭐</span>
+                        <span class="rating-star" data-rating="3">⭐</span>
+                        <span class="rating-star" data-rating="4">⭐</span>
+                        <span class="rating-star" data-rating="5">⭐</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevPhase()">
+                    ← Zurück
+                </button>
+                <button class="btn btn-primary" onclick="nextPhase()">
+                    Weiter zu Phase 4 →
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 4: Gruppenaktivitäten -->
+        <section class="phase" id="phase-4">
+            <div class="phase-header">
+                <div class="phase-number">Phase 4 von 6</div>
+                <h2 class="phase-title">Miteinander - Warme Dusche</h2>
+                <p class="phase-description">Zeit für positives Feedback! Was schätzt ihr aneinander?</p>
+            </div>
+
+            <div class="card">
+                <div class="group-activity">
+                    <div class="activity-icon">🚿💝</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Die "Warme Dusche"</h3>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 2rem;">
+                        Jede*r schreibt für die anderen beiden etwas Positives auf.
+                        Was hast du an ihnen beobachtet? Was schätzt du? Was haben sie gut gemacht?
+                    </p>
+                </div>
+            </div>
+
+            <div class="student-tabs" id="feedbackFromTabs">
+                <!-- Who is giving feedback -->
+            </div>
+
+            <div class="feedback-cards" id="feedbackCards">
+                <!-- Generated dynamically -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-title">🎯 Gruppen-Challenge</div>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                    Besprecht gemeinsam: Was war euer gemeinsamer Höhepunkt in der DBT-Gruppe dieses Jahr?
+                </p>
+                <textarea id="groupHighlight" placeholder="Unser gemeinsamer Höhepunkt war..."></textarea>
+
+                <div style="margin-top: 1.5rem;">
+                    <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Was habt ihr voneinander gelernt?</p>
+                    <textarea id="learnedFromEachOther" placeholder="Wir haben voneinander gelernt, dass..."></textarea>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevPhase()">
+                    ← Zurück
+                </button>
+                <button class="btn btn-primary" onclick="nextPhase()">
+                    Weiter zu Phase 5 →
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 5: Zukunft -->
+        <section class="phase" id="phase-5">
+            <div class="phase-header">
+                <div class="phase-number">Phase 5 von 6</div>
+                <h2 class="phase-title">Blick in die Zukunft</h2>
+                <p class="phase-description">Was nimmst du mit ins Jahr 2026?</p>
+            </div>
+
+            <div class="student-tabs" id="futureTabs">
+                <!-- Generated dynamically -->
+            </div>
+
+            <div class="card">
+                <div class="card-title">✉️ Brief an dein zukünftiges Ich</div>
+                <div class="letter-container">
+                    <div class="letter-header">
+                        Liebe*r <span id="futureLetterName">___</span> im Dezember 2025...
+                    </div>
+                    <textarea class="letter-textarea" id="futureLetter" placeholder="Schreibe hier deinen Brief an dein zukünftiges Ich. Was möchtest du dir selbst sagen? Was soll dein zukünftiges Ich wissen? Welche Ratschläge gibst du dir?
+
+Du könntest schreiben über:
+- Was du dieses Jahr erreicht hast
+- Worauf du stolz bist
+- Was du dir fürs nächste Jahr wünschst
+- Einen wichtigen Rat an dich selbst..."></textarea>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 Meine Ziele für 2026</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Setze dir 3 konkrete Ziele für das neue Jahr. Was willst du erreichen oder verändern?
+                </p>
+
+                <div class="goal-input-group">
+                    <input type="text" id="goalInput" placeholder="Neues Ziel eingeben...">
+                    <button class="btn btn-secondary" onclick="addGoal()">+ Hinzufügen</button>
+                </div>
+
+                <ul class="goals-list" id="goalsList">
+                    <!-- Goals added dynamically -->
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💪 Skills, die ich stärken will</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Welche DBT-Skills möchtest du im neuen Jahr besonders üben?
+                </p>
+                <div class="skill-cards" id="futureSkills">
+                    <div class="skill-card" data-future-skill="achtsamkeit">Achtsamkeit vertiefen</div>
+                    <div class="skill-card" data-future-skill="stresstoleranz">Stresstoleranz ausbauen</div>
+                    <div class="skill-card" data-future-skill="emotionsregulation">Emotionen besser regulieren</div>
+                    <div class="skill-card" data-future-skill="beziehungen">Beziehungen stärken</div>
+                    <div class="skill-card" data-future-skill="grenzen">Bessere Grenzen setzen</div>
+                    <div class="skill-card" data-future-skill="selbstfuersorge">Mehr Selbstfürsorge</div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevPhase()">
+                    ← Zurück
+                </button>
+                <button class="btn btn-primary" onclick="nextPhase()">
+                    Weiter zum Abschluss →
+                </button>
+            </div>
+        </section>
+
+        <!-- Phase 6: Abschluss -->
+        <section class="phase" id="phase-6">
+            <div class="phase-header">
+                <div class="phase-number">Phase 6 von 6</div>
+                <h2 class="phase-title">Gemeinsamer Abschluss</h2>
+                <p class="phase-description">Lasst uns das Jahr würdig abschließen.</p>
+            </div>
+
+            <div class="card">
+                <div class="ritual-container">
+                    <div class="ritual-icon">🌟</div>
+                    <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Abschluss-Statement</h3>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 2rem;">
+                        Jede*r formuliert ein persönliches Statement: "Was ich aus 2025 mitnehme..."
+                    </p>
+                </div>
+
+                <div class="statements-container" id="statementsContainer">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🙏 Dankbarkeits-Runde</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Wofür bist du in diesem Jahr dankbar? Nenne 3 Dinge.
+                </p>
+                <div class="student-tabs" id="gratitudeTabs">
+                    <!-- Generated dynamically -->
+                </div>
+                <div style="margin-top: 1rem;">
+                    <textarea id="gratitude1" placeholder="1. Ich bin dankbar für..." style="margin-bottom: 0.5rem;"></textarea>
+                    <textarea id="gratitude2" placeholder="2. Ich bin dankbar für..." style="margin-bottom: 0.5rem;"></textarea>
+                    <textarea id="gratitude3" placeholder="3. Ich bin dankbar für..."></textarea>
+                </div>
+            </div>
+
+            <div class="time-capsule">
+                <div class="capsule-icon">📦✨</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Eure Zeitkapsel 2025</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                    Alles was ihr heute geschrieben habt, könnt ihr speichern und in einem Jahr wieder öffnen!
+                </p>
+                <button class="btn btn-primary btn-large" onclick="saveTimeCapsule()">
+                    📥 Zeitkapsel speichern
+                </button>
+            </div>
+
+            <div class="card" style="margin-top: 2rem; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Geschafft!</h3>
+                <p style="color: var(--text-muted);">
+                    Ihr habt eure Reflexionsreise abgeschlossen. Danke für eure Offenheit und euer Engagement!
+                </p>
+                <button class="btn btn-secondary" style="margin-top: 1.5rem;" onclick="celebrate()">
+                    🎊 Feiern!
+                </button>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevPhase()">
+                    ← Zurück
+                </button>
+                <button class="btn btn-primary" onclick="restartJourney()">
+                    Von vorne starten 🔄
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Month Modal -->
+    <div class="modal-overlay" id="monthModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalMonthTitle">Januar 2025</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">
+                    ✨ Was war ein Highlight in diesem Monat?
+                </label>
+                <textarea id="monthHighlight" placeholder="Das Beste in diesem Monat war..."></textarea>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">
+                    💪 Gab es Herausforderungen? Wie hast du sie gemeistert?
+                </label>
+                <textarea id="monthChallenge" placeholder="Eine Herausforderung war... Ich habe sie gemeistert, indem..."></textarea>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">
+                    🎭 Wie war deine Stimmung meistens?
+                </label>
+                <div class="mood-grid" id="monthMoodGrid" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="mood-item" data-month-mood="super">
+                        <span class="emoji">🤩</span>
+                    </div>
+                    <div class="mood-item" data-month-mood="gut">
+                        <span class="emoji">😊</span>
+                    </div>
+                    <div class="mood-item" data-month-mood="gemischt">
+                        <span class="emoji">🎭</span>
+                    </div>
+                    <div class="mood-item" data-month-mood="schwierig">
+                        <span class="emoji">😔</span>
+                    </div>
+                    <div class="mood-item" data-month-mood="turbulent">
+                        <span class="emoji">🌪️</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+                <button class="btn btn-primary" onclick="saveMonth()">Speichern ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const state = {
+            students: [],
+            currentStudent: 0,
+            currentPhase: 'start',
+            phaseNumber: 0,
+            startTime: null,
+            timerInterval: null,
+            currentMonth: null,
+            data: {
+                // Per student data
+                students: {}
+            },
+            groupData: {
+                groupHighlight: '',
+                learnedFromEachOther: ''
+            }
+        };
+
+        const months = [
+            'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+        ];
+
+        const phaseNames = [
+            'Start',
+            'Ankommen im Moment',
+            'Zeitreise durch 2025',
+            'DBT-Skills Reflexion',
+            'Miteinander',
+            'Blick in die Zukunft',
+            'Gemeinsamer Abschluss'
+        ];
+
+        // Initialize student data structure
+        function initStudentData(name) {
+            return {
+                name: name,
+                checkIn: { mood: '', text: '' },
+                months: {},
+                skills: {
+                    selected: [],
+                    topSkill: '',
+                    topSkillStory: '',
+                    rating: 0
+                },
+                feedback: {},
+                future: {
+                    letter: '',
+                    goals: [],
+                    skillsToImprove: []
+                },
+                statement: '',
+                gratitude: ['', '', '']
+            };
+        }
+
+        // Start the journey
+        function startJourney() {
+            const names = [
+                document.getElementById('student1').value.trim(),
+                document.getElementById('student2').value.trim(),
+                document.getElementById('student3').value.trim()
+            ].filter(n => n);
+
+            if (names.length < 3) {
+                alert('Bitte gebt alle 3 Namen ein!');
+                return;
+            }
+
+            state.students = names;
+            names.forEach(name => {
+                state.data.students[name] = initStudentData(name);
+            });
+
+            // Show navigation
+            document.getElementById('mainNav').classList.remove('hidden');
+
+            // Start timer
+            state.startTime = Date.now();
+            startTimer();
+
+            // Go to phase 1
+            goToPhase(1);
+
+            // Setup all dynamic content
+            setupStudentTabs();
+            setupTimeline();
+            setupSkillCards();
+            setupFeedbackCards();
+            setupFutureTabs();
+            setupStatements();
+            setupGratitudeTabs();
+        }
+
+        // Timer
+        function startTimer() {
+            const totalMinutes = 90;
+            state.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                const remaining = Math.max(0, totalMinutes * 60 - elapsed);
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                document.getElementById('timer').textContent =
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (remaining <= 300 && remaining > 0) {
+                    document.getElementById('timer').style.color = '#f59e0b';
+                }
+                if (remaining <= 60) {
+                    document.getElementById('timer').style.color = '#ef4444';
+                }
+            }, 1000);
+        }
+
+        // Navigation
+        function goToPhase(num) {
+            // Hide all phases
+            document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+
+            // Show target phase
+            const phaseId = num === 0 ? 'phase-start' : `phase-${num}`;
+            document.getElementById(phaseId).classList.add('active');
+
+            // Update dots
+            document.querySelectorAll('.phase-dot').forEach((dot, i) => {
+                dot.classList.remove('active');
+                if (i + 1 < num) dot.classList.add('completed');
+                if (i + 1 === num) dot.classList.add('active');
+            });
+
+            // Update phase name
+            document.getElementById('currentPhaseName').textContent = phaseNames[num];
+
+            state.phaseNumber = num;
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextPhase() {
+            saveCurrentPhaseData();
+            if (state.phaseNumber < 6) {
+                goToPhase(state.phaseNumber + 1);
+            }
+        }
+
+        function prevPhase() {
+            saveCurrentPhaseData();
+            if (state.phaseNumber > 1) {
+                goToPhase(state.phaseNumber - 1);
+            }
+        }
+
+        // Setup student tabs
+        function setupStudentTabs() {
+            const containers = ['checkInTabs', 'timelineTabs', 'skillTabs', 'feedbackFromTabs', 'futureTabs', 'gratitudeTabs'];
+
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.innerHTML = state.students.map((name, i) => `
+                    <div class="student-tab ${i === 0 ? 'active' : ''}" data-student="${i}" onclick="selectStudent(${i}, '${containerId}')">
+                        <div class="name">${name}</div>
+                        <div class="status">Noch nicht ausgefüllt</div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function selectStudent(index, containerId) {
+            state.currentStudent = index;
+
+            // Update tabs in this container
+            const container = document.getElementById(containerId);
+            container.querySelectorAll('.student-tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+
+            // Load student data for current phase
+            loadStudentDataForPhase();
+        }
+
+        function loadStudentDataForPhase() {
+            const student = state.students[state.currentStudent];
+            const data = state.data.students[student];
+
+            if (state.phaseNumber === 1) {
+                // Check-in
+                document.querySelectorAll('.mood-item').forEach(item => {
+                    item.classList.toggle('selected', item.dataset.mood === data.checkIn.mood);
+                });
+                document.getElementById('checkInText').value = data.checkIn.text || '';
+            }
+
+            if (state.phaseNumber === 3) {
+                // Skills
+                document.querySelectorAll('.skill-card[data-skill]').forEach(card => {
+                    card.classList.toggle('selected', data.skills.selected.includes(card.dataset.skill));
+                });
+                document.getElementById('topSkillStory').value = data.skills.topSkillStory || '';
+                updateRatingStars(data.skills.rating);
+            }
+
+            if (state.phaseNumber === 5) {
+                // Future
+                document.getElementById('futureLetterName').textContent = student;
+                document.getElementById('futureLetter').value = data.future.letter || '';
+                renderGoals();
+                document.querySelectorAll('.skill-card[data-future-skill]').forEach(card => {
+                    card.classList.toggle('selected', data.future.skillsToImprove.includes(card.dataset.futureSkill));
+                });
+            }
+
+            if (state.phaseNumber === 6) {
+                // Gratitude
+                document.getElementById('gratitude1').value = data.gratitude[0] || '';
+                document.getElementById('gratitude2').value = data.gratitude[1] || '';
+                document.getElementById('gratitude3').value = data.gratitude[2] || '';
+            }
+        }
+
+        function saveCurrentPhaseData() {
+            const student = state.students[state.currentStudent];
+            if (!student) return;
+
+            const data = state.data.students[student];
+
+            if (state.phaseNumber === 1) {
+                const selectedMood = document.querySelector('.mood-item.selected');
+                data.checkIn.mood = selectedMood ? selectedMood.dataset.mood : '';
+                data.checkIn.text = document.getElementById('checkInText').value;
+            }
+
+            if (state.phaseNumber === 3) {
+                data.skills.topSkillStory = document.getElementById('topSkillStory').value;
+            }
+
+            if (state.phaseNumber === 4) {
+                state.groupData.groupHighlight = document.getElementById('groupHighlight').value;
+                state.groupData.learnedFromEachOther = document.getElementById('learnedFromEachOther').value;
+            }
+
+            if (state.phaseNumber === 5) {
+                data.future.letter = document.getElementById('futureLetter').value;
+            }
+
+            if (state.phaseNumber === 6) {
+                data.gratitude[0] = document.getElementById('gratitude1').value;
+                data.gratitude[1] = document.getElementById('gratitude2').value;
+                data.gratitude[2] = document.getElementById('gratitude3').value;
+
+                const statementTextarea = document.querySelector(`#statementsContainer textarea[data-student="${student}"]`);
+                if (statementTextarea) {
+                    data.statement = statementTextarea.value;
+                }
+            }
+
+            updateTabStatus();
+        }
+
+        function updateTabStatus() {
+            // Update status indicators on tabs
+            state.students.forEach((name, i) => {
+                const data = state.data.students[name];
+                let status = 'Noch nicht ausgefüllt';
+                let hasContent = false;
+
+                if (state.phaseNumber === 1 && data.checkIn.mood) hasContent = true;
+                if (state.phaseNumber === 2 && Object.keys(data.months).length > 0) hasContent = true;
+                if (state.phaseNumber === 3 && data.skills.selected.length > 0) hasContent = true;
+                if (state.phaseNumber === 5 && data.future.letter) hasContent = true;
+                if (state.phaseNumber === 6 && data.statement) hasContent = true;
+
+                if (hasContent) status = '✓ Ausgefüllt';
+
+                document.querySelectorAll(`.student-tab[data-student="${i}"] .status`).forEach(el => {
+                    el.textContent = status;
+                    el.style.color = hasContent ? 'var(--success)' : 'var(--text-muted)';
+                });
+            });
+        }
+
+        // Breathing exercise
+        let breathingActive = false;
+        let breathingCycle = 0;
+
+        function startBreathing() {
+            if (breathingActive) return;
+            breathingActive = true;
+
+            const circle = document.getElementById('breathingCircle');
+            const instruction = document.getElementById('breathingInstruction');
+            const btn = document.getElementById('breathingBtn');
+            btn.textContent = 'Läuft...';
+            btn.disabled = true;
+
+            const phases = [
+                { text: 'Einatmen...', duration: 4000, scale: 'inhale' },
+                { text: 'Halten...', duration: 7000, scale: 'inhale' },
+                { text: 'Ausatmen...', duration: 8000, scale: 'exhale' }
+            ];
+
+            let cycleCount = 0;
+            const maxCycles = 3;
+
+            function runPhase(phaseIndex) {
+                if (cycleCount >= maxCycles) {
+                    circle.textContent = 'Fertig! 🙏';
+                    circle.className = 'breathing-circle';
+                    instruction.textContent = 'Gut gemacht!';
+                    btn.textContent = 'Nochmal';
+                    btn.disabled = false;
+                    breathingActive = false;
+                    return;
+                }
+
+                const phase = phases[phaseIndex];
+                circle.textContent = phase.duration / 1000;
+                circle.className = `breathing-circle ${phase.scale}`;
+                instruction.textContent = phase.text;
+
+                // Countdown
+                let countdown = phase.duration / 1000;
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        circle.textContent = countdown;
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(countdownInterval);
+                    const nextPhase = (phaseIndex + 1) % phases.length;
+                    if (nextPhase === 0) cycleCount++;
+                    runPhase(nextPhase);
+                }, phase.duration);
+            }
+
+            runPhase(0);
+        }
+
+        // Mood selection
+        document.addEventListener('click', (e) => {
+            const moodItem = e.target.closest('.mood-item[data-mood]');
+            if (moodItem && !e.target.closest('#monthMoodGrid')) {
+                document.querySelectorAll('.mood-item[data-mood]').forEach(m => m.classList.remove('selected'));
+                moodItem.classList.add('selected');
+
+                const student = state.students[state.currentStudent];
+                if (student) {
+                    state.data.students[student].checkIn.mood = moodItem.dataset.mood;
+                    updateTabStatus();
+                }
+            }
+        });
+
+        // Timeline
+        function setupTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = months.map((month, i) => `
+                <div class="timeline-item">
+                    <div class="month" data-month="${i}" onclick="openMonthModal(${i})">
+                        <div class="month-name">
+                            <span>${getMonthEmoji(i)}</span>
+                            ${month} 2025
+                        </div>
+                        <div class="month-preview" id="monthPreview${i}">Klicke zum Ausfüllen</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getMonthEmoji(monthIndex) {
+            const emojis = ['❄️', '💝', '🌸', '🌷', '🌻', '☀️', '🏖️', '🌅', '🍂', '🎃', '🍁', '🎄'];
+            return emojis[monthIndex];
+        }
+
+        function openMonthModal(monthIndex) {
+            state.currentMonth = monthIndex;
+            const student = state.students[state.currentStudent];
+            const monthData = state.data.students[student].months[monthIndex] || {};
+
+            document.getElementById('modalMonthTitle').textContent = `${months[monthIndex]} 2025`;
+            document.getElementById('monthHighlight').value = monthData.highlight || '';
+            document.getElementById('monthChallenge').value = monthData.challenge || '';
+
+            // Reset mood selection
+            document.querySelectorAll('#monthMoodGrid .mood-item').forEach(m => {
+                m.classList.toggle('selected', m.dataset.monthMood === monthData.mood);
+            });
+
+            document.getElementById('monthModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('monthModal').classList.remove('active');
+        }
+
+        function saveMonth() {
+            const student = state.students[state.currentStudent];
+            const monthIndex = state.currentMonth;
+
+            const selectedMood = document.querySelector('#monthMoodGrid .mood-item.selected');
+
+            state.data.students[student].months[monthIndex] = {
+                highlight: document.getElementById('monthHighlight').value,
+                challenge: document.getElementById('monthChallenge').value,
+                mood: selectedMood ? selectedMood.dataset.monthMood : ''
+            };
+
+            // Update preview
+            const preview = document.getElementById(`monthPreview${monthIndex}`);
+            const monthData = state.data.students[student].months[monthIndex];
+            if (monthData.highlight || monthData.challenge) {
+                preview.textContent = monthData.highlight ? monthData.highlight.substring(0, 50) + '...' : 'Ausgefüllt ✓';
+                document.querySelector(`[data-month="${monthIndex}"]`).classList.add('has-content');
+            }
+
+            updateYearStats();
+            closeModal();
+        }
+
+        function updateYearStats() {
+            const student = state.students[state.currentStudent];
+            const monthsData = state.data.students[student].months;
+
+            let highlights = 0;
+            let challenges = 0;
+            let filled = 0;
+
+            Object.values(monthsData).forEach(m => {
+                if (m.highlight) highlights++;
+                if (m.challenge) challenges++;
+                filled++;
+            });
+
+            document.getElementById('highlightCount').textContent = highlights;
+            document.getElementById('challengeCount').textContent = challenges;
+            document.getElementById('monthsFilledCount').textContent = filled;
+        }
+
+        // Month mood selection
+        document.addEventListener('click', (e) => {
+            const monthMood = e.target.closest('#monthMoodGrid .mood-item');
+            if (monthMood) {
+                document.querySelectorAll('#monthMoodGrid .mood-item').forEach(m => m.classList.remove('selected'));
+                monthMood.classList.add('selected');
+            }
+        });
+
+        // Skills
+        function setupSkillCards() {
+            document.querySelectorAll('.skill-card[data-skill]').forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('selected');
+
+                    const student = state.students[state.currentStudent];
+                    const skill = card.dataset.skill;
+                    const skills = state.data.students[student].skills.selected;
+
+                    if (card.classList.contains('selected')) {
+                        if (!skills.includes(skill)) skills.push(skill);
+                        state.data.students[student].skills.topSkill = skill;
+                    } else {
+                        const idx = skills.indexOf(skill);
+                        if (idx > -1) skills.splice(idx, 1);
+                    }
+
+                    updateTabStatus();
+                });
+            });
+
+            // Rating stars
+            document.querySelectorAll('.rating-star').forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    const student = state.students[state.currentStudent];
+                    state.data.students[student].skills.rating = rating;
+                    updateRatingStars(rating);
+                });
+            });
+        }
+
+        function updateRatingStars(rating) {
+            document.querySelectorAll('.rating-star').forEach((star, i) => {
+                star.classList.toggle('active', i < rating);
+            });
+        }
+
+        // Feedback cards
+        function setupFeedbackCards() {
+            const container = document.getElementById('feedbackCards');
+
+            function renderFeedbackCards() {
+                const giver = state.students[state.currentStudent];
+                const receivers = state.students.filter(s => s !== giver);
+
+                container.innerHTML = receivers.map(receiver => {
+                    const existingFeedback = state.data.students[giver].feedback[receiver] || '';
+                    return `
+                        <div class="feedback-card">
+                            <div class="recipient">Für ${receiver}:</div>
+                            <textarea
+                                placeholder="Was schätzt du an ${receiver}? Was hat ${receiver} gut gemacht? Was hast du von ${receiver} gelernt?"
+                                data-from="${giver}"
+                                data-to="${receiver}"
+                                onchange="saveFeedback(this)"
+                            >${existingFeedback}</textarea>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Initial render
+            setTimeout(renderFeedbackCards, 100);
+
+            // Re-render on tab change
+            document.getElementById('feedbackFromTabs')?.addEventListener('click', (e) => {
+                if (e.target.closest('.student-tab')) {
+                    setTimeout(renderFeedbackCards, 50);
+                }
+            });
+        }
+
+        function saveFeedback(textarea) {
+            const from = textarea.dataset.from;
+            const to = textarea.dataset.to;
+            state.data.students[from].feedback[to] = textarea.value;
+        }
+
+        // Future
+        function setupFutureTabs() {
+            // Future skills
+            document.querySelectorAll('.skill-card[data-future-skill]').forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('selected');
+
+                    const student = state.students[state.currentStudent];
+                    const skill = card.dataset.futureSkill;
+                    const skills = state.data.students[student].future.skillsToImprove;
+
+                    if (card.classList.contains('selected')) {
+                        if (!skills.includes(skill)) skills.push(skill);
+                    } else {
+                        const idx = skills.indexOf(skill);
+                        if (idx > -1) skills.splice(idx, 1);
+                    }
+                });
+            });
+        }
+
+        function addGoal() {
+            const input = document.getElementById('goalInput');
+            const goal = input.value.trim();
+
+            if (!goal) return;
+
+            const student = state.students[state.currentStudent];
+            const goals = state.data.students[student].future.goals;
+
+            if (goals.length >= 5) {
+                alert('Maximal 5 Ziele!');
+                return;
+            }
+
+            goals.push(goal);
+            input.value = '';
+            renderGoals();
+        }
+
+        function renderGoals() {
+            const student = state.students[state.currentStudent];
+            const goals = state.data.students[student].future.goals;
+            const list = document.getElementById('goalsList');
+
+            list.innerHTML = goals.map((goal, i) => `
+                <li class="goal-item">
+                    <span class="icon">🎯</span>
+                    <span class="text">${goal}</span>
+                    <button class="remove" onclick="removeGoal(${i})">×</button>
+                </li>
+            `).join('');
+        }
+
+        function removeGoal(index) {
+            const student = state.students[state.currentStudent];
+            state.data.students[student].future.goals.splice(index, 1);
+            renderGoals();
+        }
+
+        // Final statements
+        function setupStatements() {
+            const container = document.getElementById('statementsContainer');
+            container.innerHTML = state.students.map(student => `
+                <div class="statement-card">
+                    <div class="student-name">${student}</div>
+                    <textarea
+                        placeholder="Was ich aus 2025 mitnehme..."
+                        data-student="${student}"
+                        onchange="saveStatement(this)"
+                    ></textarea>
+                </div>
+            `).join('');
+        }
+
+        function saveStatement(textarea) {
+            const student = textarea.dataset.student;
+            state.data.students[student].statement = textarea.value;
+        }
+
+        function setupGratitudeTabs() {
+            // Already handled by setupStudentTabs
+        }
+
+        // Time Capsule
+        function saveTimeCapsule() {
+            saveCurrentPhaseData();
+
+            const capsuleData = {
+                date: new Date().toISOString(),
+                students: state.students,
+                data: state.data,
+                groupData: state.groupData
+            };
+
+            const dataStr = JSON.stringify(capsuleData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DBT_Zeitkapsel_2025_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.json`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+
+            // Also create a readable PDF-like version
+            createReadableVersion();
+        }
+
+        function createReadableVersion() {
+            let content = `
+╔══════════════════════════════════════════════════════════════╗
+║           DBT-SKILLS JAHRESABSCHLUSS 2025                    ║
+║                   ZEITKAPSEL                                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+Erstellt am: ${new Date().toLocaleDateString('de-DE')}
+Teilnehmer: ${state.students.join(', ')}
+
+════════════════════════════════════════════════════════════════
+`;
+
+            state.students.forEach(student => {
+                const data = state.data.students[student];
+                content += `
+┌──────────────────────────────────────────────────────────────┐
+│  ${student.toUpperCase()}
+└──────────────────────────────────────────────────────────────┘
+
+📌 CHECK-IN
+   Stimmung: ${data.checkIn.mood || '-'}
+   Gedanken: ${data.checkIn.text || '-'}
+
+📅 JAHRESRÜCKBLICK
+`;
+                Object.entries(data.months).forEach(([monthIdx, monthData]) => {
+                    content += `
+   ${months[monthIdx]}:
+   ✨ Highlight: ${monthData.highlight || '-'}
+   💪 Herausforderung: ${monthData.challenge || '-'}
+   🎭 Stimmung: ${monthData.mood || '-'}
+`;
+                });
+
+                content += `
+🧠 DBT-SKILLS
+   Genutzte Skills: ${data.skills.selected.join(', ') || '-'}
+   Top-Skill: ${data.skills.topSkill || '-'}
+   Geschichte: ${data.skills.topSkillStory || '-'}
+   Selbsteinschätzung: ${'⭐'.repeat(data.skills.rating) || '-'}
+
+💝 FEEDBACK GEGEBEN
+`;
+                Object.entries(data.feedback).forEach(([to, feedback]) => {
+                    content += `   An ${to}: ${feedback || '-'}\n`;
+                });
+
+                content += `
+✉️ BRIEF AN MEIN ZUKÜNFTIGES ICH
+${data.future.letter || '-'}
+
+🎯 ZIELE FÜR 2026
+${data.future.goals.map((g, i) => `   ${i + 1}. ${g}`).join('\n') || '   -'}
+
+💪 SKILLS ZUM VERBESSERN
+   ${data.future.skillsToImprove.join(', ') || '-'}
+
+🌟 ABSCHLUSS-STATEMENT
+   "${data.statement || '-'}"
+
+🙏 DANKBARKEIT
+   1. ${data.gratitude[0] || '-'}
+   2. ${data.gratitude[1] || '-'}
+   3. ${data.gratitude[2] || '-'}
+
+════════════════════════════════════════════════════════════════
+`;
+            });
+
+            content += `
+┌──────────────────────────────────────────────────────────────┐
+│  GRUPPE
+└──────────────────────────────────────────────────────────────┘
+
+🎉 GEMEINSAMER HÖHEPUNKT
+${state.groupData.groupHighlight || '-'}
+
+📚 WAS WIR VONEINANDER GELERNT HABEN
+${state.groupData.learnedFromEachOther || '-'}
+
+════════════════════════════════════════════════════════════════
+
+Diese Zeitkapsel wurde mit ❤️ erstellt.
+Öffnet sie in einem Jahr wieder und schaut, wie weit ihr gekommen seid!
+
+`;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DBT_Zeitkapsel_2025_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.txt`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Celebration
+        function celebrate() {
+            const colors = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#22c55e'];
+
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+
+        function restartJourney() {
+            if (confirm('Willst du wirklich von vorne beginnen? Alle Daten werden gelöscht.')) {
+                location.reload();
+            }
+        }
+
+        // Phase dots click
+        document.querySelectorAll('.phase-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const phase = parseInt(dot.dataset.phase);
+                if (state.students.length > 0) {
+                    saveCurrentPhaseData();
+                    goToPhase(phase);
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('monthModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
